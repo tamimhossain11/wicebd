@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "icon": "icon flaticon-lecture",
+        "about": "Great Speakers",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt.",
+        "btnIcon": "fa fa-angle-right",
+        "btnClass": "theme-btn",
+        "animation": "fadeInUp"
+    },
+    {
+        "id": 2,
+        "icon": "icon flaticon-search",
+        "about": "Experience",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt.",
+        "btnIcon": "fa fa-angle-right",
+        "btnClass": "theme-btn",
+        "animation": "fadeInUp"
+    },
+    {
+        "id": 3,
+        "icon": "icon flaticon-diamond-1",
+        "about": "Networking",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt.",
+        "btnIcon": "fa fa-angle-right",
+        "btnClass": "theme-btn",
+        "animation": "fadeInUp"
+    },
+    {
+        "id": 4,
+        "icon": "icon flaticon-success",
+        "about": "Party",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt.",
+        "btnIcon": "fa fa-angle-right",
+        "btnClass": "theme-btn",
+        "animation": "fadeInUp"
+    }
+]

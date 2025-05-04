@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "icon": "icon flaticon-lecture",
+        "title": "Great Speakers",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "animation": "fadeInUp",
+        "delay": 0
+    },
+    {
+        "id": 2,
+        "icon": "icon flaticon-search",
+        "title": "Experience",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "animation": "fadeInUp",
+        "delay": 0
+    },
+    {
+        "id": 3,
+        "icon": "icon flaticon-diamond-1",
+        "title": "Networking",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "animation": "fadeInUp",
+        "delay": 400
+    },
+    {
+        "id": 4,
+        "icon": "icon flaticon-success",
+        "title": "Party",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "animation": "fadeInUp",
+        "delay": 800
+    },
+    {
+        "id": 5,
+        "icon": "icon flaticon-employee",
+        "title": "New People",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "animation": "fadeInUp",
+        "delay": 1200
+    }
+]

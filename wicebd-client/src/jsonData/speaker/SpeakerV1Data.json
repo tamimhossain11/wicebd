@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "thumb": "speaker-1.jpg",
+        "name": "Dale Marke",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 2,
+        "thumb": "speaker-2.jpg",
+        "name": "Natisha Decoux",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 3,
+        "thumb": "speaker-3.jpg",
+        "name": "Adolfo Plahs",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 4,
+        "thumb": "speaker-4.jpg",
+        "name": "Mitchell Heggestad",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 5,
+        "thumb": "speaker-5.jpg",
+        "name": "Kenyetta Lesley",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 6,
+        "thumb": "speaker-6.jpg",
+        "name": "Shelly Verghese",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 7,
+        "thumb": "speaker-7.jpg",
+        "name": "Cassandra Kopka",
+        "designation": "Event Manager"
+    },
+    {
+        "id": 8,
+        "thumb": "speaker-8.jpg",
+        "name": "Eugene Clumpner",
+        "designation": "Event Manager"
+    }
+]

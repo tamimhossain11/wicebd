@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "accordionParent": "faqAccordion",
+        "accordionId": "faqOne",
+        "dataTarget": "collapseOne",
+        "ariaExpanded": "false",
+        "ariaControls": "collapseOne",
+        "title": "What is Choosing?",
+        "collapseClass": "",
+        "ariaLabelled": "faqOne",
+        "text": "Lorem ipsum dolor amet consectur adipicing elit eiusmod tempor incididunt ut labore dolore magna aliqua.enim minim veniam quis nostrud exercitation ullamco laboris."
+    },
+    {
+        "id": 2,
+        "ahttp://localhost:5173/scheduleccordionParent": "faqAccordion",
+        "accordionId": "faqTwo",
+        "dataTarget": "collapseTwo",
+        "ariaExpanded": "true",
+        "ariaControls": "collapseTwo",
+        "title": "Can we change the design?",
+        "collapseClass": "show",
+        "ariaLabelled": "faqTwo",
+        "text": "Lorem ipsum dolor amet consectur adipicing elit eiusmod tempor incididunt ut labore dolore magna aliqua.enim minim veniam quis nostrud exercitation ullamco laboris."
+    },
+    {
+        "id": 3,
+        "accordionParent": "faqAccordion",
+        "accordionId": "faqThree",
+        "dataTarget": "collapseThree",
+        "ariaExpanded": "false",
+        "ariaControls": "collapseThree",
+        "title": "How is the privacy issues?",
+        "collapseClass": "",
+        "ariaLabelled": "faqThree",
+        "text": "Lorem ipsum dolor amet consectur adipicing elit eiusmod tempor incididunt ut labore dolore magna aliqua.enim minim veniam quis nostrud exercitation ullamco laboris."
+    }
+]

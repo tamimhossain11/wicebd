@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "thumb": "1.jpg",
+        "subTitle": "January 20, 2024",
+        "title1": "World Digital",
+        "title2": "Conference 2023",
+        "list1": "5000 Seats",
+        "list2": "12 SPEAKERS",
+        "list3": "Paulo, California",
+        "btnLink": "buy-ticket",
+        "btnText": "Book Now"
+    },
+    {
+        "id": 2,
+        "thumb": "2.jpg",
+        "subTitle": "January 22, 2024",
+        "title1": "World Digital",
+        "title2": "Conference 2023",
+        "list1": "4000 Seats",
+        "list2": "10 SPEAKERS",
+        "list3": "Paulo, California",
+        "btnLink": "buy-ticket",
+        "btnText": "Book Now"
+    }
+]

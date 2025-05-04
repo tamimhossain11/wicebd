@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "animation": "fadeInUp",
+        "icon": "icon flaticon-search",
+        "name": "Experience",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua.",
+        "btnText": "Read More",
+        "delay": 0
+    },
+    {
+        "id": 2,
+        "animation": "fadeInUp",
+        "icon": "icon flaticon-diamond-1",
+        "name": "Networking",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua.",
+        "btnText": "Read More",
+        "delay": 400
+    },
+    {
+        "id": 3,
+        "animation": "fadeInUp",
+        "icon": "icon flaticon-success",
+        "name": "Party",
+        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua.",
+        "btnText": "Read More",
+        "delay": 800
+    }
+]

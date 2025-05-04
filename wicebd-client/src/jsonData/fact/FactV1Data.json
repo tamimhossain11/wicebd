@@ -1,0 +1,34 @@
+[
+    {
+        "id": 1,
+        "icon": "icon_headphones",
+        "end": 190,
+        "info": "Participants",
+        "animation": "fadeInUp",
+        "delay": ""
+    },
+    {
+        "id": 2,
+        "icon": "icon_ribbon_alt",
+        "end": 62,
+        "info": "Awards Win",
+        "animation": "fadeInUp",
+        "delay": 400
+    },
+    {
+        "id": 3,
+        "icon": "icon_like",
+        "end": 54,
+        "info": "Certified Teachers",
+        "animation": "fadeInUp",
+        "delay": 800
+    },
+    {
+        "id": 4,
+        "icon": "icon_book_alt",
+        "end": "190",
+        "info": "Courses",
+        "animation": "fadeInUp",
+        "delay": 1200
+    }
+]

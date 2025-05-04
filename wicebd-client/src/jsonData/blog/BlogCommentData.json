@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "authorThumb": "thumb-1.jpg",
+        "name": "Lean Guimpes",
+        "designation": "CEO",
+        "text": "Codswallop down the pub Queens English tomfoolery the BBC owt to do with me do one Elizabeth I dont want no agro show off show?",
+        "btnText": "Reply",
+        "btnClass": "reply-btn theme-btn btn-style-one"
+    },
+    {
+        "id": 2,
+        "authorThumb": "thumb-2.jpg",
+        "name": "Lean Guimares",
+        "designation": "Product Designer",
+        "text": "Codswallop down the pub Queens English tomfoolery the BBC owt to do with me do one Elizabeth I dont want no agro show off show?",
+        "btnText": "Reply",
+        "btnClass": "reply-btn theme-btn btn-style-one"
+    }
+]

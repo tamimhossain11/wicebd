@@ -1,0 +1,34 @@
+[
+    {
+        "id": 1,
+        "animation": "fadeInUp",
+        "icon": "icon icon_headphones",
+        "end": 190,
+        "title": "Participants",
+        "delay": 0
+    },
+    {
+        "id": 2,
+        "animation": "fadeInUp",
+        "icon": "icon icon_headphones",
+        "end": 62,
+        "title": "Participants",
+        "delay": 400
+    },
+    {
+        "id": 3,
+        "animation": "fadeInUp",
+        "icon": "icon icon_headphones",
+        "end": 54,
+        "title": "Participants",
+        "delay": 800
+    },
+    {
+        "id": 4,
+        "animation": "fadeInUp",
+        "icon": "icon icon_headphones",
+        "end": 38,
+        "title": "Participants",
+        "delay": 1200
+    }
+]

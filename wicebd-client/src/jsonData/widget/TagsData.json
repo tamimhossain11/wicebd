@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "tagName": "Event"
+    },
+    {
+        "id": 2,
+        "tagName": "Meetup"
+    },
+    {
+        "id": 3,
+        "tagName": "Conference"
+    },
+    {
+        "id": 4,
+        "tagName": "Meeting"
+    },
+    {
+        "id": 5,
+        "tagName": "Business"
+    },
+    {
+        "id": 6,
+        "tagName": "Seminar"
+    },
+    {
+        "id": 7,
+        "tagName": "Workshop"
+    },
+    {
+        "id": 8,
+        "tagName": "Professionals"
+    },
+    {
+        "id": 9,
+        "tagName": "Event"
+    }
+]

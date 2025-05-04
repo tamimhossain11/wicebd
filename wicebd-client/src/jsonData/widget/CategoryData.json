@@ -1,0 +1,37 @@
+[
+    {
+        "id": 1,
+        "categoryName": "Insight",
+        "quantity": 3
+    },
+    {
+        "id": 2,
+        "categoryName": "Web Design",
+        "quantity": 7
+    },
+    {
+        "id": 3,
+        "categoryName": "Travel",
+        "quantity": 6
+    },
+    {
+        "id": 4,
+        "categoryName": "Technology",
+        "quantity": 2
+    },
+    {
+        "id": 5,
+        "categoryName": "Business",
+        "quantity": 6
+    },
+    {
+        "id": 6,
+        "categoryName": "UI/UX",
+        "quantity": 9
+    },
+    {
+        "id": 7,
+        "categoryName": "Event",
+        "quantity": 9
+    }
+]

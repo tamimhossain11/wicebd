@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "listClass": "active",
+        "dataTarget": "#tab-1",
+        "day": "Day 01",
+        "date": "01",
+        "month": "Jan",
+        "year": 2018
+    },
+    {
+        "id": 2,
+        "listClass": "",
+        "dataTarget": "#tab-2",
+        "day": "Day 02",
+        "date": "02",
+        "month": "Jan",
+        "year": 2022
+    },
+    {
+        "id": 3,
+        "listClass": "",
+        "dataTarget": "#tab-3",
+        "day": "Day 03",
+        "date": "03",
+        "month": "Jan",
+        "year": 2023
+    },
+    {
+        "id": 4,
+        "listClass": "",
+        "dataTarget": "#tab-4",
+        "day": "Day 04",
+        "date": "04",
+        "month": "Jan",
+        "year": 2024
+    }
+]

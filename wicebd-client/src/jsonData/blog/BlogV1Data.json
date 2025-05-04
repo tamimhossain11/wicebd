@@ -1,0 +1,41 @@
+[
+    {
+        "id": 1,
+        "blogLink": "blog-single",
+        "thumb": "news-1.jpg",
+        "author": "Admin",
+        "authorIcon": "far fa-user",
+        "comment": "03",
+        "commentIcon": "far fa-comments",
+        "title": "International Conference on Art Business",
+        "btnText": "Read More",
+        "animation": "fadeInRight",
+        "delay": 0
+    },
+    {
+        "id": 2,
+        "blogLink": "blog-single",
+        "thumb": "news-2.jpg",
+        "author": "Admin",
+        "authorIcon": "far fa-user",
+        "comment": "03",
+        "commentIcon": "far fa-comments",
+        "title": "International Conference on Art Business",
+        "btnText": "Read More",
+        "animation": "fadeInRight",
+        "delay": 400
+    },
+    {
+        "id": 3,
+        "blogLink": "blog-single",
+        "thumb": "news-3.jpg",
+        "author": "Admin",
+        "authorIcon": "far fa-user",
+        "comment": "03",
+        "commentIcon": "far fa-comments",
+        "title": "International Conference on Art Business",
+        "btnText": "Read More",
+        "animation": "fadeInRight",
+        "delay": 800
+    }
+]

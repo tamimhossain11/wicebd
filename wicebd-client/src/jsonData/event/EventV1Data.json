@@ -1,0 +1,35 @@
+[
+    {
+        "id": 1,
+        "tabId": "tab1",
+        "tabClass": "active show",
+        "icon": "icon far fa-calendar",
+        "title": "January 20, 2023",
+        "text": "9.00 AM - 04.00 PM",
+        "icon1": "icon icon_profile",
+        "icon2": "icon icon_phone",
+        "icon3": "icon icon_mail",
+        "list1": "Dianne Ameer",
+        "list2": "+123 456 7890",
+        "list3": "support@WICEBD.com",
+        "infoList": ""
+    },
+    {
+        "id": 2,
+        "tabId": "tab2",
+        "tabClass": "",
+        "icon": "icon fa fa-map-marker-alt",
+        "title": "Pearl hotel, New york, USA",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt labore et dolore magna aliqua. Aliquip ex ea commodo consequat. reprehenderit in voluptate velit esse cillum dolore.",
+        "infoList": "d-none"
+    },
+    {
+        "id": 3,
+        "tabId": "tab3",
+        "tabClass": "",
+        "icon": "icon fa fa-directions",
+        "title": "How to get there",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt labore et dolore magna aliqua. Aliquip ex ea commodo consequat.  reprehenderit in voluptate velit esse cillum dolore.",
+        "infoList": "d-none"
+    }
+]

@@ -1,0 +1,35 @@
+[
+    {
+        "id": 1,
+        "title": "Person",
+        "price": 19,
+        "featureList1": "01 Conference Tickets",
+        "featureList2": "Free Lunch And Coffee",
+        "featureList3": "Certificate",
+        "btnText": "BUY Ticket",
+        "btnClass": "theme-btn btn-style-one",
+        "animationName": "fadeInUp"
+    },
+    {
+        "id": 2,
+        "title": "family",
+        "price": 59,
+        "featureList1": "05 Conference Tickets",
+        "featureList2": "Free Lunch And Coffee",
+        "featureList3": "Certificate",
+        "btnText": "BUY Ticket",
+        "btnClass": "theme-btn btn-style-one",
+        "animationName": "fadeInUp"
+    },
+    {
+        "id": 3,
+        "title": "group",
+        "price": 99,
+        "featureList1": "10 Conference Tickets",
+        "featureList2": "Free Lunch And Coffee",
+        "featureList3": "Certificate",
+        "btnText": "BUY Ticket",
+        "btnClass": "theme-btn btn-style-one",
+        "animationName": "fadeInUp"
+    }
+]

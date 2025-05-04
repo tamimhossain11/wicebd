@@ -1,0 +1,68 @@
+[
+    {
+        "id": 1,
+        "title": "Platinum Sponsors",
+        "clientData": [
+            {
+                "id": 1,
+                "clientThumb": "1.png"
+            },
+            {
+                "id": 2,
+                "clientThumb": "2.png"
+            },
+            {
+                "id": 3,
+                "clientThumb": "3.png"
+            },
+            {
+                "id": 4,
+                "clientThumb": "4.png"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "title": "Gold Sponsors",
+        "clientData": [
+            {
+                "id": 1,
+                "clientThumb": "5.png"
+            },
+            {
+                "id": 2,
+                "clientThumb": "6.png"
+            },
+            {
+                "id": 3,
+                "clientThumb": "7.png"
+            },
+            {
+                "id": 4,
+                "clientThumb": "8.png"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "title": "Platinum Sponsors",
+        "clientData": [
+            {
+                "id": 1,
+                "clientThumb": "9.png"
+            },
+            {
+                "id": 2,
+                "clientThumb": "10.png"
+            },
+            {
+                "id": 3,
+                "clientThumb": "11.png"
+            },
+            {
+                "id": 4,
+                "clientThumb": "12.png"
+            }
+        ]
+    }
+]

@@ -1,0 +1,86 @@
+[
+    {
+        "id": 1,
+        "dataDepth": 0.20,
+        "iconClass": "icon-one",
+        "icon": "icon-1.png"
+    },
+    {
+        "id": 2,
+        "dataDepth": 0.50,
+        "iconClass": "icon-two",
+        "icon": "icon-2.png"
+    },
+    {
+        "id": 3,
+        "dataDepth": 0.10,
+        "iconClass": "icon-three",
+        "icon": "icon-1.png"
+    },
+    {
+        "id": 4,
+        "dataDepth": 0.30,
+        "iconClass": "icon-four",
+        "icon": "icon-4.png"
+    },
+    {
+        "id": 5,
+        "dataDepth": 0.10,
+        "iconClass": "icon-five",
+        "icon": "icon-5.png"
+    },
+    {
+        "id": 6,
+        "dataDepth": 0.20,
+        "iconClass": "icon-six",
+        "icon": "icon-6.png"
+    },
+    {
+        "id": 7,
+        "dataDepth": 0.10,
+        "iconClass": "icon-seven",
+        "icon": "icon-7.png"
+    },
+    {
+        "id": 8,
+        "dataDepth": 0.20,
+        "iconClass": "icon-eight",
+        "icon": "icon-1.png"
+    },
+    {
+        "id": 9,
+        "dataDepth": 0.50,
+        "iconClass": "icon-nine",
+        "icon": "icon-8.png"
+    },
+    {
+        "id": 10,
+        "dataDepth": 0.10,
+        "iconClass": "icon-ten",
+        "icon": "icon-3.png"
+    },
+    {
+        "id": 11,
+        "dataDepth": 0.30,
+        "iconClass": "icon-eleven",
+        "icon": "icon-4.png"
+    },
+    {
+        "id": 12,
+        "dataDepth": 0.10,
+        "iconClass": "icon-twelve",
+        "icon": "icon-5.png"
+    },
+    {
+        "id": 13,
+        "dataDepth": 0.20,
+        "iconClass": "icon-thirteen",
+        "icon": "icon-6.png"
+    },
+    {
+        "id": 14,
+        "dataDepth": 0.10,
+        "iconClass": "icon-fourteen",
+        "icon": "icon-7.png"
+    }
+]

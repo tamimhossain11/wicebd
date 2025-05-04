@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "fullThumb": "1.jpg",
+        "miniThumb": "gw-1.jpg"
+    },
+    {
+        "id": 2,
+        "fullThumb": "2.jpg",
+        "miniThumb": "gw-2.jpg"
+    },
+    {
+        "id": 3,
+        "fullThumb": "3.jpg",
+        "miniThumb": "gw-3.jpg"
+    },
+    {
+        "id": 4,
+        "fullThumb": "4.jpg",
+        "miniThumb": "gw-4.jpg"
+    },
+    {
+        "id": 5,
+        "fullThumb": "5.jpg",
+        "miniThumb": "gw-5.jpg"
+    },
+    {
+        "id": 6,
+        "fullThumb": "6.jpg",
+        "miniThumb": "gw-6.jpg"
+    }
+]

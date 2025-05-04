@@ -1,0 +1,47 @@
+[
+    {
+        "id": 1,
+        "icon": "icon flaticon-movie-tickets",
+        "title": "Day Pass",
+        "plan": 35.99,
+        "list1": "Conference Tickets",
+        "list2": "Free Lunch And Coffee",
+        "list3": "Certificate",
+        "list4": "Easy Access",
+        "list5": "Free Contacts",
+        "listClass": "true",
+        "btnText": "BUY Ticket",
+        "animationName": "fadeInUp",
+        "delay": 0
+    },
+    {
+        "id": 2,
+        "icon": "icon flaticon-movie-tickets",
+        "title": "Full Pass",
+        "plan": 99.99,
+        "list1": "Conference Tickets",
+        "list2": "Free Lunch And Coffee",
+        "list3": "Certificate",
+        "list4": "Easy Access",
+        "list5": "Free Contacts",
+        "listClass": "true",
+        "btnText": "BUY Ticket",
+        "animationName": "fadeInUp",
+        "delay": 400
+    },
+    {
+        "id": 3,
+        "icon": "icon flaticon-movie-tickets",
+        "title": "Group Pass",
+        "plan": 199.99,
+        "list1": "Conference Tickets",
+        "list2": "Free Lunch And Coffee",
+        "list3": "Certificate",
+        "list4": "Easy Access",
+        "list5": "Free Contacts",
+        "listClass": "true",
+        "btnText": "BUY Ticket",
+        "animationName": "fadeInUp",
+        "delay": 800
+    }
+]

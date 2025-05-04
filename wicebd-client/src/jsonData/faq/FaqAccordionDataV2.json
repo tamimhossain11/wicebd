@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "accordionParent": "faqAccordion2",
+        "accordionId": "faqFour",
+        "dataTarget": "collapseFour",
+        "ariaExpanded": "true",
+        "ariaControls": "collapseFour",
+        "title": "What is Cancelation Period?",
+        "collapseClass": "show",
+        "ariaLabelled": "faqFour",
+        "text": "Lorem ipsum dolor amet consectur adipicing elit eiusmod tempor incididunt ut labore dolore magna aliqua.enim minim veniam quis nostrud exercitation ullamco laboris."
+    },
+    {
+        "id": 2,
+        "accordionParent": "faqAccordion2",
+        "accordionId": "faqFive",
+        "dataTarget": "collapseFive",
+        "ariaExpanded": "true",
+        "ariaControls": "collapseFive",
+        "title": "What is Cohousing?",
+        "collapseClass": "",
+        "ariaLabelled": "faqFive",
+        "text": "Lorem ipsum dolor amet consectur adipicing elit eiusmod tempor incididunt ut labore dolore magna aliqua.enim minim veniam quis nostrud exercitation ullamco laboris."
+    },
+    {
+        "id": 3,
+        "accordionParent": "faqAccordion2",
+        "accordionId": "faqSix",
+        "dataTarget": "collapseSix",
+        "ariaExpanded": "false",
+        "ariaControls": "collapseSix",
+        "title": "How is the privacy issues?",
+        "collapseClass": "",
+        "ariaLabelled": "faqSix",
+        "text": "Lorem ipsum dolor amet consectur adipicing elit eiusmod tempor incididunt ut labore dolore magna aliqua.enim minim veniam quis nostrud exercitation ullamco laboris."
+    }
+]
