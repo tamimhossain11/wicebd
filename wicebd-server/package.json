@@ -15,6 +15,6 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-     "build": "echo 'No build necessary for this Node.js backend."
+    "build": "echo 'No build necessary for this Node.js backend.'"
   }
 }
