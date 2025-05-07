@@ -1,11 +1,10 @@
-// src/pages/BkashCallback.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircularProgress, Container, Typography, Box, Alert } from '@mui/material';
+import { CircularProgress, Container, Typography, Box } from '@mui/material';
 
 const PaymentCallback = () => {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('processing'); // 'processing', 'success', 'error'
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -17,43 +16,30 @@ const PaymentCallback = () => {
         method: 'GET',
         credentials: 'include',
       })
-        .then((response) => response.json())
+        .then((res) => res.json())
         .then((data) => {
-          console.log('Execute response:', data); // ✅ Check the actual backend message
-          if (data && data.success) {
-            setStatus('success');
-            setTimeout(() => {
-              navigate('/thank-you');
-            }, 2000);
+          if (data?.success) {
+            navigate('/thank-you');
           } else {
-            setStatus('error');
+            navigate('/payment-error');
           }
         })
-        .catch((err) => {
-          console.error('Fetch error:', err);
-          setStatus('error');
+        .catch(() => {
+          navigate('/payment-error');
         });
-      
     } else {
-      setStatus('error');
+      navigate('/payment-error');
     }
   }, [navigate]);
 
   return (
-    <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 8 }}>
-      {status === 'processing' && (
-        <>
-          <CircularProgress />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Processing your payment, please wait...
-          </Typography>
-        </>
-      )}
-      {status === 'error' && (
-        <Alert severity="error">
-          There was an issue processing your payment. Please try again or contact support.
-        </Alert>
-      )}
+    <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 12 }}>
+      <Box>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Verifying your payment...
+        </Typography>
+      </Box>
     </Container>
   );
 };

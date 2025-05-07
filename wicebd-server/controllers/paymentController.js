@@ -66,7 +66,7 @@ const initiatePayment = async (req, res) => {
     intent: 'sale',
     payerReference: sessionID,
     merchantInvoiceNumber: 'INV-' + Date.now(),
-    callbackURL: 'http://localhost:5173/success',
+    callbackURL: `${process.env.FRONTEND_BASE_URL}/success`,
     merchantAssociationInfo: 'MI05MID54RF09123456One'
   },
   {
@@ -126,30 +126,50 @@ const executePayment = async (req, res) => {
       });
 
       const sql = `
-        INSERT INTO registrations 
-        (participantCategory, competitionCategory, teamMembers, leaderWhatsApp, phoneCode, leaderEmail, schoolName, grade, country, supervisorName, supervisorWhatsApp, supervisorEmail, projectTitle, projectCategory, participatedBefore, previousCompetition, socialMedia, infoSource) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO registrations (
+          participantCategory, country, competitionCategory, projectSubcategory, categories,crRefrence,
+          leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
+          member2, institution2, tshirtSize2,
+          member3, institution3, tshirtSize3,
+          projectTitle, projectCategory, participatedBefore, previousCompetition,
+          socialMedia, infoSource,
+          transactionId, paymentStatus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
       `;
 
       const values = [
         registrationData.participantCategory,
-        registrationData.competitionCategory,
-        registrationData.teamMembers,
-        registrationData.leaderWhatsApp,
-        registrationData.phoneCode,
-        registrationData.leaderEmail,
-        registrationData.schoolName,
-        registrationData.grade,
         registrationData.country,
-        registrationData.supervisorName,
-        registrationData.supervisorWhatsApp,
-        registrationData.supervisorEmail,
+        registrationData.competitionCategory,
+        registrationData.projectSubcategory,
+        registrationData.categories,
+        registrationData.crRefrence,
+
+        registrationData.leader,
+        registrationData.institution,
+        registrationData.leaderPhone,
+        registrationData.leaderWhatsApp,
+        registrationData.leaderEmail,
+        registrationData.tshirtSizeLeader,
+
+        registrationData.member2,
+        registrationData.institution2,
+        registrationData.tshirtSize2,
+
+        registrationData.member3,
+        registrationData.institution3,
+        registrationData.tshirtSize3,
+
         registrationData.projectTitle,
         registrationData.projectCategory,
         registrationData.participatedBefore,
         registrationData.previousCompetition,
+
         registrationData.socialMedia,
         registrationData.infoSource,
+
+        executeRes.data.paymentID,
+        executeRes.data.transactionStatus
       ];
 
       await connection.execute(sql, values);
@@ -159,15 +179,26 @@ const executePayment = async (req, res) => {
 
       res.status(200).json({
         success: true,
-        message: 'Payment executed and registration saved.'
-      });      
+        message: 'Payment executed and registration saved.',
+        transactionId: executeRes.data.paymentID,
+        paymentStatus: executeRes.data.transactionStatus
+      });
     } else {
       console.error('Payment not completed:', executeRes.data);
-      res.status(400).json({ error: 'Payment not completed' });
+      res.status(200).json({
+        success: false,
+        message: 'Payment was not completed',
+        transactionStatus: executeRes.data?.transactionStatus,
+        rawResponse: executeRes.data
+      });
     }
   } catch (err) {
     console.error('Error executing payment:', err.response?.data || err.message);
-    res.status(500).json({ error: 'Payment execution failed' });
+    res.status(200).json({
+      success: false,
+      message: 'Payment execution failed',
+      error: err.response?.data || err.message
+    });
   }
 };
 
