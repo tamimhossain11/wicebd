@@ -49,7 +49,7 @@
     },
     {
         "id": 7,
-        "icon": "fa fa-book",
+        "icon": "fa fa-brain-circuit",
         "title": "Olympiad",
         "text": "Compete to test knowledge and skills in key subjects.",
         "animation": "fadeInUp",
