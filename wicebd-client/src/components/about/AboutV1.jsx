@@ -22,8 +22,8 @@ const AboutV1 = () => {
                             <div className="inner-column">
                                 <div className="sec-title">
                                     <span className="title">ABOUT EVENT</span>
-                                    <h2>Welcome to the World Digital Conference 2023</h2>
-                                    <div className="text">Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip exea commodo consequat.</div>
+                                    <h2>7th World Invention Competition & Exhibition 2025</h2>
+                                    <div className="text">Bangladesh is proud to host the National Round of the World Invention Competition & Exhibition (WICE) 2025 for the first time, following consecutive Gold Medal wins and the Best Country Representative Award. Organized in partnership with the Indonesian Young Scientist Association (IYSA), this event will empower students from elementary to university levels to showcase innovative ideas in science, technology, and social impact. The top teams will earn the chance to represent Bangladesh at the international WICE 2025 in Malaysia. Join us in fostering a new era of creativity, research, and global collaboration among our brightest young minds.                                    </div>
                                 </div>
                                 <ul className="list-style-one">
                                     {AboutV1Data.map(aboutData =>

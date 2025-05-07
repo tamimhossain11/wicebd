@@ -21,8 +21,8 @@ const FeatureV1 = () => {
                         <div className="title-block col-lg-4 col-md-12 col-sm-12 wow fadeInUp">
                             <div className="inner-box">
                                 <div className="sec-title">
-                                    <span className="title">Features</span>
-                                    <h2>Our Feature</h2>
+                                    <span className="title">Segments</span>
+                                    <h2>Our Segments</h2>
                                 </div>
                             </div>
                         </div>
