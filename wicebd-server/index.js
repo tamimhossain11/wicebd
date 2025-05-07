@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 
@@ -9,23 +10,50 @@ const registrationRoutes = require('./routes/registerRoute');
 
 const app = express();
 
+// CORS config — adjust FRONTEND_BASE_URL in .env to match your frontend domain
 app.use(cors({
-  origin: `${process.env.FRONTEND_BASE_URL}`,
+  origin: process.env.FRONTEND_BASE_URL,
   credentials: true
 }));
 
 app.use(express.json());
+
+// MySQL session store setup
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: 3306,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+// Session middleware
 app.use(session({
-  secret: 'your-secret-key',
+  key: 'wice2025.sid',
+  secret: process.env.SESSION_SECRET || 'default-dev-secret',
+  store: sessionStore,
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false, // true if using HTTPS
+    sameSite: 'lax', // or 'none' if on different domains with HTTPS
+    maxAge: 1000 * 60 * 30 // 30 minutes
+  }
 }));
 
+// Debug: print session ID per request
+app.use((req, res, next) => {
+  console.log('🔥 [Debug] Session ID:', req.sessionID);
+  next();
+});
+
+// Routes
 console.log('Mounting /api/payment route');
 app.use('/api/payment', paymentRoutes);
-
 app.use('/api/registration', registrationRoutes);
 
+// Test DB connection
 async function testDatabaseConnection() {
   try {
     const connection = await mysql.createConnection({
@@ -43,6 +71,7 @@ async function testDatabaseConnection() {
 
 testDatabaseConnection();
 
+// Start server
 app.listen(process.env.PORT, () => {
   console.log(`🚀 Server is running on port ${process.env.PORT}`);
 });

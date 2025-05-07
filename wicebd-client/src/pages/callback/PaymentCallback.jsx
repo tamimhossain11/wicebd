@@ -12,7 +12,7 @@ const PaymentCallback = () => {
     const statusParam = urlParams.get('status');
 
     if (statusParam === 'success' && paymentID) {
-      fetch(`https://wicebd.onrender.com/api/payment/execute?paymentID=${paymentID}`, {
+      fetch(`http://localhost:5000/api/payment/execute?paymentID=${paymentID}`, {
         method: 'GET',
         credentials: 'include',
       })
