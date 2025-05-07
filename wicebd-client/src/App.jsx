@@ -37,7 +37,7 @@ function App() {
       {isLoading ? <Preloader /> :
         <div className='app-wrapper'>
           <Helmet>
-            <title>WICEBD - Digital Events React Template</title>
+            <title>WICEBD - </title>
             <link rel="shortcut icon" href="../images/favicon.ico"></link>
           </Helmet>
           <Routers />

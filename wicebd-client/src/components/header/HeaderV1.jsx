@@ -74,14 +74,7 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, headerTopV1, headerTopV2, pa
     return (
         <>
             <header className={`main-header ${headerStyle ? headerStyle : ""} ${isSticky ? "fixed-header" : ""}`}>
-                {headerTopV1 ?
-                    <HeaderTopV1 />
-                    : <></>
-                }
-                {headerTopV2 ?
-                    <HeaderTopV2 />
-                    : <></>
-                }
+            <HeaderTopV2 />
                 <div className="main-box">
                     <div className="auto-container clearfix">
                         <div className="logo-box">
@@ -105,7 +98,7 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, headerTopV1, headerTopV2, pa
                                     <div className="search-box-btn"><span className={`flaticon-search`} onClick={searchOpen}></span></div>
                                 </div>
                                 <div className="btn-box">
-                                    <Link to="/buy-ticket#" className="theme-btn btn-style-one"><span className="btn-title">Get Tickets</span></Link>
+                                    <Link to="/buy-ticket#" className="theme-btn btn-style-one"><span className="btn-title">Register now</span></Link>
                                 </div>
                             </div>
                         </div>

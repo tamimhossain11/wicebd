@@ -21,6 +21,8 @@ import BlogSingle from './pages/innerPages/BlogSingle';
 import Login from './pages/innerPages/Login';
 import Contact from './pages/innerPages/Contact';
 import ErrorPage from './pages/innerPages/ErrorPage';
+import PaymentCallback from './pages/callback/PaymentCallback';
+import ThankYou from './pages/ThankYou';
 
 const Routers = () => {
     return (
@@ -46,6 +48,8 @@ const Routers = () => {
                 <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
                 <Route path='/login' element={<Login />}></Route>
                 <Route path='/contact' element={<Contact />}></Route>
+                <Route path='/success' element={<PaymentCallback />}></Route>
+                <Route path='/thank-you' element={<ThankYou/>}></Route>
                 <Route path='*' element={<ErrorPage />}></Route>
             </Routes>
         </>

@@ -1,18 +1,14 @@
 import React from 'react';
 import { HashLink as Link } from 'react-router-hash-link'
+import Home2 from '../../pages/homePages/Home2';
 
 const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
     return (
         <>
             <ul className="navigation clearfix">
                 <li className={`dropdown ${parentMenu === 'home' ? 'current' : ''} `}>
-                    <Link to={void (0)} onClick={toggleMenu}>Home</Link>
+                    <Link to="/home-2#">Home</Link>
                     <ul className='sub-menu'>
-                        <li><Link to="/#">Home Classic</Link></li>
-                        <li><Link to="/home-2#">Home Conference</Link></li>
-                        <li><Link to="/home-3#">Home Meetup</Link></li>
-                        <li><Link to="/home-4#">Home Page Four</Link></li>
-                        <li><Link to="/home-5#">Home Page Five</Link></li>
                         <li className={`dropdown ps-0 multi-menu-parent`}>
                             <Link to={void (0)} onClick={toggleMultiMenu}>Header Styles</Link>
                             <ul className='multi-menu'>
@@ -39,7 +35,7 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     <div className="dropdown-btn" ><span className="fa fa-angle-down"></span></div>
                 </li>
                 <li className={`dropdown ${parentMenu === 'speakers' ? 'current' : ''}`}>
-                    <Link to={void (0)} onClick={toggleMenu}>Speakers</Link>
+                    <Link to={void (0)} onClick={toggleMenu}>Our Team</Link>
                     <ul className='sub-menu'>
                         <li><Link to="/speakers#">Speakers</Link></li>
                         <li><Link to="/speakers-detail/1#">Speakers Detail</Link></li>
