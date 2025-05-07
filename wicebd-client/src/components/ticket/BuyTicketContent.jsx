@@ -59,7 +59,7 @@ const Registration = () => {
       });
 
       if (saveRes.status === 200) {
-        const payRes = await axios.post('https://wicebd.onrender.comy/api/payment/initiate', {}, {
+        const payRes = await axios.post('https://wicebd.onrender.com/api/payment/initiate', {}, {
           withCredentials: true
         });
         if (payRes.data?.bkashURL) {
