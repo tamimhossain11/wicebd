@@ -54,12 +54,12 @@ const Registration = () => {
     }
 
     try {
-      const saveRes = await axios.post('http://localhost:5000/api/registration/temp-save', formData, {
+      const saveRes = await axios.post('https://wicebd.onrender.com/api/registration/temp-save', formData, {
         withCredentials: true
       });
 
       if (saveRes.status === 200) {
-        const payRes = await axios.post('http://localhost:5000/api/payment/initiate', {}, {
+        const payRes = await axios.post('https://wicebd.onrender.comy/api/payment/initiate', {}, {
           withCredentials: true
         });
         if (payRes.data?.bkashURL) {
