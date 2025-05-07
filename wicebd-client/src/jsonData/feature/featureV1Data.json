@@ -1,42 +1,58 @@
 [
     {
         "id": 1,
-        "icon": "icon flaticon-lecture",
-        "title": "Great Speakers",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "icon": "icon fa fa-laptop",
+        "title": "IT & Robotics",
+        "text": "Create solutions using coding, robotics, electronics, and smart systems.",
         "animation": "fadeInUp",
         "delay": 0
     },
     {
         "id": 2,
-        "icon": "icon flaticon-search",
-        "title": "Experience",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "icon": "fa fa-leaf",
+        "title": "Environmental Science",
+        "text": "Innovate to protect nature, reduce pollution, and save resources.",
         "animation": "fadeInUp",
         "delay": 0
     },
     {
         "id": 3,
-        "icon": "icon flaticon-diamond-1",
-        "title": "Networking",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "icon": "fa fa-lightbulb",
+        "title": "Innovative Social Science",
+        "text": "Create solutions for society, focusing on equality and well-being.",
         "animation": "fadeInUp",
         "delay": 400
     },
     {
         "id": 4,
-        "icon": "icon flaticon-success",
-        "title": "Party",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "icon": "fa fa-solar-system",
+        "title": "Applied Physics & Engineering",
+        "text": "Solve problems using science, math, engineering, and creative design.",
         "animation": "fadeInUp",
         "delay": 800
     },
     {
         "id": 5,
-        "icon": "icon flaticon-employee",
-        "title": "New People",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd.",
+        "icon": "fa fa-heartbeat",
+        "title": "Applied Life Science",
+        "text": "Explore biology, health, and life sciences to help living beings.",
         "animation": "fadeInUp",
         "delay": 1200
+    },
+    {
+        "id": 6,
+        "icon": "fa fa-paintbrush-pencil",
+        "title": "Wall Magazine",
+        "text": "Showcase student ideas, creativity, projects, and scientific expressions.",
+        "animation": "fadeInUp",
+        "delay": 1400
+    },
+    {
+        "id": 7,
+        "icon": "fa fa-book",
+        "title": "Olympiad",
+        "text": "Compete to test knowledge and skills in key subjects.",
+        "animation": "fadeInUp",
+        "delay": 1600
     }
 ]
