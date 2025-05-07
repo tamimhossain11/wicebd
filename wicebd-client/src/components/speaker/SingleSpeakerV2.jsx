@@ -11,6 +11,7 @@ const SingleSpeakerV2 = ({ speaker }) => {
             <ReactWOW animation='fadeInUp'>
                 <div className="speaker-block-two col-lg-3 col-md-6 col-sm-12">
                     <div className="inner-box">
+                    <figure className="image"><img src={`/src/assets/images/teams/${thumb}`} alt="image"/></figure>
                         <div className="info-box">
                         <h4 className="name">{name}</h4>
                             <span className="designation">{designation}</span>

@@ -8,6 +8,7 @@ const SingleSpeakerV3 = ({ speaker }) => {
     return (
         <>
             <div className="inner-box">
+            <figure className="image"><img src={`/src/assets/images/teams/${thumb}`} alt="image"/></figure>
                 <div className="image-box">
                 </div>
                 <div className="info-box">

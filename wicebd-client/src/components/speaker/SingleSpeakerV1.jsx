@@ -11,9 +11,13 @@ const SingleSpeakerV1 = ({ speaker }) => {
                 <div className="image-box">
                 </div>
                 <div className="info-box">
+                <figure className="image"><img src={`/src/assets/images/teams/${thumb}`} alt="image"/></figure>
                     <div className="inner">
-                        <h4 className="name">{name}</h4>
+                        <h4 className="name"><Link to={`/speakers-detail/${id}#`}>{name}</Link></h4>
                         <span className="designation">{designation}</span>
+                        <ul className="social-links social-icon-colored">
+                            <SocialShare />
+                        </ul>
                     </div>
                 </div>
             </div>
