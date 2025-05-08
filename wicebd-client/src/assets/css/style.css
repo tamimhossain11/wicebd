@@ -2603,7 +2603,7 @@ img {
 	position: relative;
 	z-index: 1;
 	border-radius: 50%;
-	border: 15px solid #ffffff;
+	border:0px solid #ffffff;
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.10);
 }
 
@@ -3592,7 +3592,6 @@ img {
 	top: 0;
 	height: 100%;
 	width: 100%;
-	background-color: rgba(28, 139, 210, .50);
 	content: "";
 }
 
@@ -3605,7 +3604,6 @@ img {
 	position: relative;
 	overflow: hidden;
 	border-radius: 50%;
-	border: 10px solid #ffffff;
 	box-shadow: 0 30px 30px rgba(0, 0, 0, 0.40);
 	max-width: 300px;
 	margin: 0 auto;
@@ -3700,7 +3698,6 @@ img {
 	display: block;
 	font-size: 22px;
 	line-height: 1.2em;
-	color: #ffffff;
 	font-weight: 700;
 	opacity: 0;
 	margin-bottom: 5px;
@@ -3732,7 +3729,6 @@ img {
 
 
 .speaker-block .info-box .name a {
-	color: #ffffff;
 	-webkit-transition: all 300ms ease;
 	-moz-transition: all 300ms ease;
 	-ms-transition: all 300ms ease;
@@ -3745,7 +3741,6 @@ img {
 	display: block;
 	font-size: 13px;
 	line-height: 30px;
-	color: #ffffff;
 	font-weight: 400;
 	margin-bottom: 15px;
 	opacity: 0;
@@ -3817,7 +3812,7 @@ img {
 	height: 32px;
 	font-size: 16px;
 	line-height: 30px;
-	background-color: #ffffff;
+
 	text-align: center;
 	-webkit-transition: all 300ms ease;
 	-moz-transition: all 300ms ease;
@@ -3851,12 +3846,10 @@ img {
 
 .speaker-block-two .inner-box {
 	position: relative;
-	background-color: #ffffff;
 	overflow: hidden;
-	padding: 50px 0 40px;
+	padding: 0px 0 0px;
 	box-shadow: 0 20px 30px rgba(0, 0, 0, 0.10);
 	border: 1px solid #dddddd;
-	border-bottom: 5px solid #1c94d2;
 	max-width: 300px;
 	margin: 0 auto;
 	-webkit-transition: all 600ms ease;
@@ -3876,7 +3869,6 @@ img {
 	top: 0;
 	height: 100%;
 	width: 100%;
-	background-image: url(../images/icons/speaker-bg.png);
 	background-repeat: no-repeat;
 	background-position: center;
 	background-size: 100%;
@@ -3936,8 +3928,7 @@ img {
 	height: 150px;
 	width: 150px;
 	overflow: hidden;
-	border: 4px solid #1c94d2;
-	box-shadow: 0 0 20px rgba(0, 0, 0, 0.10);
+	box-shadow: 0 0 0px rgba(0, 0, 0, 0.10);
 	border-radius: 50%;
 	z-index: 9;
 	margin-bottom: 0;
@@ -3981,7 +3972,6 @@ img {
 	border: 1px solid #eeeeee;
 	font-size: 16px;
 	line-height: 30px;
-	background-color: #ffffff;
 	text-align: center;
 	-webkit-transition: all 300ms ease;
 	-moz-transition: all 300ms ease;
