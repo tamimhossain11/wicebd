@@ -1,8 +1,4 @@
 const axios = require('axios');
-const {
-  getTempRegistration,
-  deleteTempRegistration
-} = require('../tempData/tempRegistration');
 const mysql = require('mysql2/promise');
 
 // Get bKash Token
@@ -16,14 +12,11 @@ const getBkashToken = async () => {
   try {
     const res = await axios.post(
       `${baseURL}/tokenized/checkout/token/grant`,
-      {
-        app_key: appKey,
-        app_secret: appSecret
-      },
+      { app_key: appKey, app_secret: appSecret },
       {
         headers: {
-          username: username,
-          password: password,
+          username,
+          password,
           'Content-Type': 'application/json'
         }
       }
@@ -39,44 +32,53 @@ const getBkashToken = async () => {
   }
 };
 
-module.exports = { getBkashToken };
-
 const initiatePayment = async (req, res) => {
   try {
     const sessionID = req.sessionID;
-    console.log('🚀 INITIATE hit');
-    console.log('Session ID:', sessionID);
+    console.log('🚀 INITIATE hit | Session ID:', sessionID);
 
-    const data = getTempRegistration(sessionID);
-    console.log('Temp registration data:', data);
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
 
-    if (!data) {
-      return res.status(404).json({ error: 'No registration data found' });
+    const [rows] = await connection.execute(
+      'SELECT * FROM temp_registrations WHERE session_id = ?',
+      [sessionID]
+    );
+    await connection.end();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No temp registration found for this session' });
     }
+
+    const data = rows[0];
 
     const token = await getBkashToken();
-    const amount = '5';
+    const amount = '5'; // BDT
 
     const paymentRes = await axios.post(
-  `${process.env.BKASH_BASE_URL}/tokenized/checkout/create`,
-  {
-    mode: '0011',
-    amount,
-    currency: 'BDT',
-    intent: 'sale',
-    payerReference: sessionID,
-    merchantInvoiceNumber: 'INV-' + Date.now(),
-    callbackURL: 'http://localhost:5173/success',
-    merchantAssociationInfo: 'MI05MID54RF09123456One'
-  },
-  {
-    headers: {
-      authorization: token,
-      'x-app-key': process.env.BKASH_APP_KEY,
-      'Content-Type': 'application/json'
-    }
-  }
-);
+      `${process.env.BKASH_BASE_URL}/tokenized/checkout/create`,
+      {
+        mode: '0011',
+        amount,
+        currency: 'BDT',
+        intent: 'sale',
+        payerReference: sessionID,
+        merchantInvoiceNumber: 'INV-' + Date.now(),
+        callbackURL: `${process.env.FRONTEND_BASE_URL}/success`,
+        merchantAssociationInfo: 'MI05MID54RF09123456One'
+      },
+      {
+        headers: {
+          authorization: token,
+          'x-app-key': process.env.BKASH_APP_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
     if (paymentRes.data?.bkashURL) {
       res.status(200).json({ bkashURL: paymentRes.data.bkashURL });
@@ -89,7 +91,6 @@ const initiatePayment = async (req, res) => {
   }
 };
 
-// Execute Payment
 const executePayment = async (req, res) => {
   try {
     const { paymentID } = req.query;
@@ -112,12 +113,6 @@ const executePayment = async (req, res) => {
     );
 
     if (executeRes.data?.transactionStatus === 'Completed') {
-      const registrationData = getTempRegistration(sessionID);
-
-      if (!registrationData) {
-        return res.status(404).json({ error: 'Registration data not found' });
-      }
-
       const connection = await mysql.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -125,49 +120,90 @@ const executePayment = async (req, res) => {
         database: process.env.DB_NAME
       });
 
-      const sql = `
-        INSERT INTO registrations 
-        (participantCategory, competitionCategory, teamMembers, leaderWhatsApp, phoneCode, leaderEmail, schoolName, grade, country, supervisorName, supervisorWhatsApp, supervisorEmail, projectTitle, projectCategory, participatedBefore, previousCompetition, socialMedia, infoSource) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      const [rows] = await connection.execute(
+        'SELECT * FROM temp_registrations WHERE session_id = ?',
+        [sessionID]
+      );
+
+      if (rows.length === 0) {
+        await connection.end();
+        return res.status(404).json({ error: 'Registration data not found' });
+      }
+
+      const data = rows[0];
+
+      const insertSQL = `
+        INSERT INTO registrations (
+          participantCategory, country, competitionCategory, projectSubcategory, categories, crRefrence,
+          leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
+          member2, institution2, tshirtSize2,
+          member3, institution3, tshirtSize3,
+          projectTitle, projectCategory, participatedBefore, previousCompetition,
+          socialMedia, infoSource,
+          transactionId, paymentStatus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
-        registrationData.participantCategory,
-        registrationData.competitionCategory,
-        registrationData.teamMembers,
-        registrationData.leaderWhatsApp,
-        registrationData.phoneCode,
-        registrationData.leaderEmail,
-        registrationData.schoolName,
-        registrationData.grade,
-        registrationData.country,
-        registrationData.supervisorName,
-        registrationData.supervisorWhatsApp,
-        registrationData.supervisorEmail,
-        registrationData.projectTitle,
-        registrationData.projectCategory,
-        registrationData.participatedBefore,
-        registrationData.previousCompetition,
-        registrationData.socialMedia,
-        registrationData.infoSource,
+        data.participantCategory,
+        data.country,
+        data.competitionCategory,
+        data.projectSubcategory,
+        data.categories,
+        data.crRefrence,
+
+        data.leader,
+        data.institution,
+        data.leaderPhone,
+        data.leaderWhatsApp,
+        data.leaderEmail,
+        data.tshirtSizeLeader,
+
+        data.member2,
+        data.institution2,
+        data.tshirtSize2,
+
+        data.member3,
+        data.institution3,
+        data.tshirtSize3,
+
+        data.projectTitle,
+        data.projectCategory,
+        data.participatedBefore,
+        data.previousCompetition,
+
+        data.socialMedia,
+        data.infoSource,
+
+        executeRes.data.paymentID,
+        executeRes.data.transactionStatus
       ];
 
-      await connection.execute(sql, values);
+      await connection.execute(insertSQL, values);
+      await connection.execute('DELETE FROM temp_registrations WHERE session_id = ?', [sessionID]);
       await connection.end();
-
-      deleteTempRegistration(sessionID);
 
       res.status(200).json({
         success: true,
-        message: 'Payment executed and registration saved.'
-      });      
+        message: 'Payment executed and registration saved.',
+        transactionId: executeRes.data.paymentID,
+        paymentStatus: executeRes.data.transactionStatus
+      });
     } else {
-      console.error('Payment not completed:', executeRes.data);
-      res.status(400).json({ error: 'Payment not completed' });
+      res.status(200).json({
+        success: false,
+        message: 'Payment was not completed',
+        transactionStatus: executeRes.data?.transactionStatus,
+        rawResponse: executeRes.data
+      });
     }
   } catch (err) {
     console.error('Error executing payment:', err.response?.data || err.message);
-    res.status(500).json({ error: 'Payment execution failed' });
+    res.status(500).json({
+      success: false,
+      message: 'Payment execution failed',
+      error: err.response?.data || err.message
+    });
   }
 };
 

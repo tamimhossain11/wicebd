@@ -1,15 +1,55 @@
-const { saveTempRegistration } = require('../tempData/tempRegistration');
+const mysql = require('mysql2/promise');
 
-const startRegistration = async (req, res) => {
-  const sessionID = req.sessionID;
-  const registrationData = req.body;
+// Get data from temp_registrations table
+const getTempRegistration = async (sessionID) => {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
 
-  if (!registrationData.participantCategory || !registrationData.leaderEmail) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    const [rows] = await connection.execute(
+      `SELECT data FROM temp_registrations WHERE session_id = ?`,
+      [sessionID]
+    );
+
+    await connection.end();
+
+    if (rows.length > 0) {
+      return JSON.parse(rows[0].data);
+    }
+
+    return null;
+  } catch (err) {
+    console.error('❌ Error fetching temp registration:', err.message);
+    return null;
   }
-
-  saveTempRegistration(sessionID, registrationData);
-  res.status(200).json({ message: 'Data saved temporarily' });
 };
 
-module.exports = { startRegistration };
+// Delete temp data after successful payment
+const deleteTempRegistration = async (sessionID) => {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await connection.execute(
+      `DELETE FROM temp_registrations WHERE session_id = ?`,
+      [sessionID]
+    );
+
+    await connection.end();
+  } catch (err) {
+    console.error('❌ Error deleting temp registration:', err.message);
+  }
+};
+
+module.exports = {
+  getTempRegistration,
+  deleteTempRegistration
+};

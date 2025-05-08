@@ -6,17 +6,23 @@ import { ToastContainer, toast } from 'react-toastify';
 const Registration = () => {
   const [formData, setFormData] = useState({
     participantCategory: '',
-    competitionCategory: '',
-    teamMembers: '',
-    leaderWhatsApp: '',
-    phoneCode: '',
-    leaderEmail: '',
-    schoolName: '',
-    grade: '',
     country: '',
-    supervisorName: '',
-    supervisorWhatsApp: '',
-    supervisorEmail: '',
+    competitionCategory: '',
+    projectSubcategory: '',
+    categories: '',
+    crRefrence:'',
+    leader: '',
+    institution: '',
+    leaderPhone: '',
+    leaderWhatsApp: '',
+    leaderEmail: '',
+    tshirtSizeLeader: '',
+    member2: '',
+    institution2: '',
+    tshirtSize2: '',
+    member3: '',
+    institution3: '',
+    tshirtSize3: '',
     projectTitle: '',
     projectCategory: '',
     participatedBefore: '',
@@ -29,28 +35,33 @@ const Registration = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "competitionCategory" && value !== "Science"
+        ? { projectSubcategory: "" } // Reset subcategory if not Project
+        : {}),
+    }));
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-  
+
     if (!form.checkValidity()) {
       event.stopPropagation();
       setValidated(true);
       return;
     }
-  
+
     try {
-      const saveRes = await axios.post('http://localhost:5000/api/registration/temp-save', formData, {
+      const saveRes = await axios.post('https://wicebd.onrender.com/api/registration/temp-save', formData, {
         withCredentials: true
       });
-      
+
       if (saveRes.status === 200) {
-        const payRes = await axios.post('http://localhost:5000/api/payment/initiate', {}, {
+        const payRes = await axios.post('https://wicebd.onrender.com/api/payment/initiate', {}, {
           withCredentials: true
-        });        
+        });
         if (payRes.data?.bkashURL) {
           window.location.href = payRes.data.bkashURL;
         } else {
@@ -62,9 +73,9 @@ const Registration = () => {
       toast.error('Something went wrong');
     }
   };
-  
+
   return (
-    <Container className="mt-5">
+    <Container className="mt-5 mb-5">
       <ToastContainer />
       <h2 className="mb-4 text-center">WICE 2025 Registration Form</h2>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
@@ -90,139 +101,6 @@ const Registration = () => {
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group controlId="competitionCategory">
-              <Form.Label>Competition Category</Form.Label>
-              <Form.Select
-                name="competitionCategory"
-                value={formData.competitionCategory}
-                onChange={handleChange}
-                required
-              >
-                <option value="">--Choose Category Competition--</option>
-                <option value="Science">Science</option>
-                <option value="Technology">Technology</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Mathematics">Mathematics</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                Please select a competition category.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Form.Group className="mb-3" controlId="teamMembers">
-          <Form.Label>Name of Leader & Team Members</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            name="teamMembers"
-            value={formData.teamMembers}
-            onChange={handleChange}
-            maxLength={180}
-            placeholder="Input the name of the team leader and team members with the team leader's name at the beginning."
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            Please enter team members' names.
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Row className="mb-3">
-          <Col md={6}>
-            <Form.Group controlId="leaderWhatsApp">
-              <Form.Label>Leader WhatsApp Number</Form.Label>
-              <Form.Control
-                type="text"
-                name="leaderWhatsApp"
-                value={formData.leaderWhatsApp}
-                onChange={handleChange}
-                placeholder="e.g., +62 8177091xxxx"
-                required
-              />
-              <Form.Control.Feedback type="invalid">
-                Please enter the leader's WhatsApp number.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group controlId="phoneCode">
-              <Form.Label>Phone Code</Form.Label>
-              <Form.Select
-                name="phoneCode"
-                value={formData.phoneCode}
-                onChange={handleChange}
-                required
-              >
-                <option value="">--Choose Phone Code--</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-                <option value="+62">+62</option>
-                {/* Add more options as needed */}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                Please select a phone code.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Form.Group className="mb-3" controlId="leaderEmail">
-          <Form.Label>Leader Email Address</Form.Label>
-          <Form.Control
-            type="email"
-            name="leaderEmail"
-            value={formData.leaderEmail}
-            onChange={handleChange}
-            placeholder="Enter leader's email"
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            Please enter a valid email address.
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        {/* School Data Section */}
-        <h4>School Data</h4>
-        <Form.Group className="mb-3" controlId="schoolName">
-          <Form.Label>Name of School/University</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            name="schoolName"
-            value={formData.schoolName}
-            onChange={handleChange}
-            maxLength={500}
-            placeholder="If all members are in the same institution, write only 1 institution. If not, list each with the member's name."
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            Please enter the school/university name(s).
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Row className="mb-3">
-          <Col md={6}>
-            <Form.Group controlId="grade">
-              <Form.Label>Grade</Form.Label>
-              <Form.Select
-                name="grade"
-                value={formData.grade}
-                onChange={handleChange}
-                required
-              >
-                <option value="">--Choose Grade--</option>
-                <option value="High School">High School</option>
-                <option value="Undergraduate">Undergraduate</option>
-                <option value="Postgraduate">Postgraduate</option>
-                {/* Add more options as needed */}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                Please select a grade.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
             <Form.Group controlId="country">
               <Form.Label>Country</Form.Label>
               <Form.Control
@@ -239,6 +117,336 @@ const Registration = () => {
             </Form.Group>
           </Col>
         </Row>
+
+
+        <Row>
+          <Col md={6}>
+            <Form.Group controlId="competitionCategory">
+              <Form.Label>Segment</Form.Label>
+              <Form.Select
+                name="competitionCategory"
+                value={formData.competitionCategory}
+                onChange={handleChange}
+                required
+              >
+                <option value="">--Choose Category Competition--</option>
+                <option value="Science">Project</option>
+                <option value="Technology">Wall Magazine</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                Please select a Segment.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+
+          {formData.competitionCategory === "Science" && (
+            <Col md={6}>
+              <Form.Group controlId="projectSubcategory">
+                <Form.Label>Project Subcategory</Form.Label>
+                <Form.Select
+                  name="projectSubcategory"
+                  value={formData.projectSubcategory}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">--Choose a Subcategory--</option>
+                  <option value="IT and Robotics">IT and Robotics</option>
+                  <option value="Environmental science">Environmental science</option>
+                  <option value="Innovative social science">Innovative social science</option>
+                  <option value="Applied Physics and engineering">Applied Physics and engineering</option>
+                  <option value="Applied life science">Applied life science</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">
+                  Please select a subcategory.
+                </Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          )}
+        </Row>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="categories">
+              <Form.Label>Categories</Form.Label>
+              <Form.Select
+                name="categories"
+                value={formData.categories}
+                onChange={handleChange}
+                required
+              >
+                <option value="">--Choose Categories--</option>
+                <option value="High School">Elementary || Class 1 to 5</option>
+                <option value="Undergraduate">High School ||  Class 6 to 10</option>
+                <option value="Postgraduate">College || Class 11 to 12</option>
+                <option value="University">University</option>
+                {/* Add more options as needed */}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                Please select a Categories.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="crRefrence">
+              <Form.Label>CR Refrence</Form.Label>
+              <Form.Control
+                type="text"
+                name="crRefrence"
+                value={formData.crRefrence}
+                onChange={handleChange}
+                placeholder="Enter CR Refrence"
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please provide your CR Name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+
+        {/*Leader and team member section*/}
+
+
+        <h4>Team Leader Information</h4>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="leader">
+              <Form.Label>Team Leader Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="leader"
+                value={formData.leader}
+                onChange={handleChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter team leader name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="institution">
+              <Form.Label>Institution</Form.Label>
+              <Form.Control
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter institute name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="leaderWhatsApp">
+              <Form.Label>Leader WhatsApp Number</Form.Label>
+              <Form.Control
+                type="text"
+                name="leaderWhatsApp"
+                value={formData.leaderWhatsApp}
+                onChange={handleChange}
+                placeholder="e.g., +880 171660xxxx"
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter the leader's WhatsApp number.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3" controlId="leaderEmail">
+              <Form.Label>Leader Email Address</Form.Label>
+              <Form.Control
+                type="email"
+                name="leaderEmail"
+                value={formData.leaderEmail}
+                onChange={handleChange}
+                placeholder="Enter leader's email"
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter a valid email address.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="leaderPhone">
+              <Form.Label>Leader Phone Number</Form.Label>
+              <Form.Control
+                type="text"
+                name="leaderPhone"
+                value={formData.leaderPhone}
+                onChange={handleChange}
+                placeholder="e.g., +880 171660xxxx"
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter the leader's phone number.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+
+          <Col md={6}>
+            <Form.Group controlId="tshirtSizeLeader" className="mb-3">
+              <Form.Label>T-Shirt Size (Leader)</Form.Label>
+              <Form.Select
+                name="tshirtSizeLeader"
+                value={formData.tshirtSizeLeader}
+                onChange={handleChange}
+                required
+              >
+                <option value="">--Select Size--</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                Please select a T-Shirt size.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+
+
+        {/* Team Member */}
+        <h4>Team Member's Information</h4>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="member2">
+              <Form.Label>2nd Team Member Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="member2"
+                value={formData.member2}
+                onChange={handleChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter 2nd team member name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="institution2">
+              <Form.Label>Institution</Form.Label>
+              <Form.Control
+                type="text"
+                name="institution2"
+                value={formData.institution2}
+                onChange={handleChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter institute name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Col md={6}>
+          <Form.Group controlId="tshirtSize2" className="mb-3">
+            <Form.Label>T-Shirt Size (2nd Member)</Form.Label>
+            <Form.Select
+              name="tshirtSize2"
+              value={formData.tshirtSize2}
+              onChange={handleChange}
+              required
+            >
+              <option value="">--Select Size--</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="XXL">XXL</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">
+              Please select a T-Shirt size.
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="member3">
+              <Form.Label>3rd Team Member Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="member3"
+                value={formData.member3}
+                onChange={handleChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter 3rd team member name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="institution3">
+              <Form.Label>Institution</Form.Label>
+              <Form.Control
+                type="text"
+                name="institution3"
+                value={formData.institution3}
+                onChange={handleChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please enter institute name.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Col md={6}>
+          <Form.Group controlId="tshirtSize3" className="mb-3">
+            <Form.Label>T-Shirt Size (3rd Member)</Form.Label>
+            <Form.Select
+              name="tshirtSize3"
+              value={formData.tshirtSize3}
+              onChange={handleChange}
+              required
+            >
+              <option value="">--Select Size--</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="XXL">XXL</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+
+
+
+
+
+
+
 
         {/* Project Details Section */}
         <h4>Project Details</h4>
@@ -331,7 +539,7 @@ const Registration = () => {
 
         <div className="text-center">
           <Button variant="primary" type="submit">
-            Submit Registration
+            Submit and proceed for payment.
           </Button>
         </div>
       </Form>
