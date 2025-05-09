@@ -1,77 +1,30 @@
 require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors');
-const mysql = require('mysql2/promise');
+const app = express();
 
 const paymentRoutes = require('./routes/paymentRoute');
 const registrationRoutes = require('./routes/registerRoute');
 
-const app = express();
+// Parse JSON
+app.use(express.json());
 
-// CORS config — adjust FRONTEND_BASE_URL in .env to match your frontend domain
+// CORS setup
 app.use(cors({
-  origin: process.env.FRONTEND_BASE_URL,
+  origin: process.env.FRONTEND_BASE_URL || 'http://localhost:5173', // adjust this if needed
   credentials: true
 }));
 
-app.use(express.json());
-
-// MySQL session store setup
-const sessionStore = new MySQLStore({
-  host: process.env.DB_HOST,
-  port: 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
-
-// Session middleware
-app.use(session({
-  key: 'wice2025.sid',
-  secret: process.env.SESSION_SECRET || 'default-dev-secret',
-  store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: true, // must be true if sameSite is 'none'
-    sameSite: 'none',
-    maxAge: 1000 * 60 * 30
-  }
-}));
-
-// Debug: print session ID per request
-app.use((req, res, next) => {
-  console.log('🔥 [Debug] Session ID:', req.sessionID);
+// Add console log middleware to track hits
+app.use('/api/payment', (req, res, next) => {
+  console.log('🛣️ Base /api/payment route accessed');
   next();
 });
 
-// Routes
-console.log('Mounting /api/payment route');
-app.use('/api/payment', paymentRoutes);
 app.use('/api/registration', registrationRoutes);
+app.use('/api/payment', paymentRoutes); // Should come AFTER the /api/payment middleware
 
-// Test DB connection
-async function testDatabaseConnection() {
-  try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    });
-    console.log('✅ MySQL connection successful');
-    await connection.end();
-  } catch (error) {
-    console.error('❌ MySQL connection failed:', error.message);
-  }
-}
-
-testDatabaseConnection();
-
-// Start server
-app.listen(process.env.PORT, () => {
-  console.log(`🚀 Server is running on port ${process.env.PORT}`);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

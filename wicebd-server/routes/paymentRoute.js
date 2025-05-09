@@ -1,17 +1,21 @@
 const express = require('express');
+const { initiatePayment, confirmPayment } = require('../controllers/paymentController');
 const router = express.Router();
-const { initiatePayment, executePayment } = require('../controllers/paymentController');
 
-console.log('Inside paymentRoutes file');
+// Add base route logging
+router.use((req, res, next) => {
+  console.log(`🔍 Received request to /api/payment${req.path}`);
+  next();
+});
 
 router.post('/initiate', (req, res, next) => {
-  console.log('POST /api/payment/initiate hit');
-  next();
+  console.log('✅ /api/payment/initiate route hit');
+  next(); // Move to controller
 }, initiatePayment);
 
-router.get('/execute', (req, res, next) => {
-  console.log('GET /api/payment/execute hit');
+router.post('/confirm', (req, res, next) => {
+  console.log('✅ /api/payment/confirm route hit');
   next();
-}, executePayment);
+}, confirmPayment);
 
 module.exports = router;

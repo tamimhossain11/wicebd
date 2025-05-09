@@ -22,7 +22,9 @@ import Login from './pages/innerPages/Login';
 import Contact from './pages/innerPages/Contact';
 import ErrorPage from './pages/innerPages/ErrorPage';
 import PaymentCallback from './pages/callback/PaymentCallback';
-import ThankYou from './pages/ThankYou';
+import ThankYou from './pages/callback/PaymentSuccess';
+import PaymentError from './pages/callback/PaymentError';
+import PaymentCancelled from './pages/callback/PaymentCancelled';
 
 const Routers = () => {
     return (
@@ -48,8 +50,11 @@ const Routers = () => {
                 <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
                 <Route path='/login' element={<Login />}></Route>
                 <Route path='/contact' element={<Contact />}></Route>
-                <Route path='/success' element={<PaymentCallback />}></Route>
-                <Route path='/thank-you' element={<ThankYou/>}></Route>
+                <Route path='/callback' element={<PaymentCallback />}></Route>
+                <Route path='/thank-you' element={<ThankYou />}></Route>
+                <Route path="/payment-error" element={<PaymentError />} />
+                <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+
                 <Route path='*' element={<ErrorPage />}></Route>
             </Routes>
         </>

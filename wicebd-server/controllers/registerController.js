@@ -1,55 +1,45 @@
-const mysql = require('mysql2/promise');
+const { v4: uuidv4 } = require('uuid');
+const db = require('../db');
 
-// Get data from temp_registrations table
-const getTempRegistration = async (sessionID) => {
+const startRegistration = async (req, res) => {
+  const data = req.body;
+  const paymentID = uuidv4();
+
+  const {
+    participantCategory, country, competitionCategory, projectSubcategory, categories, crRefrence,
+    leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
+    member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
+    projectTitle, projectCategory, participatedBefore, previousCompetition,
+    socialMedia, infoSource
+  } = data;
+
+  const sql = `
+    INSERT INTO temp_registrations (
+      paymentID, participantCategory, country, competitionCategory, projectSubcategory, categories, crRefrence,
+      leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
+      member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
+      projectTitle, projectCategory, participatedBefore, previousCompetition,
+      socialMedia, infoSource
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    paymentID, participantCategory, country, competitionCategory, projectSubcategory, categories, crRefrence,
+    leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
+    member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
+    projectTitle, projectCategory, participatedBefore, previousCompetition,
+    socialMedia, infoSource
+  ];
+
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    });
-
-    const [rows] = await connection.execute(
-      `SELECT data FROM temp_registrations WHERE session_id = ?`,
-      [sessionID]
-    );
-
-    await connection.end();
-
-    if (rows.length > 0) {
-      return JSON.parse(rows[0].data);
-    }
-
-    return null;
+    console.log("📩 Inserting registration:", { paymentID });
+    const [result] = await db.execute(sql, values);
+    console.log("✅ Registration saved. Sending paymentID:", paymentID);
+    res.json({ paymentID });
   } catch (err) {
-    console.error('❌ Error fetching temp registration:', err.message);
-    return null;
+    console.error("❌ Database insert failed:", err);
+    res.status(500).json({ error: 'Database insert failed' });
   }
 };
 
-// Delete temp data after successful payment
-const deleteTempRegistration = async (sessionID) => {
-  try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    });
-
-    await connection.execute(
-      `DELETE FROM temp_registrations WHERE session_id = ?`,
-      [sessionID]
-    );
-
-    await connection.end();
-  } catch (err) {
-    console.error('❌ Error deleting temp registration:', err.message);
-  }
-};
-
-module.exports = {
-  getTempRegistration,
-  deleteTempRegistration
-};
+module.exports = { startRegistration };

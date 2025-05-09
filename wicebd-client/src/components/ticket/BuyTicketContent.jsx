@@ -10,7 +10,7 @@ const Registration = () => {
     competitionCategory: '',
     projectSubcategory: '',
     categories: '',
-    crRefrence:'',
+    crRefrence: '',
     leader: '',
     institution: '',
     leaderPhone: '',
@@ -46,33 +46,47 @@ const Registration = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-
+  
     if (!form.checkValidity()) {
       event.stopPropagation();
       setValidated(true);
       return;
     }
-
+  
     try {
-      const saveRes = await axios.post('https://wicebd.onrender.com/api/registration/temp-save', formData, {
-        withCredentials: true
-      });
-
-      if (saveRes.status === 200) {
-        const payRes = await axios.post('https://wicebd.onrender.com/api/payment/initiate', {}, {
-          withCredentials: true
-        });
-        if (payRes.data?.bkashURL) {
-          window.location.href = payRes.data.bkashURL;
-        } else {
-          toast.error('Payment link not received');
-        }
+      // Step 1: Save registration
+      const saveRes = await axios.post('https://wicebd.onrender.com/api/registration/start', formData);
+      const { paymentID } = saveRes.data;
+  
+      if (!paymentID) {
+        toast.error('Failed to get payment ID');
+        return;
       }
+  
+      console.log("📤 Sending payment initiation:", { paymentID });
+  
+      // Step 2: Initiate payment
+      const payRes = await axios.post('https://wicebd.onrender.com/api/payment/initiate', {
+        paymentID,
+        formData,
+      });
+  
+      const { bkashURL } = payRes.data;
+  
+      if (bkashURL) {
+        // Step 3: Redirect to bKash payment page
+        window.location.href = bkashURL;
+      } else {
+        toast.error('bKash payment URL not received');
+      }
+  
     } catch (err) {
-      console.error(err);
-      toast.error('Something went wrong');
+      console.error("❌ Error during submission or payment initiation:", err);
+      toast.error('Something went wrong during registration');
     }
   };
+  
+
 
   return (
     <Container className="mt-5 mb-5">
@@ -543,6 +557,7 @@ const Registration = () => {
           </Button>
         </div>
       </Form>
+      <ToastContainer />
     </Container>
   );
 };
