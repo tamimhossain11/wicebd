@@ -8,34 +8,48 @@ const PaymentCallback = () => {
   const [message, setMessage] = useState('Verifying your payment...');
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentID = urlParams.get('paymentID');
-    const status = urlParams.get('status');
-
-    const handleRedirect = (path, delay = 2000) => {
+    const status = new URLSearchParams(window.location.search).get('status');
+    const paymentID = sessionStorage.getItem('bkashPaymentID');
+  
+    const handleRedirect = (path, delay = 2500) => {
       setTimeout(() => navigate(path), delay);
     };
-
-    if (status === 'success' && paymentID) {
+  
+    const hasConfirmed = localStorage.getItem(`confirmed_${paymentID}`);
+  
+    if (status === 'success' && paymentID && !hasConfirmed) {
       setMessage('Payment successful! Verifying...');
-      fetch(`http://localhost:5000/api/payment/execute?paymentID=${paymentID}`, {
-        method: 'GET',
-        credentials: 'include',
+  
+      fetch(`https://wicebd.onrender.com/api/payment/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentID }),
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.success) {
-            setMessage('Payment verified! Redirecting...');
+        .then(async (res) => {
+          const data = await res.json();
+  
+          if (res.ok && data?.success) {
+            localStorage.setItem(`confirmed_${paymentID}`, 'true'); // ✅ Mark as confirmed
+            setMessage('Payment verified! Redirecting to thank you page...');
+            handleRedirect('/thank-you');
+          } else if (res.ok && data?.message === 'Payment already processed') {
+            localStorage.setItem(`confirmed_${paymentID}`, 'true'); // ✅ Prevent future re-requests
+            setMessage('Payment already verified earlier. Redirecting...');
             handleRedirect('/thank-you');
           } else {
+            console.error('Verification failed:', data);
             setMessage('Verification failed. Redirecting...');
             handleRedirect('/payment-error');
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error('Error during payment verification:', err);
           setMessage('Something went wrong. Redirecting...');
           handleRedirect('/payment-error');
         });
+    } else if (hasConfirmed) {
+      setMessage('Payment already verified earlier. Redirecting...');
+      handleRedirect('/thank-you');
     } else if (status === 'failure') {
       setMessage('Payment failed. Redirecting...');
       handleRedirect('/payment-error');
@@ -47,6 +61,7 @@ const PaymentCallback = () => {
       handleRedirect('/payment-error');
     }
   }, [navigate]);
+  
 
   return (
     <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 12 }}>

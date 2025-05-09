@@ -54,7 +54,7 @@ const Registration = () => {
     }
   
     try {
-      // Step 1: Save registration
+      // Step 1: Save registration temporarily
       const saveRes = await axios.post('https://wicebd.onrender.com/api/registration/start', formData);
       const { paymentID } = saveRes.data;
   
@@ -71,13 +71,16 @@ const Registration = () => {
         formData,
       });
   
-      const { bkashURL } = payRes.data;
+      const { bkashURL, paymentID: bkashPaymentID } = payRes.data;
   
-      if (bkashURL) {
+      if (bkashURL && bkashPaymentID) {
+        // ✅ Save actual bKash payment ID (not the UUID) for callback use
+        sessionStorage.setItem("bkashPaymentID", bkashPaymentID);
+  
         // Step 3: Redirect to bKash payment page
         window.location.href = bkashURL;
       } else {
-        toast.error('bKash payment URL not received');
+        toast.error('bKash payment URL or ID not received');
       }
   
     } catch (err) {
@@ -85,6 +88,7 @@ const Registration = () => {
       toast.error('Something went wrong during registration');
     }
   };
+  
   
 
 
