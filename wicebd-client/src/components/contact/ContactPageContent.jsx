@@ -16,23 +16,23 @@ const ContactPageContent = () => {
                                 <ul className="contact-info">
                                     <li>
                                         <span className="icon fa fa-map-marker-alt"></span>
-                                        <p><strong>32, Breaking Street,</strong></p>
-                                        <p>2nd cros, Newyork ,USA 10002</p>
+                                        <p><strong>block C, 9/25 Humayun Rd</strong></p>
+                                        <p>Dhaka 1207, Bangladesh</p>
                                     </li>
                                     <li>
                                         <span className="icon fa fa-phone-volume"></span>
                                         <p><strong>Call Us</strong></p>
-                                        <p><a href="tel:+321 4567 89 012">+321 4567 89 012</a></p>
+                                        <p><a href="tel:+880 1716605265"> 01746-342152</a></p>
                                     </li>
                                     <li>
                                         <span className="icon fa fa-envelope"></span>
                                         <p><strong>Mail Us</strong></p>
-                                        <p><a href="mailto:support@example.com">Support@example.com</a></p>
+                                        <p><a href="mailto:support@example.com">contact@wicebd.com</a></p>
                                     </li>
                                     <li>
                                         <span className="icon fa fa-clock"></span>
                                         <p><strong>Opening Time</strong></p>
-                                        <p>Mon - Sat: 09.00am to 18.00pm</p>
+                                        <p>Sat - Fri: 09.00am to 22.00pm</p>
                                     </li>
                                 </ul>
                                 <ul className="social-icon-two social-icon-colored">
@@ -50,7 +50,16 @@ const ContactPageContent = () => {
             <div className="map-section">
                 <div className="auto-container">
                     <div className="map-outer">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25216.765666144616!2d144.9456413371385!3d-37.8112271492458!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642b8c21cb29b%3A0x1c045678462e3510!2sMelbourne%20VIC%203000%2C%20Australia!5e0!3m2!1sen!2s!4v1599237324751!5m2!1sen!2s" height="540" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.45619571192!2d90.36076077516411!3d23.76676407865919!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c1004cb313c9%3A0x6ca7a5d7fc7b9f3b!2sDREAMS%20OF%20BANGLADESH!5e0!3m2!1sen!2sbd!4v1746868913690!5m2!1sen!2sbd"
+                            width="600"
+                            height="450"
+                            style={{ border: 0 }}
+                            allowFullScreen=""
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        />
+
                     </div>
                 </div>
             </div>

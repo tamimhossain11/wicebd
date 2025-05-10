@@ -20,7 +20,7 @@ const FooterV1 = () => {
                                                 <Link to="/#"><img src="/images/logo.png" alt="image" /></Link>
                                             </div>
                                             <div className="text">
-                                                <p>We have very good strength in innovative technology and tools with over 35 years of experience. We makes long-term investments goal in global companies in different sectors, mainly in Europe, America and other countries.</p>
+                                                <p>Empowering innovation and creativity in Bangladesh through the global platform of WICE.</p>
                                             </div>
                                             <ul className="social-icon-one social-icon-colored">
                                                 <SocialShare />
@@ -51,19 +51,19 @@ const FooterV1 = () => {
                                                 <ul className="contact-list">
                                                     <li>
                                                         <span className="icon flaticon-clock"></span>
-                                                        <div className="text">Mon - Fri: 09:00 - 18:00</div>
+                                                        <div className="text">Sat - Fri: 09:00 - 18:00</div>
                                                     </li>
                                                     <li>
                                                         <span className="icon flaticon-phone"></span>
-                                                        <div className="text"><Link to="tel:+1-345-5678-77">+1-345-5678-77</Link></div>
+                                                        <div className="text"><Link to="tel: +8801746-342152">01746-342152</Link></div>
                                                     </li>
                                                     <li>
                                                         <span className="icon flaticon-paper-plane"></span>
-                                                        <div className="text"><Link to="mailto:support@example.com">support@example.com</Link></div>
+                                                        <div className="text"><Link to="mailto:support@example.com">contact@wicebd.com</Link></div>
                                                     </li>
                                                     <li>
                                                         <span className="icon flaticon-worldwide"></span>
-                                                        <div className="text">13005 Greenville Avenue <br /> California, TX 70240</div>
+                                                        <div className="text">block C, 9/25 Humayun Rd <br />Dhaka 1207, Bangladesh</div>
                                                     </li>
                                                 </ul>
                                             </div>
