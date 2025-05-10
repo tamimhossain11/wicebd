@@ -65,8 +65,8 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
             <h3 style="color: #0066cc;">Payment Details</h3>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>Transaction ID:</strong></td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${paymentDetails.trxID}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>Payment ID:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${registration.paymentID}</td>
               </tr>
               <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Amount:</strong></td>
