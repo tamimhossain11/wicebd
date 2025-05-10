@@ -11383,3 +11383,19 @@ img {
 	height: 540px;
 	margin-bottom: -10px;
 }
+/*custom css by me*/
+
+.btn-gradient {
+	background: linear-gradient(135deg, #ed1f79, #8b0000); /* pinkish red to dark red */
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	font-weight: 600;
+	transition: all 0.3s ease;
+  }
+  
+  .btn-gradient:hover {
+	background: linear-gradient(135deg, #c2185b, #6b0000);
+	transform: scale(1.03);
+  }
+  

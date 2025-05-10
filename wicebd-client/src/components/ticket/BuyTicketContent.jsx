@@ -512,10 +512,11 @@ const Registration = () => {
         </Form.Group>
 
         <div className="text-center">
-          <Button variant="primary" type="submit">
-            Submit and proceed for payment.
-          </Button>
-        </div>
+  <Button className="btn-gradient" type="submit">
+    Submit and proceed for payment.
+  </Button>
+</div>
+
       </Form>
       <ToastContainer />
     </Container>
