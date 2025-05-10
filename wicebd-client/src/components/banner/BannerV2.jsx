@@ -6,7 +6,7 @@ import Parallax from 'parallax-js';
 import TimeV1 from '../counter/TimeV1';
 
 const BannerV2 = () => {
-    const time = new Date("Nov 07 2025")
+    const time = new Date("May 30 2025")
 
     const sceneRef = useRef(null);
 
@@ -34,7 +34,7 @@ const BannerV2 = () => {
                     <div className="gradient-layer"></div>
                 </div>
                 <div className="images-outer">
-                    <figure className="speaker-img"><img src="../images/main-slider/speaker.png" alt="image" /></figure>
+                    <figure className="speaker-img"><img src="../images/main-slider/robo01.jpg" alt="image" /></figure>
                 </div>
                 <div className="anim-icons full-width">
                     <ReactWOW animation='zoomIn'>
@@ -46,8 +46,8 @@ const BannerV2 = () => {
                 </div>
                 <div className="auto-container">
                     <div className="content-box">
-                        <span className="title">January 20, 2023</span>
-                        <h2> World Digital <br />Conference 2023</h2>
+                        <span className="title">May 30, 2025</span>
+                        <h2> World Innovation <br />& Creativity  Exhibition<br /> Bangladesh</h2>
                         <div className="time-counter">
                             <TimeV1 expiryTimestamp={time} />
                         </div>

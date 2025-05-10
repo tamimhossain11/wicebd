@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { NavHashLink as Link } from 'react-router-hash-link'
 import SearchPopup from '../others/SearchPopup';
-import HeaderTopV1 from './HeaderTopV1';
-import HeaderTopV2 from './HeaderTopV2';
 import MainMenu from './MainMenu';
 import ColorsPalate from '../others/ColorsPalate';
 
-const HeaderV1 = ({ headerStyle, whiteLogo = false, headerTopV1, headerTopV2, parentMenu }) => {
+const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
 
     // Sticky Menu 
     const [isSticky, setIsSticky] = useState(false);
@@ -39,7 +37,6 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, headerTopV1, headerTopV2, pa
     }
 
     // Mobile Menu 
-
     const [openMenu, setOpenMenu] = useState(false);
 
     const handleOpenMenu = (event) => {
@@ -74,7 +71,6 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, headerTopV1, headerTopV2, pa
     return (
         <>
             <header className={`main-header ${headerStyle ? headerStyle : ""} ${isSticky ? "fixed-header" : ""}`}>
-            <HeaderTopV2 />
                 <div className="main-box">
                     <div className="auto-container clearfix">
                         <div className="logo-box">
@@ -83,7 +79,7 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, headerTopV1, headerTopV2, pa
                                     <div className="logo"><Link to="/#"><img src="/images/logo.png" alt="image" /></Link></div>
                                 </>
                                 : <>
-                                    <div className="logo"><Link to="/#"><img src="/images/logo-2.png" alt="image" /></Link></div>
+                                    <div className="logo"><Link to="/#"><img src="/images/logo.png" alt="image" /></Link></div>
                                 </>}
                         </div>
                         <div className="nav-outer clearfix">

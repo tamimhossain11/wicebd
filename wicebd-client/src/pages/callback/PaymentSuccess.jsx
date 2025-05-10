@@ -12,15 +12,13 @@ const ThankYou = () => {
           Thank You for Registering!
         </Typography>
         <Typography variant="subtitle1" sx={{ mt: 1 }}>
-          Your payment was successful, and your registration is confirmed.
+          Your payment was successful, and your registration is confirmed, you will receive a confirmation to the leader's email as soon as possible.
+
         </Typography>
       </Box>
       <Box>
         <Button variant="contained" color="primary" href="/">
           Return to Home
-        </Button>
-        <Button variant="outlined" color="secondary" href="/events" sx={{ ml: 2 }}>
-          Explore More Events
         </Button>
       </Box>
     </Container>
