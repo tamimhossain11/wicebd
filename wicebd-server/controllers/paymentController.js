@@ -30,7 +30,7 @@ const initiatePayment = async (req, res) => {
   }
 
   try {
-    const result = await createPayment(1, paymentID);
+    const result = await createPayment(620, paymentID);
     const bkashPaymentID = result.paymentID;
 
     await db.query(
