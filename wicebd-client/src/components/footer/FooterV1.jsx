@@ -92,7 +92,7 @@ const FooterV1 = () => {
                     <div className="auto-container">
                         <div className="inner-container clearfix">
                             <div className="copyright-text">
-                                <p>&copy; Copyright {(new Date().getFullYear())} All Rights Reserved by <Link to="https://themeforest.net/user/expert-themes/portfolio" target='_blank'>Expert-Themes</Link></p>
+                                <p>&copy; Copyright {(new Date().getFullYear())} All Rights Reserved by <Link to="https://themeforest.net/user/expert-themes/portfolio" target='_blank'>Dreams of Bangladesh</Link></p>
                             </div>
                         </div>
                     </div>

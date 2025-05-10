@@ -10,7 +10,7 @@ const initiatePayment = async (req, res) => {
   }
 
   try {
-    const result = await createPayment(620, paymentID); // your existing call
+    const result = await createPayment(1, paymentID); // your existing call
     const bkashPaymentID = result.paymentID;
 
     await db.query(
@@ -74,16 +74,15 @@ const confirmPayment = async (req, res) => {
     // 5. Insert into final table
     await db.query(
       `INSERT INTO registrations (
-        participantCategory, country, competitionCategory, 
+        competitionCategory, 
         projectSubcategory, categories, crRefrence,
         leader, institution, leaderPhone, leaderWhatsApp,
         leaderEmail, tshirtSizeLeader, member2, institution2,
         tshirtSize2, member3, institution3, tshirtSize3,
         projectTitle, projectCategory, participatedBefore,
         previousCompetition, socialMedia, infoSource, paymentID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        registration.participantCategory, registration.country, 
         registration.competitionCategory, registration.projectSubcategory,
         registration.categories, registration.crRefrence, registration.leader,
         registration.institution, registration.leaderPhone, registration.leaderWhatsApp,

@@ -5,8 +5,6 @@ import { ToastContainer, toast } from 'react-toastify';
 
 const Registration = () => {
   const [formData, setFormData] = useState({
-    participantCategory: '',
-    country: '',
     competitionCategory: '',
     projectSubcategory: '',
     categories: '',
@@ -101,44 +99,6 @@ const Registration = () => {
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         {/* Biodata Section */}
         <h4>Biodata</h4>
-        <Row className="mb-3">
-          <Col md={6}>
-            <Form.Group controlId="participantCategory">
-              <Form.Label>Participant Category</Form.Label>
-              <Form.Select
-                name="participantCategory"
-                value={formData.participantCategory}
-                onChange={handleChange}
-                required
-              >
-                <option value="">--Select--</option>
-                <option value="International">International Participant</option>
-                <option value="National">National Participant</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                Please select a participant category.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group controlId="country">
-              <Form.Label>Country</Form.Label>
-              <Form.Control
-                type="text"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                placeholder="Your Country"
-                required
-              />
-              <Form.Control.Feedback type="invalid">
-                Please enter your country.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-
         <Row>
           <Col md={6}>
             <Form.Group controlId="competitionCategory">
@@ -353,7 +313,7 @@ const Registration = () => {
 
 
         {/* Team Member */}
-        <h4>Team Member's Information</h4>
+        <h4>Team Member's Information(Optional)</h4>
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="member2">
@@ -363,7 +323,6 @@ const Registration = () => {
                 name="member2"
                 value={formData.member2}
                 onChange={handleChange}
-                required
               />
               <Form.Control.Feedback type="invalid">
                 Please enter 2nd team member name.
@@ -378,7 +337,6 @@ const Registration = () => {
                 name="institution2"
                 value={formData.institution2}
                 onChange={handleChange}
-                required
               />
               <Form.Control.Feedback type="invalid">
                 Please enter institute name.
@@ -394,7 +352,6 @@ const Registration = () => {
               name="tshirtSize2"
               value={formData.tshirtSize2}
               onChange={handleChange}
-              required
             >
               <option value="">--Select Size--</option>
               <option value="S">S</option>
@@ -418,7 +375,6 @@ const Registration = () => {
                 name="member3"
                 value={formData.member3}
                 onChange={handleChange}
-                required
               />
               <Form.Control.Feedback type="invalid">
                 Please enter 3rd team member name.
@@ -433,7 +389,6 @@ const Registration = () => {
                 name="institution3"
                 value={formData.institution3}
                 onChange={handleChange}
-                required
               />
               <Form.Control.Feedback type="invalid">
                 Please enter institute name.
@@ -449,7 +404,6 @@ const Registration = () => {
               name="tshirtSize3"
               value={formData.tshirtSize3}
               onChange={handleChange}
-              required
             >
               <option value="">--Select Size--</option>
               <option value="S">S</option>

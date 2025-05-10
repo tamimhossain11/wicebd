@@ -51,7 +51,7 @@ const BannerV2 = () => {
                         <div className="time-counter">
                             <TimeV1 expiryTimestamp={time} />
                         </div>
-                        <div className="btn-box"><Link to="/buy-ticket#" className="theme-btn btn-style-two"><span className="btn-title">Book Now</span></Link></div>
+                        <div className="btn-box"><Link to="/buy-ticket#" className="theme-btn btn-style-two"><span className="btn-title">Register Now</span></Link></div>
                     </div>
                 </div>
             </section>
