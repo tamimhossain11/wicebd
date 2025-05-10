@@ -76,10 +76,10 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
                         <div className="logo-box">
                             {whiteLogo ?
                                 <>
-                                    <div className="logo"><Link to="/#"><img src="/images/logo.png" alt="image" /></Link></div>
+                                    <div className="logo"><Link to="/#"><img src="/images/logo-2.png" alt="image" /></Link></div>
                                 </>
                                 : <>
-                                    <div className="logo"><Link to="/#"><img src="/images/logo.png" alt="image" /></Link></div>
+                                    <div className="logo"><Link to="/#"><img src="/images/logo-2.png" alt="image" /></Link></div>
                                 </>}
                         </div>
                         <div className="nav-outer clearfix">

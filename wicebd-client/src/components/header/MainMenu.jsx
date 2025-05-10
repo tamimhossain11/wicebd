@@ -8,7 +8,13 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                 <li className={`dropdown ${parentMenu === 'home' ? 'current' : ''} `}>
                     <Link to="/#">Home</Link>
                 </li>
-                <li className={`dropdown ${parentMenu === 'about' ? 'current' : ''}`}>
+                <li className={`dropdown ${parentMenu === 'schedule' ? 'current' : ''}`}>
+                    <Link to="/buy-ticket">Schedule</Link>
+                   
+                    <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
+                </li>
+                <li><Link to="/contact#">Contact</Link></li> 
+               {/* <li className={`dropdown ${parentMenu === 'about' ? 'current' : ''}`}>
                     <Link to={void (0)} onClick={toggleMenu}>About</Link>
                     <ul className='sub-menu'>
                         <li><Link to="/about-us#" >About Us</Link></li>
@@ -27,15 +33,7 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     </ul>
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>
-                <li className={`dropdown ${parentMenu === 'schedule' ? 'current' : ''}`}>
-                    <Link to={void (0)} onClick={toggleMenu}>Schedule</Link>
-                    <ul className='sub-menu'>
-                        <li><Link to="/schedule#">Schedule</Link></li>
-                        <li><Link to="/event-detail/1/1#">Event Detail</Link></li>
-                        <li><Link to="/buy-ticket#">Buy Ticket</Link></li>
-                    </ul>
-                    <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
-                </li>
+                
                 <li className={`dropdown ${parentMenu === 'blog' ? 'current' : ''}`}>
                     <Link to={void (0)} onClick={toggleMenu}>Blog</Link>
                     <ul className='sub-menu'>
@@ -46,7 +44,7 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     </ul>
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>
-                <li><Link to="/contact#">Contact</Link></li>
+                */}
             </ul>
         </>
     );

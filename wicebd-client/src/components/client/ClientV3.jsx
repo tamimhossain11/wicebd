@@ -50,7 +50,7 @@ const ClientV3 = () => {
 
     return (
         <>
-            <section className="clients-section-three" style={{ backgroundImage: "url(images/background/9.jpg)" }}>
+            <section className="clients-section-three" style={{ backgroundImage: "url(images/background/9.png)" }}>
                 <div className="auto-container">
                     <div className="sponsors-outer">
                         <div className="sponsors-carousel">

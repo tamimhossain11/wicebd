@@ -5,7 +5,7 @@ import ClientV2Data from '../../jsonData/client/ClientV2Data.json'
 const ClientV2 = () => {
     return (
         <>
-            <section className="clients-section-two" style={{ backgroundImage: "url(../images/background/9.jpg)" }}>
+            <section className="clients-section-two" style={{ backgroundImage: "url(../images/background/9.png)" }}>
                 <div className="auto-container">
                     <div className="sponsors-outer">
                         <div className="row">
