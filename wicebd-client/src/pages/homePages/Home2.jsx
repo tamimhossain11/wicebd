@@ -21,7 +21,7 @@ const Home2 = () => {
                 <span className="header-span"></span>
                 <HeaderV1 headerStyle="header-style-two" parentMenu='home' />
                 <BannerV2 />
-                <FeatureV2 />
+                {/*<FeatureV2 />
                 <FactV2 />
                 <SpeakerV2 />
                 <ScheduleV2 />
@@ -31,7 +31,7 @@ const Home2 = () => {
                 <GalleryV2 />
                 <TestimonialV1 />
                 <BlogV1 />
-                <SubscribeV1 />
+                <SubscribeV1 />*/}
                 <FooterV2 />
             </div>
         </>
