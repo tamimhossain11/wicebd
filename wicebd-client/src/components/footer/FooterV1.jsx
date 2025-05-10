@@ -31,11 +31,12 @@ const FooterV1 = () => {
                                         <div className="footer-widget widget-ps-50">
                                             <h2 className="widget-title">Useful Links</h2>
                                             <ul className="user-links">
-                                                <li><Link to="/about-us#">About Us</Link></li>
+                                                {/*<li><Link to="/about-us#">About Us</Link></li>
                                                 <li><Link to="/services#">Services</Link></li>
                                                 <li><Link to="/projects#">Projects</Link></li>
-                                                <li><Link to="/schedule#">Schedule</Link></li>
-                                                <li><Link to="/blog#">Blogs</Link></li>
+                                                <li><Link to="/blog#">Blogs</Link></li>*/}
+
+                                                <li><Link to="/buy-ticket#">Register Now</Link></li>
                                                 <li><Link to="/contact#">Contact Us</Link></li>
                                             </ul>
                                         </div>
@@ -92,7 +93,7 @@ const FooterV1 = () => {
                     <div className="auto-container">
                         <div className="inner-container clearfix">
                             <div className="copyright-text">
-                                <p>&copy; Copyright {(new Date().getFullYear())} All Rights Reserved by <Link to="https://themeforest.net/user/expert-themes/portfolio" target='_blank'>Dreams of Bangladesh</Link></p>
+                                <p>&copy; Copyright {(new Date().getFullYear())} All Rights Reserved by <Link to="https://dreamsofbangladesh.com" target='_blank'>Dreams of Bangladesh</Link></p>
                             </div>
                         </div>
                     </div>

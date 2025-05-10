@@ -27,10 +27,10 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => {
                         }
                         <ul className="footer-nav">
                             <li><Link to="/#">Home</Link></li>
-                            <li><Link to="/about-us#">About Us</Link></li>
-                            <li><Link to="#">Services</Link></li>
-                            <li><Link to="#">Projects</Link></li>
                             <li><Link to="/contact#">Contact Us</Link></li>
+                            {/*<li><Link to="/about-us#">About Us</Link></li>
+                            <li><Link to="#">Services</Link></li>
+                            <li><Link to="#">Projects</Link></li>*/}
                         </ul>
                         <div className="copyright-text">&copy; Copyright {(new Date().getFullYear())} All Rights Reserved by <Link to="https://themeforest.net/user/expert-themes/portfolio" target='_blank'>Dreams of Bangladesh</Link></div>
                         <ul className="social-icon-one">

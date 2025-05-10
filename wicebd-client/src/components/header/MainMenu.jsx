@@ -9,7 +9,7 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     <Link to="/#">Home</Link>
                 </li>
                 <li className={`dropdown ${parentMenu === 'schedule' ? 'current' : ''}`}>
-                    <Link to="/buy-ticket">Schedule</Link>
+                    <Link to="/buy-ticket">Registration</Link>
                    
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>
