@@ -32,6 +32,8 @@ const Registration = () => {
   });
 
   const [validated, setValidated] = useState(false);
+   // Get backend URL from environment variables
+   const backendUrl = import.meta.env.VITE_BACKEND_URL
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,7 +57,7 @@ const Registration = () => {
   
     try {
       // Step 1: Save registration temporarily
-      const saveRes = await axios.post('https://wicebd.onrender.com/api/registration/start', formData);
+      const saveRes = await axios.post(`${backendUrl}/api/registration/start`, formData);
       const { paymentID } = saveRes.data;
   
       if (!paymentID) {
@@ -66,7 +68,7 @@ const Registration = () => {
       console.log("📤 Sending payment initiation:", { paymentID });
   
       // Step 2: Initiate payment
-      const payRes = await axios.post('https://wicebd.onrender.com/api/payment/initiate', {
+      const payRes = await axios.post(`${backendUrl}/api/payment/initiate`, {
         paymentID,
         formData,
       });
