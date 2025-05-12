@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Button, 
-  Container, 
-  Typography, 
+import {
+  Box,
+  Button,
+  Container,
+  Typography,
   CircularProgress,
   Alert,
   Paper,
   IconButton,
   Tooltip
 } from '@mui/material';
-import { 
-  DataGrid, 
+import {
+  DataGrid,
   GridToolbar,
-  GridActionsCellItem 
+  GridActionsCellItem
 } from '@mui/x-data-grid';
-import { 
-  Logout, 
-  Visibility, 
+import {
+  Logout,
+  Visibility,
   FileDownload,
-  Refresh 
+  Refresh
 } from '@mui/icons-material';
-import { participantsApi} from '../../api/participants';  // Instead of importing 'api'
+import { participantsApi } from '../../api/participants';
 
 const AdminDashboard = () => {
   const [participants, setParticipants] = useState([]);
@@ -32,12 +32,12 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   const fetchParticipants = async () => {
-  try {
-    setLoading(true);
-    setError('');
-    const response = await participantsApi.getAll();  // Use participantsApi instead of api
-    setParticipants(response.data);
-  } catch (err) {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await participantsApi.getAll();
+      setParticipants(response.data);
+    } catch (err) {
       console.error('Fetch error:', err);
       if (err.response?.status === 401) {
         localStorage.removeItem('adminToken');
@@ -64,9 +64,9 @@ const AdminDashboard = () => {
   };
 
   const handleExport = async () => {
-  try {
-    const response = await participantsApi.exportToCSV();  // Use participantsApi here too
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    try {
+      const response = await participantsApi.exportToCSV();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'participants.csv');
@@ -79,17 +79,33 @@ const AdminDashboard = () => {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'leader', headerName: 'Leader', width: 150 },
+    { field: 'leader', headerName: 'Leader Name', width: 150 },
     { field: 'leaderEmail', headerName: 'Email', width: 200 },
-    { field: 'institution', headerName: 'Institution', width: 180 },
+    { field: 'leaderPhone', headerName: 'Phone', width: 130 },
+    { field: 'leaderWhatsApp', headerName: 'WhatsApp', width: 130 },
+    { field: 'tshirtSizeLeader', headerName: 'T-Shirt Size (Leader)', width: 180 },
+    { field: 'member2', headerName: 'Member 2', width: 130 },
+    { field: 'institution2', headerName: 'Institution 2', width: 180 },
+    { field: 'tshirtSize2', headerName: 'T-Shirt Size 2', width: 160 },
+    { field: 'member3', headerName: 'Member 3', width: 130 },
+    { field: 'institution3', headerName: 'Institution 3', width: 180 },
+    { field: 'tshirtSize3', headerName: 'T-Shirt Size 3', width: 160 },
+    { field: 'institution', headerName: 'Main Institution', width: 180 },
+    { field: 'competitionCategory', headerName: 'Category', width: 160 },
+    { field: 'projectSubcategory', headerName: 'Subcategory', width: 160 },
+    { field: 'projectCategory', headerName: 'Project Category', width: 160 },
     { field: 'projectTitle', headerName: 'Project Title', width: 200 },
-    { field: 'competitionCategory', headerName: 'Category', width: 120 },
-    { field: 'projectSubcategory', headerName: 'Subcategory', width: 140 },
+    { field: 'categories', headerName: 'Main Category', width: 160 },
+    { field: 'participatedBefore', headerName: 'Participated Before?', width: 180 },
+    { field: 'previousCompetition', headerName: 'Previous Competition', width: 200 },
+    { field: 'socialMedia', headerName: 'Social Media Link', width: 200 },
+    { field: 'infoSource', headerName: 'Info Source', width: 180 },
+    { field: 'crRefrence', headerName: 'CR Ref.', width: 160 },
     { field: 'paymentID', headerName: 'Payment ID', width: 180 },
-    { 
-      field: 'createdAt', 
-      headerName: 'Date', 
-      width: 120,
+    {
+      field: 'createdAt',
+      headerName: 'Registration Date',
+      width: 160,
       valueFormatter: (params) => new Date(params.value).toLocaleDateString()
     },
     {
@@ -100,7 +116,7 @@ const AdminDashboard = () => {
       getActions: (params) => [
         <GridActionsCellItem
           icon={<Tooltip title="View Details"><Visibility /></Tooltip>}
-          onClick={() => navigate(`/admin/participants/${params.id}`)}
+          onClick={() => navigate(`/api/admin/participants/${params.id}`)}
           label="View"
         />,
       ],
@@ -117,21 +133,16 @@ const AdminDashboard = () => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        mb: 3
-      }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Participants information
+          Participants Dashboard
         </Typography>
-        
+
         <Box>
           <Tooltip title="Export to CSV">
             <Button
-              variant="contained"
-              color="secondary"
+              variant="outlined"
+              color="primary"
               startIcon={<FileDownload />}
               onClick={handleExport}
               sx={{ mr: 2 }}
@@ -139,13 +150,13 @@ const AdminDashboard = () => {
               Export
             </Button>
           </Tooltip>
-          
-          <Tooltip title="Refresh Data">
+
+          <Tooltip title="Refresh">
             <IconButton onClick={fetchParticipants} sx={{ mr: 2 }}>
               <Refresh />
             </IconButton>
           </Tooltip>
-          
+
           <Button
             variant="contained"
             color="error"
@@ -163,7 +174,7 @@ const AdminDashboard = () => {
         </Alert>
       )}
 
-      <Paper elevation={3} sx={{ p: 2, height: '75vh' }}>
+      <Paper elevation={4} sx={{ p: 2, height: '75vh', borderRadius: 3 }}>
         <DataGrid
           rows={participants}
           columns={columns}
@@ -182,11 +193,19 @@ const AdminDashboard = () => {
           loading={loading}
           sx={{
             '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'primary.main',
-              color: 'primary.contrastText',
+              backgroundColor: '#1976d2',
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 'bold',
             },
             '& .MuiDataGrid-cell': {
-              borderRight: '1px solid rgba(224, 224, 224, 1)',
+              fontSize: 14,
+              whiteSpace: 'normal',
+              lineHeight: 1.4,
+              padding: '8px',
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: '#f5f5f5',
             },
           }}
         />

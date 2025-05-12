@@ -46,95 +46,6 @@ const initiatePayment = async (req, res) => {
   }
 };
 
-const sendConfirmationEmail = async (registration, paymentDetails) => {
-  try {
-    const mailOptions = {
-      from: '"WICE Registration Team" <contact@wicebd.com>',
-      to: registration.leaderEmail,
-      subject: `Registration Confirmed - ${registration.projectTitle}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: #0066cc; padding: 20px; color: white;">
-            <h1 style="margin: 0;">WICE Registration Confirmation</h1>
-          </div>
-          
-          <div style="padding: 20px;">
-            <p>Dear ${registration.leader},</p>
-            <p>Thank you for registering for WICE ${registration.competitionCategory} competition.</p>
-            
-            <h3 style="color: #0066cc;">Payment Details</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>Payment ID:</strong></td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${registration.paymentID}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Amount:</strong></td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">620 BDT</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px;"><strong>Status:</strong></td>
-                <td style="padding: 8px;">Completed</td>
-              </tr>
-            </table>
-            
-            <h3 style="color: #0066cc; margin-top: 20px;">Team Information</h3>
-            <p><strong>Project Title:</strong> ${registration.projectTitle}</p>
-            <p><strong>Team Members:</strong></p>
-            <ul>
-              <li>${registration.leader} (Leader)</li>
-              ${registration.member2 ? `<li>${registration.member2}</li>` : ''}
-              ${registration.member3 ? `<li>${registration.member3}</li>` : ''}
-            </ul>
-            
-            <div style="background: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #0066cc;">
-              <h4 style="margin-top: 0;">Next Steps</h4>
-              <ol>
-                <li>Save this confirmation email</li>
-                <li>Join our official participants group</li>
-                <li>Check our website for schedule updates</li>
-              </ol>
-            </div>
-            
-            <p>For any questions, please contact <a href="mailto:contact@wicebd.com">contact@wicebd.com</a></p>
-          </div>
-          
-          <div style="background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px;">
-            <p>WICE Bangladesh &copy; ${new Date().getFullYear()}</p>
-            <p><a href="https://www.wicebd.com" style="color: #0066cc;">www.wicebd.com</a></p>
-          </div>
-        </div>
-      `,
-      text: `WICE Registration Confirmation\n\n` +
-        `Dear ${registration.leader},\n\n` +
-        `Thank you for registering for WICE ${registration.competitionCategory} competition.\n\n` +
-        `Payment Details:\n` +
-        `- Payment ID: ${registration.paymentID}\n` +
-        `- Amount: 620 BDT\n` +
-        `- Status: Completed\n\n` +
-        `Team Information:\n` +
-        `- Project Title: ${registration.projectTitle}\n` +
-        `- Team Members:\n` +
-        `  • ${registration.leader} (Leader)\n` +
-        `${registration.member2 ? `  • ${registration.member2}\n` : ''}` +
-        `${registration.member3 ? `  • ${registration.member3}\n` : ''}\n` +
-        `Next Steps:\n` +
-        `1. Save this confirmation email\n` +
-        `2. Join our official participants group\n` +
-        `3. Check our website for schedule updates\n\n` +
-        `For questions: contact@wicebd.com\n\n` +
-        `WICE Bangladesh\n` +
-        `www.wicebd.com`
-    };
-
-    await emailTransporter.sendMail(mailOptions);
-    console.log(`✅ Confirmation email sent to ${registration.leaderEmail}`);
-  } catch (error) {
-    console.error('❌ Failed to send confirmation email:', error);
-    // Don't throw error - we'll still complete registration
-  }
-};
-
 const confirmPayment = async (req, res) => {
   const { paymentID } = req.body;
 
@@ -187,8 +98,8 @@ const confirmPayment = async (req, res) => {
         leaderEmail, tshirtSizeLeader, member2, institution2,
         tshirtSize2, member3, institution3, tshirtSize3,
         projectTitle, projectCategory, participatedBefore,
-        previousCompetition, socialMedia, infoSource, paymentID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        previousCompetition, socialMedia, infoSource, paymentID, transactionId, paymentStatus
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         registration.competitionCategory, registration.projectSubcategory,
         registration.categories, registration.crRefrence, registration.leader,
@@ -198,7 +109,7 @@ const confirmPayment = async (req, res) => {
         registration.institution3, registration.tshirtSize3, registration.projectTitle,
         registration.projectCategory, registration.participatedBefore,
         registration.previousCompetition, registration.socialMedia, 
-        registration.infoSource, paymentID
+        registration.infoSource, paymentID, result.trxID, 'Completed'
       ]
     );
 
@@ -232,5 +143,99 @@ const confirmPayment = async (req, res) => {
     });
   }
 };
+
+const sendConfirmationEmail = async (registration, paymentDetails) => {
+  try {
+    const mailOptions = {
+      from: '"WICE Registration Team" <contact@wicebd.com>',
+      to: registration.leaderEmail,
+      subject: `Registration Confirmed - ${registration.projectTitle}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #0066cc; padding: 20px; color: white;">
+            <h1 style="margin: 0;">WICE Registration Confirmation</h1>
+          </div>
+          
+          <div style="padding: 20px;">
+            <p>Dear ${registration.leader},</p>
+            <p>Thank you for registering for WICE ${registration.competitionCategory} competition.</p>
+            
+            <h3 style="color: #0066cc;">Payment Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>Payment ID:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${paymentDetails.paymentID}</td>
+              </tr>
+              <tr>
+               <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>Transaction ID:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${paymentDetails.trxID}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Amount:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">620 BDT</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px;"><strong>Status:</strong></td>
+                <td style="padding: 8px;">Completed</td>
+              </tr>
+            </table>
+            
+            <h3 style="color: #0066cc; margin-top: 20px;">Team Information</h3>
+            <p><strong>Project Title:</strong> ${registration.projectTitle}</p>
+            <p><strong>Team Members:</strong></p>
+            <ul>
+              <li>${registration.leader} (Leader)</li>
+              ${registration.member2 ? `<li>${registration.member2}</li>` : ''}
+              ${registration.member3 ? `<li>${registration.member3}</li>` : ''}
+            </ul>
+            
+            <div style="background: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #0066cc;">
+              <h4 style="margin-top: 0;">Next Steps</h4>
+              <ol>
+                <li>Save this confirmation email</li>
+                <li>Join our official participants group</li>
+                <li>Check our website for schedule updates</li>
+              </ol>
+            </div>
+            
+            <p>For any questions, please contact <a href="mailto:contact@wicebd.com">contact@wicebd.com</a></p>
+          </div>
+          
+          <div style="background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px;">
+            <p>WICE Bangladesh &copy; ${new Date().getFullYear()}</p>
+            <p><a href="https://www.wicebd.com" style="color: #0066cc;">www.wicebd.com</a></p>
+          </div>
+        </div>
+      `,
+      text: `WICE Registration Confirmation\n\n` +
+        `Dear ${registration.leader},\n\n` +
+        `Thank you for registering for WICE ${registration.competitionCategory} competition.\n\n` +
+        `Payment Details:\n` +
+        `- Transaction ID: ${registration.trxID}\n` +
+        `- Amount: 620 BDT\n` +
+        `- Status: Completed\n\n` +
+        `Team Information:\n` +
+        `- Project Title: ${registration.projectTitle}\n` +
+        `- Team Members:\n` +
+        `  • ${registration.leader} (Leader)\n` +
+        `${registration.member2 ? `  • ${registration.member2}\n` : ''}` +
+        `${registration.member3 ? `  • ${registration.member3}\n` : ''}\n` +
+        `Next Steps:\n` +
+        `1. Save this confirmation email\n` +
+        `2. Join our official participants group\n` +
+        `3. Check our website for schedule updates\n\n` +
+        `For questions: contact@wicebd.com\n\n` +
+        `WICE Bangladesh\n` +
+        `www.wicebd.com`
+    };
+
+    await emailTransporter.sendMail(mailOptions);
+    console.log(`✅ Confirmation email sent to ${registration.leaderEmail}`);
+  } catch (error) {
+    console.error('❌ Failed to send confirmation email:', error);
+    // Don't throw error - we'll still complete registration
+  }
+};
+
 
 module.exports = { initiatePayment, confirmPayment };
