@@ -21,6 +21,9 @@ import PaymentCallback from './pages/callback/PaymentCallback';
 import ThankYou from './pages/callback/PaymentSuccess';
 import PaymentError from './pages/callback/PaymentError';
 import PaymentCancelled from './pages/callback/PaymentCancelled';
+import AdminRoute from './components/admin/AdminRoute';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 const Routers = () => {
     return (
@@ -46,6 +49,16 @@ const Routers = () => {
                 <Route path='/thank-you' element={<ThankYou />}></Route>
                 <Route path="/payment-error" element={<PaymentError />} />
                 <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+                {/*Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                    path="/admin/dashboard"
+                    element={
+                        <AdminRoute>
+                            <AdminDashboard />
+                        </AdminRoute>
+                    }
+                />
 
                 <Route path='*' element={<ErrorPage />}></Route>
             </Routes>

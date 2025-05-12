@@ -5,6 +5,8 @@ const app = express();
 
 const paymentRoutes = require('./routes/paymentRoute');
 const registrationRoutes = require('./routes/registerRoute');
+const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 // Parse JSON
 app.use(express.json());
@@ -22,7 +24,11 @@ app.use('/api/payment', (req, res, next) => {
 });
 
 app.use('/api/registration', registrationRoutes);
-app.use('/api/payment', paymentRoutes); // Should come AFTER the /api/payment middleware
+app.use('/api/payment', paymentRoutes);
+
+//admin routes
+app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
