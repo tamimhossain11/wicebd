@@ -9,7 +9,11 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     <Link to="/#">Home</Link>
                 </li>
                 <li className={`dropdown ${parentMenu === 'schedule' ? 'current' : ''}`}>
-                    <Link to="/buy-ticket">Registration</Link>
+                     <Link to={void (0)} onClick={toggleMenu}>Registration</Link>
+                    <ul className='sub-menu'>
+                        <li><Link to="/buy-ticket#" >project and Wall megazine</Link></li>
+                        <li><Link to="/olympiad#" >Olympiad</Link></li>
+                    </ul>
                    
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>

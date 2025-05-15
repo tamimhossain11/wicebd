@@ -24,6 +24,8 @@ import PaymentCancelled from './pages/callback/PaymentCancelled';
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import Olympiad from './pages/innerPages/Olympiad';
+
 
 const Routers = () => {
     return (
@@ -49,6 +51,7 @@ const Routers = () => {
                 <Route path='/thank-you' element={<ThankYou />}></Route>
                 <Route path="/payment-error" element={<PaymentError />} />
                 <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+                <Route path="/olympiad" element={<Olympiad />} />
                 {/*Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route

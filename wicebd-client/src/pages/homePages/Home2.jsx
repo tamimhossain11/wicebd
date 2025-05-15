@@ -21,8 +21,8 @@ const Home2 = () => {
                 <span className="header-span"></span>
                 <HeaderV1 headerStyle="header-style-two" parentMenu='home' />
                 <BannerV2 />
-                {/*<FeatureV2 />
-                <FactV2 />
+                <FeatureV2 />
+               {/* <FactV2 />
                 <SpeakerV2 />
                 <ScheduleV2 />
                 <PriceV2 />

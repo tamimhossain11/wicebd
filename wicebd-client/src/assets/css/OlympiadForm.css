@@ -1,0 +1,79 @@
+/* Unique class prefixes to avoid conflicts with other forms */
+.olympiad-form-page {
+  background-color: #f5f3f0;
+  min-height: 100vh;
+}
+
+.olympiad-form-card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  border-top: 5px solid #8b0000;
+}
+
+.olympiad-form-header {
+  background: linear-gradient(135deg, #6b0000, #8b0000);
+  color: white;
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.olympiad-form-header h2 {
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 0.5px;
+}
+
+.olympiad-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.olympiad-form-control {
+  border-radius: 8px;
+  padding: 12px 15px;
+  border: 1px solid #d1c7c7;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.olympiad-form-control:focus {
+  border-color: #8b0000;
+  box-shadow: 0 0 0 0.25rem rgba(139, 0, 0, 0.15);
+  background-color: #fff;
+}
+
+.olympiad-submit-btn {
+  background: linear-gradient(to right, #8b0000, #a52a2a);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 12px 30px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.olympiad-submit-btn:hover {
+  background: linear-gradient(to right, #6b0000, #8b0000);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.2);
+}
+
+.olympiad-submit-btn:disabled {
+  background: #cccccc;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .olympiad-form-header h2 {
+    font-size: 1.6rem;
+  }
+  
+  .olympiad-form-card {
+    border-radius: 0;
+  }
+}

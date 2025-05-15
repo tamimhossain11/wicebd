@@ -5,6 +5,7 @@ const app = express();
 
 const paymentRoutes = require('./routes/paymentRoute');
 const registrationRoutes = require('./routes/registerRoute');
+const olympiadRoutes = require('./routes/olympiadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 
@@ -25,6 +26,7 @@ app.use('/api/payment', (req, res, next) => {
 
 app.use('/api/registration', registrationRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/olympiad', olympiadRoutes);
 
 //admin routes
 app.use('/api/admin', adminRoutes);
