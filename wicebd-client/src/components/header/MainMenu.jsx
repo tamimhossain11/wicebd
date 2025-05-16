@@ -11,7 +11,7 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                 <li className={`dropdown ${parentMenu === 'schedule' ? 'current' : ''}`}>
                      <Link to={void (0)} onClick={toggleMenu}>Registration</Link>
                     <ul className='sub-menu'>
-                        <li><Link to="/buy-ticket#" >project and Wall megazine</Link></li>
+                        <li><Link to="/buy-ticket#" >project and Wall magazine</Link></li>
                         <li><Link to="/olympiad#" >Olympiad</Link></li>
                     </ul>
                    

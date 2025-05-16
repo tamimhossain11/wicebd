@@ -93,9 +93,6 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
                                 <div className="search-box-outer">
                                     <div className="search-box-btn"><span className={`flaticon-search`} onClick={searchOpen}></span></div>
                                 </div>
-                                <div className="btn-box">
-                                    <Link to="/buy-ticket#" className="theme-btn btn-style-one"><span className="btn-title">Register now</span></Link>
-                                </div>
                             </div>
                         </div>
                     </div>

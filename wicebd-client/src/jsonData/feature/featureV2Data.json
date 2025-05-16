@@ -3,27 +3,27 @@
         "id": 1,
         "animation": "fadeInUp",
         "icon": "icon flaticon-search",
-        "name": "Experience",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua.",
-        "btnText": "Read More",
+        "name": "Wall Magazine",
+        "text": "Showcase your creativity through our wall magazine competition. Design informative and artistic displays that highlight important engineering concepts and innovations.",
+        "btnText": "Learn More",
         "delay": 0
     },
     {
         "id": 2,
         "animation": "fadeInUp",
         "icon": "icon flaticon-diamond-1",
-        "name": "Networking",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua.",
-        "btnText": "Read More",
+        "name": "Project Display",
+        "text": "Present your innovative projects to peers and judges. This segment allows you to demonstrate practical applications of your knowledge and problem-solving skills.",
+        "btnText": "View Details",
         "delay": 400
     },
     {
         "id": 3,
         "animation": "fadeInUp",
         "icon": "icon flaticon-success",
-        "name": "Party",
-        "text": "Dolor sit amet consectetur elit sed do eiusmod tempor incd idunt labore et dolore magna aliqua.",
-        "btnText": "Read More",
+        "name": "Olympiad",
+        "text": "Test your theoretical knowledge and technical skills in our comprehensive Olympiad. Compete with the brightest minds in various engineering disciplines.",
+        "btnText": "Register Now",
         "delay": 800
     }
 ]

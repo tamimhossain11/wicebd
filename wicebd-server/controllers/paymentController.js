@@ -23,14 +23,30 @@ const emailTransporter = nodemailer.createTransport({
 
 const initiatePayment = async (req, res) => {
   console.log("🚀 initiatePayment called with:", req.body); 
-  const { paymentID, formData } = req.body;
+  const { paymentID } = req.body;
 
   if (!paymentID) {
     return res.status(400).json({ error: 'Missing payment ID' });
   }
 
   try {
-    const result = await createPayment(620, paymentID);
+    // 1. Get the temp registration data to check competition category
+    const [tempData] = await db.query(
+      'SELECT competitionCategory FROM temp_registrations WHERE paymentID = ?',
+      [paymentID]
+    );
+
+    if (tempData.length === 0) {
+      return res.status(404).json({ error: 'Registration data not found' });
+    }
+
+    const registration = tempData[0];
+    
+    // 2. Determine amount based on competition category
+    const amount = registration.competitionCategory.toLowerCase() === 'megazine' ? 200 : 620;
+
+    // 3. Create payment with dynamic amount
+    const result = await createPayment(amount, paymentID);
     const bkashPaymentID = result.paymentID;
 
     await db.query(
@@ -146,6 +162,8 @@ const confirmPayment = async (req, res) => {
 
 const sendConfirmationEmail = async (registration, paymentDetails) => {
   try {
+    const amount = registration.competitionCategory.toLowerCase() === 'magazine' ? 200 : 620;
+
     const mailOptions = {
       from: '"WICE Registration Team" <contact@wicebd.com>',
       to: registration.leaderEmail,
@@ -172,7 +190,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
               </tr>
               <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Amount:</strong></td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">620 BDT</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${amount} BDT</td>
               </tr>
               <tr>
                 <td style="padding: 8px;"><strong>Status:</strong></td>
@@ -212,7 +230,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
         `Thank you for registering for WICE ${registration.competitionCategory} competition.\n\n` +
         `Payment Details:\n` +
         `- Transaction ID: ${registration.trxID}\n` +
-        `- Amount: 620 BDT\n` +
+        `- Amount: ${amount} BDT\n` +
         `- Status: Completed\n\n` +
         `Team Information:\n` +
         `- Project Title: ${registration.projectTitle}\n` +
@@ -233,7 +251,6 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
     console.log(`✅ Confirmation email sent to ${registration.leaderEmail}`);
   } catch (error) {
     console.error('❌ Failed to send confirmation email:', error);
-    // Don't throw error - we'll still complete registration
   }
 };
 
