@@ -9,7 +9,9 @@ import {
   Alert,
   Paper,
   IconButton,
-  Tooltip
+  Tooltip,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   DataGrid,
@@ -26,9 +28,11 @@ import { participantsApi } from '../../api/participants';
 
 const AdminDashboard = () => {
   const [participants, setParticipants] = useState([]);
+  const [olympiadParticipants, setOlympiadParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pageSize, setPageSize] = useState(10);
+  const [currentTab, setCurrentTab] = useState(0);
   const navigate = useNavigate();
 
   const fetchParticipants = async () => {
@@ -39,15 +43,37 @@ const AdminDashboard = () => {
       setParticipants(response.data);
     } catch (err) {
       console.error('Fetch error:', err);
-      if (err.response?.status === 401) {
-        localStorage.removeItem('adminToken');
-        navigate('/admin/login');
-      } else {
-        setError(err.response?.data?.message || 'Failed to load participants');
-      }
+      handleError(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchOlympiadParticipants = async () => {
+  try {
+    setLoading(true);
+    setError('');
+    const response = await participantsApi.getOlympiadParticipants();
+    setOlympiadParticipants(response.data); // Make sure this is an array
+  } catch (err) {
+    console.error('Fetch Olympiad error:', err);
+    handleError(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleError = (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('adminToken');
+      navigate('/admin/login');
+    } else {
+      setError(err.response?.data?.message || 'Failed to load data');
+    }
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
   };
 
   useEffect(() => {
@@ -56,6 +82,7 @@ const AdminDashboard = () => {
       return;
     }
     fetchParticipants();
+    fetchOlympiadParticipants();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -64,20 +91,33 @@ const AdminDashboard = () => {
   };
 
   const handleExport = async () => {
-    try {
-      const response = await participantsApi.exportToCSV();
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'participants.csv');
-      document.body.appendChild(link);
-      link.click();
-    } catch (err) {
-      setError('Failed to export data');
+  try {
+    const exportFunction = currentTab === 0 
+      ? participantsApi.exportToCSV 
+      : participantsApi.exportOlympiadToCSV;
+    
+    const response = await exportFunction();
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', currentTab === 0 ? 'participants.csv' : 'olympiad_participants.csv');
+    document.body.appendChild(link);
+    link.click();
+  } catch (err) {
+    setError('Failed to export data');
+  }
+};
+
+  const refreshData = () => {
+    if (currentTab === 0) {
+      fetchParticipants();
+    } else {
+      fetchOlympiadParticipants();
     }
   };
 
-  const columns = [
+  // Columns for Project/Magazine participants
+  const projectColumns = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'leader', headerName: 'Leader Name', width: 150 },
     { field: 'leaderEmail', headerName: 'Email', width: 200 },
@@ -108,7 +148,7 @@ const AdminDashboard = () => {
       width: 160,
       valueFormatter: (params) => new Date(params.value).toLocaleDateString()
     },
-    {
+     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
@@ -117,6 +157,38 @@ const AdminDashboard = () => {
         <GridActionsCellItem
           icon={<Tooltip title="View Details"><Visibility /></Tooltip>}
           onClick={() => navigate(`/api/admin/participants/${params.id}`)}
+          label="View"
+        />,
+      ],
+    },
+  ];
+
+  // Columns for Olympiad participants
+  const olympiadColumns = [
+    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'registration_id', headerName: 'Reg ID', width: 120 },
+    { field: 'full_name', headerName: 'Full Name', width: 180 },
+    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'phone', headerName: 'Phone', width: 130 },
+    { field: 'institution', headerName: 'Institution', width: 200 },
+    { field: 'address', headerName: 'Address', width: 250 },
+    { field: 'cr_reference', headerName: 'CR Ref', width: 120 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    {
+      field: 'created_at',
+      headerName: 'Registration Date',
+      width: 160,
+      valueFormatter: (params) => new Date(params.value).toLocaleDateString()
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 100,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<Tooltip title="View Details"><Visibility /></Tooltip>}
+          onClick={() => navigate(`/api/olympiad/getolympiad/${params.id}`)}
           label="View"
         />,
       ],
@@ -135,7 +207,7 @@ const AdminDashboard = () => {
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Participants Dashboard
+          Admin Dashboard
         </Typography>
 
         <Box>
@@ -152,7 +224,7 @@ const AdminDashboard = () => {
           </Tooltip>
 
           <Tooltip title="Refresh">
-            <IconButton onClick={fetchParticipants} sx={{ mr: 2 }}>
+            <IconButton onClick={refreshData} sx={{ mr: 2 }}>
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -168,6 +240,11 @@ const AdminDashboard = () => {
         </Box>
       </Box>
 
+      <Tabs value={currentTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+        <Tab label="Project/Magazine" />
+        <Tab label="Olympiad" />
+      </Tabs>
+
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
           {error}
@@ -176,8 +253,8 @@ const AdminDashboard = () => {
 
       <Paper elevation={4} sx={{ p: 2, height: '75vh', borderRadius: 3 }}>
         <DataGrid
-          rows={participants}
-          columns={columns}
+          rows={currentTab === 0 ? participants : olympiadParticipants}
+          columns={currentTab === 0 ? projectColumns : olympiadColumns}
           pageSize={pageSize}
           onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           rowsPerPageOptions={[5, 10, 20, 50]}
@@ -213,5 +290,4 @@ const AdminDashboard = () => {
     </Container>
   );
 };
-
 export default AdminDashboard;

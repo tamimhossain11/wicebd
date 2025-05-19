@@ -1,8 +1,11 @@
 import api from './index';
 
 export const participantsApi = {
-  // Get all participants (admin only)
+  // Get all project/magazine participants (admin only)
   getAll: () => api.get('/api/admin/participants'),
+
+  // Get all olympiad participants (admin only)
+  getOlympiadParticipants: () => api.get('/api/olympiad/getolympiad'),
 
   // Get participant by ID
   getById: (id) => api.get(`/api/participants/${id}`),
@@ -10,8 +13,13 @@ export const participantsApi = {
   // Search participants
   search: (query) => api.get('/participants/search', { params: { q: query } }),
 
-  // Export data
+  // Export project/magazine data
   exportToCSV: () => api.get('/admin/participants/export', {
-    responseType: 'blob' // For file downloads
+    responseType: 'blob'
+  }),
+
+  // Export olympiad data
+  exportOlympiadToCSV: () => api.get('/admin/olympiad/export', {
+    responseType: 'blob'
   })
 };

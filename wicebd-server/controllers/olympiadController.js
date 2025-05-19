@@ -144,6 +144,67 @@ const sendConfirmationEmail = async ({ fullName, email, registrationId }) => {
   }
 };
 
+
+// Get all olympiad participants
+// In your controller
+const getOlympiadParticipants = async (req, res) => {
+  try {
+    const [results] = await db.query(`
+      SELECT id, registration_id, full_name, email, phone, 
+             institution, address, cr_reference, status, 
+             created_at 
+      FROM olympiad_registrations
+      ORDER BY created_at DESC
+    `);
+    
+    // Return the array directly or as a data property
+    res.json(results); // or res.json({ data: results });
+  } catch (error) {
+    console.error('Error fetching olympiad participants:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch olympiad participants',
+      data: [] // Return empty array on error
+    });
+  }
+};
+
+// Export olympiad participants to CSV
+const exportOlympiadToCSV = async (req, res) => {
+  try {
+    const [results] = await db.query(`
+      SELECT registration_id as "Registration ID",
+             full_name as "Full Name",
+             email as "Email",
+             phone as "Phone",
+             institution as "Institution",
+             address as "Address",
+             cr_reference as "CR Reference",
+             status as "Status",
+             DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') as "Registration Date"
+      FROM olympiad_registrations
+      ORDER BY created_at DESC
+    `);
+
+    const json2csv = require('json2csv').parse;
+    const csv = json2csv(results);
+    
+    res.header('Content-Type', 'text/csv');
+    res.attachment('olympiad_participants.csv');
+    res.send(csv);
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to export olympiad data'
+    });
+  }
+};
+
+// Add these to your exports
 module.exports = {
-  registerParticipant
+  // ... your existing exports
+   registerParticipant,
+  getOlympiadParticipants,
+  exportOlympiadToCSV
 };
