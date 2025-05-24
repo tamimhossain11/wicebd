@@ -47,7 +47,7 @@ const BannerV2 = () => {
                 <div className="auto-container">
                     <div className="content-box">
                         <span className="title">May 30, 2025</span>
-                        <h2> World Innovation <br />& Creativity  Exhibition<br /> Bangladesh</h2>
+                        <h2> World Invention <br />Competition and Exhibition<br /> Bangladesh</h2>
                         <div className="time-counter">
                             <TimeV1 expiryTimestamp={time} />
                         </div>
