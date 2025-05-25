@@ -14,12 +14,12 @@ export const participantsApi = {
   search: (query) => api.get('/participants/search', { params: { q: query } }),
 
   // Export project/magazine data
-  exportToCSV: () => api.get('/admin/participants/export', {
+  exportToCSV: () => api.get('/api/admin/participants/export', {
     responseType: 'blob'
   }),
 
   // Export olympiad data
-  exportOlympiadToCSV: () => api.get('/admin/olympiad/export', {
+  exportOlympiadToCSV: () => api.get('/api/olympiad/olympiad/export', {
     responseType: 'blob'
   })
 };
