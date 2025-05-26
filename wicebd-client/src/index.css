@@ -1,0 +1,87 @@
+.social-link{
+    display: flex;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 8px 0;
+    list-style: none;
+}
+/* Gorgeous futuristic card */
+.rounded-card {
+    background: linear-gradient(to bottom, #da346b, #991a37);
+
+    border-radius: 20px;
+    overflow: hidden;
+    padding-bottom: ;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.rounded-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+}
+
+.rounded-top {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+/* Speaker info */
+.info-box {
+   background: linear-gradient(to bottom, #ec407a, #6a0f24);
+
+}
+
+.info-box .name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+.info-box .designation {
+    font-size: 14px;
+    color: #d1d5db;
+    letter-spacing: 0.3px;
+}
+
+/* Social icons row */
+.horizontal-social {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    
+}
+.social-share-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.social-share-list li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    color: #ffffff;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.social-share-list li a:hover {
+   background: linear-gradient(to bottom, #ec407a, #6a0f24);
+
+    color: #fff;
+    transform: scale(1.15);
+}

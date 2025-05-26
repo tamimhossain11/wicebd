@@ -4,13 +4,13 @@
         "tabId": "tab1",
         "tabClass": "active show",
         "icon": "icon far fa-calendar",
-        "title": "January 20, 2023",
-        "text": "9.00 AM - 04.00 PM",
+        "title": "May 30.2025",
+        "text": "08:30 AM - 8:30 PM",
         "icon1": "icon icon_profile",
         "icon2": "icon icon_phone",
         "icon3": "icon icon_mail",
-        "list1": "Dianne Ameer",
-        "list2": "+123 456 7890",
+        "list1": "Sayed Sorower Zahan",
+        "list2": "01741121067",
         "list3": "support@WICEBD.com",
         "infoList": ""
     },
@@ -19,8 +19,8 @@
         "tabId": "tab2",
         "tabClass": "",
         "icon": "icon fa fa-map-marker-alt",
-        "title": "Pearl hotel, New york, USA",
-        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt labore et dolore magna aliqua. Aliquip ex ea commodo consequat. reprehenderit in voluptate velit esse cillum dolore.",
+        "title": "Dhaka Imperial College, Dhaka, Bangladesh",
+        "text": "Dhaka Imperial College is situated at Road No. 2, Jahurul Islam City, Aftabnagar, Badda, Dhaka-1212, Bangladesh.",
         "infoList": "d-none"
     },
     {
@@ -29,7 +29,7 @@
         "tabClass": "",
         "icon": "icon fa fa-directions",
         "title": "How to get there",
-        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt labore et dolore magna aliqua. Aliquip ex ea commodo consequat.  reprehenderit in voluptate velit esse cillum dolore.",
+        "text": "Dhaka Imperial College is located in Jahurul Islam City, Aftabnagar, Dhaka.It's easy to reach from Rampura, Badda, and Banasree.You can come by bus, car, CNG, or ride-sharing apps like Uber or Pathao.The campus is near Aftabnagar Main Road with clear directions available.",
         "infoList": "d-none"
     }
 ]

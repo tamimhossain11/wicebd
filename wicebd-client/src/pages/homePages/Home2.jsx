@@ -22,16 +22,16 @@ const Home2 = () => {
                 <HeaderV1 headerStyle="header-style-two" parentMenu='home' />
                 <BannerV2 />
                 <FeatureV2 />
-               {/* <FactV2 />
+               <FactV2 />
                 <SpeakerV2 />
                 <ScheduleV2 />
                 <PriceV2 />
                 <EventV1 />
-                <ClientV2 />
-                <GalleryV2 />
-                <TestimonialV1 />
-                <BlogV1 />
-                <SubscribeV1 />*/}
+                {/* <ClientV2 /> */}
+                {/* <GalleryV2 /> */}
+                {/* <TestimonialV1 /> */}
+                {/* <BlogV1 /> */}
+                {/* <SubscribeV1 /> */}
                 <FooterV2 />
             </div>
         </>

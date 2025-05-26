@@ -22,8 +22,8 @@ const AboutUs = () => {
                 <FeatureV1 />
                 <CallToActionV1 />
                 <EventV2 />
-                <AppV1 />
-                <SubscribeV2 />
+                {/* <AppV1 /> */}
+                {/* <SubscribeV2 /> */}
                 <FooterV1 />
             </div>
         </>

@@ -1,22 +1,24 @@
 import React from 'react';
-import { HashLink as Link } from 'react-router-hash-link'
+import { HashLink as Link } from 'react-router-hash-link';
 
 const SocialShare = () => {
+    const socialLinks = [
+        { href: "https://facebook.com", icon: "fab fa-facebook-f", label: "Facebook" },
+        { href: "https://twitter.com", icon: "fab fa-twitter", label: "Twitter" },
+        { href: "https://pinterest.com", icon: "fab fa-pinterest", label: "Pinterest" },
+        { href: "https://dribbble.com", icon: "fab fa-dribbble", label: "Dribbble" }
+    ];
+
     return (
-        <>
-            <li>
-                <Link to="http://facebook.com" target='_blank'><i className="fab fa-facebook-f"></i></Link>
-            </li>
-            <li>
-                <Link to="http://twitter.com" target='_blank'><i className="fab fa-twitter"></i></Link>
-            </li>
-            <li>
-                <Link to="http://pinterest.com" target='_blank'><i className="fab fa-pinterest"></i></Link>
-            </li>
-            <li>
-                <Link to="http://dribbble.com" target='_blank'><i className="fab fa-dribbble"></i></Link>
-            </li>
-        </>
+        <ul className="social-share-list">
+            {socialLinks.map((social, index) => (
+                <li key={index}>
+                    <Link to={social.href} target="_blank" aria-label={social.label}>
+                        <i className={social.icon}></i>
+                    </Link>
+                </li>
+            ))}
+        </ul>
     );
 };
 

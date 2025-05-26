@@ -44,7 +44,7 @@
     {
         "id": 8,
         "thumb": "speaker-8.jpg",
-        "name": "MD Easin Arafat",
+        "name": "Tonima Jaman Bonhi",
         "designation": "Executive"
     },
     {
@@ -97,8 +97,8 @@
     },
     {
         "id": 17,
-        "thumb": "speaker-18.jpg",
-        "name": "Udoy Ahmed",
+        "thumb": "speaker-17.jpg",
+        "name": "Udoy Haider",
         "designation": "Executive"
     },
     {
@@ -110,7 +110,7 @@
     {
         "id": 19,
         "thumb": "speaker-19.jpg",
-        "name": "Atif Jr",
+        "name": "Khalid",
         "designation": "Organizer"
     },
     {
@@ -125,70 +125,77 @@
         "name": "Inaz",
         "designation": "Organizer"
     },
-    {
+        {
         "id": 22,
         "thumb": "speaker-22.jpg",
-        "name": "Fahim",
+        "name": "Galib",
         "designation": "Organizer"
     },
     {
         "id": 23,
         "thumb": "speaker-23.jpg",
-        "name": "Galib",
+        "name": "Aldullah Al Sadiq",
         "designation": "Organizer"
     },
     {
         "id": 24,
         "thumb": "speaker-24.jpg",
-        "name": "Aldullah Al Sadiq",
+        "name": "Rohan",
         "designation": "Organizer"
     },
     {
         "id": 25,
         "thumb": "speaker-25.jpg",
-        "name": "Rohan",
+        "name": "Sanzid",
         "designation": "Organizer"
     },
     {
         "id": 26,
         "thumb": "speaker-26.jpg",
-        "name": "Sanzid",
+        "name": "Yamin",
         "designation": "Organizer"
     },
     {
         "id": 27,
         "thumb": "speaker-27.jpg",
-        "name": "Yamin",
+        "name": "Tanvir",
         "designation": "Organizer"
     },
     {
         "id": 28,
         "thumb": "speaker-28.jpg",
-        "name": "Tanvir",
+        "name": "Tahmid",
         "designation": "Organizer"
     },
     {
         "id": 29,
         "thumb": "speaker-29.jpg",
-        "name": "Tahmid",
+        "name": "Tajbir Prottoy",
         "designation": "Organizer"
     },
     {
         "id": 30,
         "thumb": "speaker-30.jpg",
-        "name": "Tajbir Prottoy",
+        "name": "Wasi Al Masud",
         "designation": "Organizer"
     },
     {
         "id": 31,
         "thumb": "speaker-31.jpg",
-        "name": "Wasi Al Masud",
+        "name": "Ashraf",
         "designation": "Organizer"
     },
     {
         "id": 32,
         "thumb": "speaker-32.jpg",
-        "name": "Tasfiqul Islam Tarif",
+        "name": "Prionty Islam",
+        "designation": "Executive"
+    },
+    {
+        "id": 33,
+        "thumb": "speaker-33.jpg",
+        "name": "Saba",
         "designation": "Organizer"
     }
+
 ]
