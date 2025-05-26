@@ -12,7 +12,11 @@ const SingleSpeakerV2 = ({ speaker }) => {
             <div className="speaker-block-two col-lg-3 col-md-6 col-sm-12">
                 <div className="inner-box rounded-card">
                     <figure className="image">
-                        <img src={`/src/assets/images/teams/${thumb}`} alt={name} className="rounded-top" />
+                        <img src={`/images/speakers/${thumb}`} alt={name} className="rounded-top"
+                            onError={(e) => {
+                                e.target.src = '/images/speakers/default.png';
+                            }}
+                        />
                     </figure>
                     <div className="info-box">
                         <h4 className="name">{name}</h4>
