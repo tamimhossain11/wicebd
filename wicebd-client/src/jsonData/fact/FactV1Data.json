@@ -2,7 +2,7 @@
     {
         "id": 1,
         "icon": "icon_headphones",
-        "end": 190,
+        "end": 800,
         "info": "Participants",
         "animation": "fadeInUp",
         "delay": ""

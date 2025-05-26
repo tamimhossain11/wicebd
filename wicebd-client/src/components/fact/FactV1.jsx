@@ -10,7 +10,7 @@ const FactV1 = () => {
                     <div className="fact-counter">
                         <div className="row clearfix">
                             {FactV1Data.map(fact =>
-                                <div className={`counter-column col-lg-3 col-md-6 col-sm-12`} key={fact.id}>
+                                <div className={`counter-column col-lg-3 col-md-6 col-sm-12 tex-center`} key={fact.id}>
                                     <SingleFactV1 fact={fact} />
                                 </div>
                             )}

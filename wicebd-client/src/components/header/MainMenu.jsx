@@ -18,27 +18,28 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>
                 <li><Link to="/contact#">Contact</Link></li> 
-               {/* <li className={`dropdown ${parentMenu === 'about' ? 'current' : ''}`}>
-                    <Link to={void (0)} onClick={toggleMenu}>About</Link>
-                    <ul className='sub-menu'>
+               <li className={`dropdown ${parentMenu === 'about' ? 'current' : ''}`}>
+                    <Link to="/about-us#">About</Link>
+                    </li>
+                    {/* <ul className='sub-menu'>
                         <li><Link to="/about-us#" >About Us</Link></li>
                         <li><Link to="/pricing#" >Pricing</Link></li>
                         <li><Link to="/faqs#" >FAQs</Link></li>
                         <li><Link to="/gallery#" >Gallery</Link></li>
                         <li><Link to="/coming-soon#" >Coming Soon</Link></li>
-                    </ul>
-                    <div className="dropdown-btn" ><span className="fa fa-angle-down"></span></div>
-                </li>
-                <li className={`dropdown ${parentMenu === 'speakers' ? 'current' : ''}`}>
+                    </ul> */}
+                    {/* <div className="dropdown-btn" ><span className="fa fa-angle-down"></span></div>
+                 */}
+                {/* <li className={`dropdown ${parentMenu === 'speakers' ? 'current' : ''}`}>
                     <Link to={void (0)} onClick={toggleMenu}>Our Team</Link>
                     <ul className='sub-menu'>
                         <li><Link to="/speakers#">Speakers</Link></li>
                         <li><Link to="/speakers-detail/1#">Speakers Detail</Link></li>
                     </ul>
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
-                </li>
+                </li> */}
                 
-                <li className={`dropdown ${parentMenu === 'blog' ? 'current' : ''}`}>
+                {/* <li className={`dropdown ${parentMenu === 'blog' ? 'current' : ''}`}>
                     <Link to={void (0)} onClick={toggleMenu}>Blog</Link>
                     <ul className='sub-menu'>
                         <li><Link to="/blog-sidebar#">Blog With Sidebar</Link></li>
@@ -47,8 +48,8 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                         <li><Link to="/error-page#">404 Error</Link></li>
                     </ul>
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
-                </li>
-                */}
+                </li> */}
+               
             </ul>
         </>
     );

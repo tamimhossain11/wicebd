@@ -8,7 +8,7 @@ const SingleFeatureV2 = ({ feature }) => {
     return (
         <>
             <ReactWOW animation={animation} delay={delay}>
-                <div className="feature-block col-lg-4 col-md-6 col-sm-12">
+                <div className="feature-block col-lg-4 col-md-6 col-sm-12 ">
                     <div className="inner-box">
                         <div className="icon-box"><span className={icon}></span></div>
                         <h4><Link to="/about-us#">{name}</Link></h4>

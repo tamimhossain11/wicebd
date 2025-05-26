@@ -1,34 +1,38 @@
 [
     {
         "id": 1,
-        "animation": "fadeInUp",
-        "icon": "icon icon_headphones",
-        "end": 190,
+        "animation": "fade-up",
+        "icon": "bi bi-people-fill",
+        "end": 800,
         "title": "Participants",
-        "delay": 0
+        "delay": 800,
+        "iconColor": "text-primary"
     },
     {
         "id": 2,
-        "animation": "fadeInUp",
-        "icon": "icon icon_headphones",
-        "end": 62,
-        "title": "Participants",
-        "delay": 400
+        "animation": "fade-up",
+        "icon": "bi bi-lightning-charge-fill",
+        "end": 50,
+        "title": "Executives and Organizers",
+        "delay": 800,
+        "iconColor": "text-warning"
     },
     {
         "id": 3,
-        "animation": "fadeInUp",
-        "icon": "icon icon_headphones",
+        "animation": "fade-up",
+        "icon": "bi bi-globe-americas",
         "end": 54,
-        "title": "Participants",
-        "delay": 800
+        "title": "Segments",
+        "delay": 800,
+        "iconColor": "text-success"
     },
     {
         "id": 4,
-        "animation": "fadeInUp",
-        "icon": "icon icon_headphones",
-        "end": 38,
-        "title": "Participants",
-        "delay": 1200
+        "animation": "fade-up",
+        "icon": "bi bi-building",
+        "end": 80,
+        "title": "Institutes Represented",
+        "delay": 1200,
+        "iconColor": "text-info"
     }
 ]
