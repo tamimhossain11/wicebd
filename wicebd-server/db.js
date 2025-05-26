@@ -23,3 +23,4 @@ async function testDatabaseConnection() {
 testDatabaseConnection();
 
 module.exports = pool;
+//working as expected
