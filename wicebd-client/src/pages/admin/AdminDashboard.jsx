@@ -142,12 +142,16 @@ const AdminDashboard = () => {
     { field: 'infoSource', headerName: 'Info Source', width: 180 },
     { field: 'crRefrence', headerName: 'CR Ref.', width: 160 },
     { field: 'paymentID', headerName: 'Payment ID', width: 180 },
-    {
-      field: 'createdAt',
-      headerName: 'Registration Date',
-      width: 160,
-      valueFormatter: (params) => new Date(params.value).toLocaleDateString()
-    },
+   {
+  field: 'createdAt',
+  headerName: 'Registration Date',
+  width: 160,
+  valueFormatter: (params) => {
+    console.log('params.value:', params.value); // Log the value here
+    const date = new Date(params.value);
+    return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : 'Invalid Date';
+  }
+},
      {
       field: 'actions',
       type: 'actions',
@@ -175,11 +179,15 @@ const AdminDashboard = () => {
     { field: 'cr_reference', headerName: 'CR Ref', width: 120 },
     { field: 'status', headerName: 'Status', width: 120 },
     {
-      field: 'created_at',
-      headerName: 'Registration Date',
-      width: 160,
-      valueFormatter: (params) => new Date(params.value).toLocaleDateString()
-    },
+  field: 'created_at',
+  headerName: 'Registration Date',
+  width: 160,
+  valueFormatter: (params) => {
+    console.log('params.value:', params.value); // Log the value here
+    const date = new Date(params.value);
+    return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : 'Invalid Date';
+  }
+},
     {
       field: 'actions',
       type: 'actions',
@@ -251,42 +259,50 @@ const AdminDashboard = () => {
         </Alert>
       )}
 
-      <Paper elevation={4} sx={{ p: 2, height: '75vh', borderRadius: 3 }}>
-        <DataGrid
-          rows={currentTab === 0 ? participants : olympiadParticipants}
-          columns={currentTab === 0 ? projectColumns : olympiadColumns}
-          pageSize={pageSize}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-          rowsPerPageOptions={[5, 10, 20, 50]}
-          pagination
-          disableSelectionOnClick
-          components={{ Toolbar: GridToolbar }}
-          componentsProps={{
-            toolbar: {
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
-            },
-          }}
-          loading={loading}
-          sx={{
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#1976d2',
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: 'bold',
-            },
-            '& .MuiDataGrid-cell': {
-              fontSize: 14,
-              whiteSpace: 'normal',
-              lineHeight: 1.4,
-              padding: '8px',
-            },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: '#f5f5f5',
-            },
-          }}
-        />
-      </Paper>
+     <Paper elevation={4} sx={{ 
+  p: 2, 
+  height: '75vh',
+  borderRadius: 3,
+  display: 'flex',      // Add this
+  flexDirection: 'column' // Add this
+}}>
+  <DataGrid
+  rows={currentTab === 0 ? participants : olympiadParticipants}
+  columns={currentTab === 0 ? projectColumns : olympiadColumns}
+  pageSize={pageSize}
+  onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+  rowsPerPageOptions={[5, 10, 20, 50]}
+  pagination
+  disableSelectionOnClick
+  components={{ Toolbar: GridToolbar }}
+  componentsProps={{
+    toolbar: {
+      showQuickFilter: true,
+      quickFilterProps: { debounceMs: 500 },
+    },
+  }}
+  loading={loading}
+  sx={{
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: '#1976d2',
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    '& .MuiDataGrid-cell': {
+      fontSize: 14,
+      whiteSpace: 'normal',
+      lineHeight: 1.4,
+      padding: '8px',
+    },
+    '& .MuiDataGrid-row:hover': {
+      backgroundColor: '#f5f5f5',
+    },
+  }}
+  getRowId={(row) => row.id} // If you have custom IDs for rows, make sure you provide a `getRowId` function.
+  disableVirtualization={false}  // If you're having scroll issues, try disabling the virtualization
+/>
+</Paper>
     </Container>
   );
 };

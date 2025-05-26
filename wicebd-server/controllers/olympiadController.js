@@ -186,12 +186,28 @@ const exportOlympiadToCSV = async (req, res) => {
       ORDER BY created_at DESC
     `);
 
-    const json2csv = require('json2csv').parse;
-    const csv = json2csv(results);
+    if (!results.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'No data to export'
+      });
+    }
+
+    // Create CSV headers
+    const headers = Object.keys(results[0]).join(',');
+    
+    // Create CSV rows
+    const rows = results.map(obj => 
+      Object.values(obj).map(value => 
+        `"${value !== null ? value.toString().replace(/"/g, '""') : ''}"`
+      ).join(',')
+    ).join('\n');
+
+    const csvContent = [headers, ...rows].join('\n');
     
     res.header('Content-Type', 'text/csv');
     res.attachment('olympiad_participants.csv');
-    res.send(csv);
+    res.send(csvContent);
   } catch (error) {
     console.error('Export error:', error);
     res.status(500).json({
@@ -200,7 +216,6 @@ const exportOlympiadToCSV = async (req, res) => {
     });
   }
 };
-
 // Add these to your exports
 module.exports = {
   // ... your existing exports
