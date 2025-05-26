@@ -1,199 +1,199 @@
 [
     {
         "id": 1,
-        "thumb": "speaker-1.jpg",
+        "thumb":"speaker-1.jpg",
         "name": "MD Moin Uddin",
         "designation": "Event Chairperson"
     },
     {
         "id": 2,
-        "thumb": "speaker-2.jpg",
+        "thumb":"speaker-2.jpg",
         "name": "Mahadir Islam Wafi",
         "designation": "Executive Director"
     },
     {
         "id": 3,
-        "thumb": "speaker-3.jpg",
+        "thumb":"speaker-3.jpg",
         "name": "Saadman Syeed",
         "designation": "Executive"
     },
     {
         "id": 4,
-        "thumb": "speaker-4.jpg",
+        "thumb":"speaker-4.jpg",
         "name": "Sikder Atif Abrar",
         "designation": "Executive"
     },
     {
         "id": 5,
-        "thumb": "speaker-5.jpg",
+        "thumb":"speaker-5.jpg",
         "name": "An Nafew",
         "designation": "Executive"
     },
     {
         "id": 6,
-        "thumb": "speaker-6.jpg",
+        "thumb":"speaker-6.jpg",
         "name": "Alif Zahan Prachurja",
         "designation": "Executive"
     },
     {
         "id": 7,
-        "thumb": "speaker-7.jpg",
+        "thumb":"speaker-7.jpg",
         "name": "Sayed Sorower Zahan",
         "designation": "Executive"
     },
     {
         "id": 8,
-        "thumb": "speaker-8.jpg",
+        "thumb":"speaker-8.jpg",
         "name": "Tonima Jaman Bonhi",
         "designation": "Executive"
     },
     {
         "id": 9,
-        "thumb": "speaker-9.jpg",
+        "thumb":"speaker-9.jpg",
         "name": "Rubaiyat H Rahman",
         "designation": "Executive"
     },
     {
         "id": 10,
-        "thumb": "speaker-10.jpg",
+        "thumb":"speaker-10.jpg",
         "name": "Tamim Hossain",
         "designation": "Executive"
     },
     {
         "id": 11,
-        "thumb": "speaker-11.jpg",
+        "thumb":"speaker-11.jpg",
         "name": "Hasin Israque Chowdhury Taha",
         "designation": "Executive"
     },
     {
         "id": 12,
-        "thumb": "speaker-12.jpg",
+        "thumb":"speaker-12.jpg",
         "name": "Md Rifat Hossain",
         "designation": "Executive"
     },
     {
         "id": 13,
-        "thumb": "speaker-13.jpg",
+        "thumb":"speaker-13.jpg",
         "name": "Md Fahim Hossain",
         "designation": "Executive"
     },
     {
         "id": 14,
-        "thumb": "speaker-14.jpg",
+        "thumb":"speaker-14.jpg",
         "name": "Tahjib Shafi",
         "designation": "Executive"
     },
     {
         "id": 15,
-        "thumb": "speaker-15.jpg",
+        "thumb":"speaker-15.jpg",
         "name": "Safin Ahmed",
         "designation": "Executive"
     },
     {
         "id": 16,
-        "thumb": "speaker-16.jpg",
+        "thumb":"speaker-16.jpg",
         "name": "Athar Shihab",
         "designation": "Executive"
     },
     {
         "id": 17,
-        "thumb": "speaker-17.jpg",
+        "thumb":"speaker-17.jpg",
         "name": "Udoy Haider",
         "designation": "Executive"
     },
     {
         "id": 18,
-        "thumb": "speaker-18.jpg",
+        "thumb":"speaker-18.jpg",
         "name": "Humayra Afia",
         "designation": "Organizer"
     },
     {
         "id": 19,
-        "thumb": "speaker-19.jpg",
+        "thumb":"speaker-19.jpg",
         "name": "Khalid",
         "designation": "Organizer"
     },
     {
         "id": 20,
-        "thumb": "speaker-20.jpg",
+        "thumb":"speaker-20.jpg",
         "name": "Arham",
         "designation": "Organizer"
     },
     {
         "id": 21,
-        "thumb": "speaker-21.jpg",
+        "thumb":"speaker-21.jpg",
         "name": "Inaz",
         "designation": "Organizer"
     },
         {
         "id": 22,
-        "thumb": "speaker-22.jpg",
+        "thumb":"speaker-22.jpg",
         "name": "Galib",
         "designation": "Organizer"
     },
     {
         "id": 23,
-        "thumb": "speaker-23.jpg",
+        "thumb":"speaker-23.jpg",
         "name": "Aldullah Al Sadiq",
         "designation": "Organizer"
     },
     {
         "id": 24,
-        "thumb": "speaker-24.jpg",
+        "thumb":"speaker-24.jpg",
         "name": "Rohan",
         "designation": "Organizer"
     },
     {
         "id": 25,
-        "thumb": "speaker-25.jpg",
+        "thumb":"speaker-25.jpg",
         "name": "Sanzid",
         "designation": "Organizer"
     },
     {
         "id": 26,
-        "thumb": "speaker-26.jpg",
+        "thumb":"speaker-26.jpg",
         "name": "Yamin",
         "designation": "Organizer"
     },
     {
         "id": 27,
-        "thumb": "speaker-27.jpg",
+        "thumb":"speaker-27.jpg",
         "name": "Tanvir",
         "designation": "Organizer"
     },
     {
         "id": 28,
-        "thumb": "speaker-28.jpg",
+        "thumb":"speaker-28.jpg",
         "name": "Tahmid",
         "designation": "Organizer"
     },
     {
         "id": 29,
-        "thumb": "speaker-29.jpg",
+        "thumb":"speaker-29.jpg",
         "name": "Tajbir Prottoy",
         "designation": "Organizer"
     },
     {
         "id": 30,
-        "thumb": "speaker-30.jpg",
+        "thumb":"speaker-30.jpg",
         "name": "Wasi Al Masud",
         "designation": "Organizer"
     },
     {
         "id": 31,
-        "thumb": "speaker-31.jpg",
+        "thumb":"speaker-31.jpg",
         "name": "Ashraf",
         "designation": "Organizer"
     },
     {
         "id": 32,
-        "thumb": "speaker-32.jpg",
+        "thumb":"speaker-32.jpg",
         "name": "Prionty Islam",
         "designation": "Executive"
     },
     {
         "id": 33,
-        "thumb": "speaker-33.jpg",
+        "thumb":"speaker-33.jpg",
         "name": "Saba",
         "designation": "Organizer"
     }
