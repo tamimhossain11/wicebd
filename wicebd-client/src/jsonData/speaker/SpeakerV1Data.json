@@ -103,9 +103,9 @@
     },
     {
         "id": 18,
-        "thumb":"speaker-18.jpg",
-        "name": "Humayra Afia",
-        "designation": "Organizer"
+        "thumb":"speaker-32.jpg",
+        "name": "Prionty Islam",
+        "designation": "Executive"
     },
     {
         "id": 19,
@@ -187,9 +187,9 @@
     },
     {
         "id": 32,
-        "thumb":"speaker-32.jpg",
-        "name": "Prionty Islam",
-        "designation": "Executive"
+         "thumb":"speaker-18.jpg",
+        "name": "Humayra Afia",
+        "designation": "Organizer"
     },
     {
         "id": 33,
