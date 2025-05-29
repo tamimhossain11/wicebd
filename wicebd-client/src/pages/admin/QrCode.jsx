@@ -1,17 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import QRCode from 'react-qr-code';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const sampleQRData = JSON.stringify({
-  projectTitle: "Smart City Initiative",
-  institution: "Tech University",
-  leader: "Dr. Sarah Johnson",
-  leaderPhone: "+1 (555) 123-4567",
-  leaderEmail: "s.johnson@tech.edu",
-  memberName: "Alex Chen",
-  memberInstitution: "Tech University"
-});
+import { motion } from 'framer-motion';
+import axios from 'axios';
 
 export default function AdminDashboard() {
   const [scanResult, setScanResult] = useState(null);
@@ -19,33 +9,53 @@ export default function AdminDashboard() {
   const [scannerReady, setScannerReady] = useState(false);
   const scannerRef = useRef(null);
 
-  useEffect(() => {
-    if (scannerReady && !scanResult) {
-      const scanner = new Html5QrcodeScanner("qr-reader", {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-      });
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000',
+  });
 
-      scanner.render(
-        (text) => {
-          try {
-            const parsed = JSON.parse(text);
-            setScanResult(parsed);
-            scanner.clear();
-          } catch (err) {
-            setError("Invalid QR Code Data");
-          }
-        },
-        (err) => {
-          console.warn("QR Scan Error:", err);
+ useEffect(() => {
+  if (scannerReady && !scanResult) {
+    const scanner = new Html5QrcodeScanner("qr-reader", {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+    });
+
+    scanner.render(
+      async (text) => {
+        try {
+          const url = new URL(text);
+          const dataParam = url.searchParams.get('data');
+          if (!dataParam) throw new Error("Missing 'data' in QR code");
+
+          const decoded = decodeURIComponent(dataParam);
+          const qrPayload = JSON.parse(decoded);
+
+          const { registrationId, memberType, token } = qrPayload;
+
+          const response = await api.post('/api/qr/verify-qr', {
+            registrationId,
+            memberType,
+            token,
+          });
+
+          setScanResult(response.data);
+          scanner.clear(); // Stop scanner on successful scan
+        } catch (err) {
+          console.error(err);
+          setError(err.message || "Failed to scan QR code");
         }
-      );
-    }
-  }, [scannerReady]);
+      },
+      (err) => {
+        console.warn("QR Scan Error:", err);
+      }
+    );
+  }
+}, [scannerReady]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -57,16 +67,6 @@ export default function AdminDashboard() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Test QR */}
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h2 className="text-lg font-semibold text-blue-800 mb-2">Test QR Code</h2>
-            <div className="flex justify-center">
-              <QRCode value={sampleQRData} size={160} />
-            </div>
-            <p className="text-sm text-center mt-2 text-gray-600">Scan this code for demo</p>
-          </div>
-
-          {/* Scanner Section */}
           {!scannerReady && !scanResult && (
             <button
               onClick={() => setScannerReady(true)}
@@ -82,12 +82,9 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Scan result */}
           {scanResult && (
             <div className="border border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-blue-50 shadow-sm">
-              <h2 className="text-2xl font-bold mb-4 text-blue-800">
-                {scanResult.projectTitle}
-              </h2>
+              <h2 className="text-2xl font-bold mb-4 text-blue-800">{scanResult.projectTitle}</h2>
 
               {scanResult.memberName ? (
                 <div>

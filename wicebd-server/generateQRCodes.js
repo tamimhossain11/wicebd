@@ -42,34 +42,32 @@ async function generateAllQRCodes() {
   }
 }
 
-async function generateQR(registrationId, memberType) {
+const generateQR = async (registrationId, memberType) => {
   const token = uuidv4();
+
   const qrPayload = {
-  registrationId,
-  memberType,
-  token
-};
+    registrationId,
+    memberType,
+    token,
+  };
 
-const qrContent = `https://www.wicebd.com/admin/qr-code?data=${encodeURIComponent(JSON.stringify(qrPayload))}`;
-
+  const payloadString = JSON.stringify(qrPayload);
+  const encodedPayload = encodeURIComponent(payloadString);
+  const qrContent = `https://www.wicebd.com/admin/qr-code?data=${encodedPayload}`;
 
   try {
-    // Save to DB
+    // Save token to DB first
     await db.query(
       'INSERT INTO qr_verification (registration_id, member_type, verification_hash) VALUES (?, ?, ?)',
       [registrationId, memberType, token]
     );
 
-    // Generate QR buffer
+    // Generate QR code as buffer
     const qrBuffer = await QRCode.toBuffer(qrContent, {
       errorCorrectionLevel: 'H',
       type: 'png',
       margin: 1,
       width: 300,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
     });
 
     const qrImage = await Jimp.read(qrBuffer);
@@ -91,7 +89,7 @@ const qrContent = `https://www.wicebd.com/admin/qr-code?data=${encodeURIComponen
       {
         text: label,
         alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-        alignmentY: Jimp.VERTICAL_ALIGN_TOP
+        alignmentY: Jimp.VERTICAL_ALIGN_TOP,
       },
       qrImage.bitmap.width,
       labelHeight
@@ -106,8 +104,7 @@ const qrContent = `https://www.wicebd.com/admin/qr-code?data=${encodeURIComponen
     console.error(`❌ Failed to generate QR for ${registrationId}-${memberType}:`, err.message);
     throw err;
   }
-}
-
+};
 
 generateAllQRCodes()
   .then(() => process.exit(0))
