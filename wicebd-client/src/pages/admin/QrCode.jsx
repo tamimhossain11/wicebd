@@ -91,52 +91,70 @@ export default function AdminDashboard() {
 
           {/* Camera Section */}
           <div className="mb-8">
-            {!cameraActive ? (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setCameraActive(true)}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all font-medium text-lg"
-              >
-                Start QR Scanner
-              </motion.button>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="border-2 border-blue-300 rounded-xl overflow-hidden shadow-inner"
-              >
-                <QrScanner
-                  ref={scannerRef}
-                  onDecode={(result) => {
-                    if (result) {
-                      handleScan(result);
-                    }
-                  }}
-                  onError={(error) => {
-                    setError(error?.message || 'Camera error');
-                    console.error('Camera error:', error);
-                  }}
-                  constraints={{
-                    audio: false,
-                    video: {
-                      facingMode: 'environment',
-                      width: { ideal: 1280 },
-                      height: { ideal: 720 }
-                    }
-                  }}
-                  className="w-full h-64 md:h-96 object-cover"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => setCameraActive(false)}
-                  className="w-full py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium"
-                >
-                  Stop Scanner
-                </motion.button>
-              </motion.div>
+           {!cameraActive ? (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={() => setCameraActive(true)}
+    className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all font-medium text-lg"
+  >
+    Start QR Scanner
+  </motion.button>
+) : (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="relative border-2 border-blue-300 rounded-xl overflow-hidden shadow-inner bg-black"
+  >
+    <div className="relative aspect-square w-full max-h-[70vh]">
+      <QrScanner
+        ref={scannerRef}
+        onDecode={(result) => {
+          if (result) {
+            handleScan(result);
+          }
+        }}
+        onError={(error) => {
+          console.error('Camera error:', error);
+          setError(error?.message || 
+            'Camera access denied. Please check permissions and try again.');
+          setCameraActive(false);
+        }}
+        constraints={{
+          audio: false,
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        }}
+        className="absolute inset-0 w-full h-full object-cover"
+        videoStyle={{
+          position: 'absolute',
+          height: '100%',
+          width: '100%',
+          objectFit: 'cover'
+        }}
+      />
+      {/* Scanner overlay */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="border-4 border-white rounded-lg w-64 h-64 md:w-80 md:h-80 relative">
+          <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-white"></div>
+          <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-white"></div>
+          <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-white"></div>
+          <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-white"></div>
+        </div>
+      </div>
+    </div>
+    <motion.button
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={() => setCameraActive(false)}
+      className="w-full py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium"
+    >
+      Stop Scanner
+    </motion.button>
+  </motion.div>
             )}
           </div>
 
