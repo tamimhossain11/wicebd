@@ -5,60 +5,57 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 
 router.post('/verify-qr', async (req, res) => {
-  const { qrData } = req.body;
-  
-  try {
-    // Parse QR code data
-    const qrParts = {};
-    qrData.split('|').forEach(part => {
-      const [key, value] = part.split(':');
-      qrParts[key] = value;
-    });
+  const { registrationId, memberType, token } = req.body;
 
+  if (!registrationId || !memberType || !token) {
+    return res.status(400).json({ error: "Missing registrationId, memberType, or token" });
+  }
+
+  try {
     // Verify QR code
-    const verification = await db.query(
+    const [verification] = await db.query(
       `SELECT * FROM qr_verification 
        WHERE registration_id = ? AND member_type = ? AND verification_hash = ? AND is_used = FALSE`,
-      [qrParts.registrationId, qrParts.memberType, qrParts.token]
+      [registrationId, memberType, token]
     );
 
-    if (!verification.length) {
+    if (!verification || verification.length === 0) {
       return res.status(400).json({ error: "Invalid or expired QR code" });
     }
 
     // Fetch registration data
-    const registration = await db.query(
+    const [registration] = await db.query(
       `SELECT 
         id, projectTitle, institution, 
         leader, leaderPhone, leaderEmail,
         member2, institution2, 
         member3, institution3
        FROM registrations WHERE id = ?`,
-      [qrParts.registrationId]
+      [registrationId]
     );
 
-    if (!registration.length) {
+    if (!registration || registration.length === 0) {
       return res.status(404).json({ error: "Registration not found" });
     }
 
+    const reg = registration[0];
+
     // Prepare response
     const response = {
-      registrationId: registration[0].id,
-      projectTitle: registration[0].projectTitle,
-      institution: registration[0].institution,
-      leader: registration[0].leader,
-      leaderPhone: registration[0].leaderPhone,
-      leaderEmail: registration[0].leaderEmail
+      registrationId: reg.id,
+      projectTitle: reg.projectTitle,
+      institution: reg.institution,
+      leader: reg.leader,
+      leaderPhone: reg.leaderPhone,
+      leaderEmail: reg.leaderEmail
     };
 
-    // Add member-specific data if not leader
-    if (qrParts.memberType === 'member2') {
-      response.memberName = registration[0].member2;
-      response.memberInstitution = registration[0].institution2;
-    } 
-    else if (qrParts.memberType === 'member3') {
-      response.memberName = registration[0].member3;
-      response.memberInstitution = registration[0].institution3;
+    if (memberType === 'member2') {
+      response.memberName = reg.member2;
+      response.memberInstitution = reg.institution2;
+    } else if (memberType === 'member3') {
+      response.memberName = reg.member3;
+      response.memberInstitution = reg.institution3;
     }
 
     // Mark QR as used
@@ -74,5 +71,6 @@ router.post('/verify-qr', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 module.exports = router;
