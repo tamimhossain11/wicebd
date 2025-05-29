@@ -15,13 +15,11 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    if (scannerReady && !scannerRef.current) {
-      const scanner = new Html5QrcodeScanner('qr-reader', {
-        fps: 15,
+    if (scannerReady && !scanResult) {
+      const scanner = new Html5QrcodeScanner("qr-reader", {
+        fps: 10,
         qrbox: { width: 250, height: 250 },
       });
-
-      scannerRef.current = scanner;
 
       scanner.render(
         async (text) => {
@@ -32,6 +30,7 @@ export default function AdminDashboard() {
 
             const decoded = decodeURIComponent(dataParam);
             const qrPayload = JSON.parse(decoded);
+
             const { registrationId, memberType, token } = qrPayload;
 
             const response = await api.post('/api/qr/verify-qr', {
@@ -41,78 +40,55 @@ export default function AdminDashboard() {
             });
 
             setScanResult(response.data);
-            scanner.clear().then(() => (scannerRef.current = null));
+            scanner.clear();
           } catch (err) {
             console.error(err);
-            setError(err.message || 'Failed to scan QR code');
+            setError(err.message || "Failed to scan QR code");
           }
         },
         (err) => {
-          console.warn('QR Scan Error:', err);
+          console.warn("QR Scan Error:", err);
         }
       );
     }
-
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
-        scannerRef.current = null;
-      }
-    };
   }, [scannerReady]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-6 font-sans flex justify-center items-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-8 font-sans">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-4xl bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-blue-100"
+        className="max-w-4xl mx-auto bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-blue-100"
       >
-        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
           <h1 className="text-4xl font-extrabold tracking-tight">QR Verification Portal</h1>
           <p className="mt-2 text-lg opacity-90">Scan participant QR codes to confirm identity</p>
         </div>
 
-        {/* Content Area */}
         <div className="p-8 space-y-6">
           {!scannerReady && !scanResult && (
-            <div className="flex justify-center">
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                whileHover={{ scale: 1.03 }}
-                onClick={() => {
-                  setError(null);
-                  setScannerReady(true);
-                }}
-                className="px-6 py-4 bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xl font-semibold rounded-2xl shadow-lg hover:shadow-indigo-400/70 transition-all flex items-center justify-center gap-3"
-              >
-                <ScanLine size={24} />
-                Start Scanning
-              </motion.button>
-            </div>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.03 }}
+              onClick={() => setScannerReady(true)}
+              className="w-full py-4 bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xl font-semibold rounded-2xl shadow-lg hover:shadow-indigo-400/70 transition-all flex items-center justify-center gap-3"
+            >
+              <ScanLine size={24} />
+              Start Scanning
+            </motion.button>
           )}
 
-          {/* Scanner Section */}
           {scannerReady && !scanResult && (
-            <>
-              <div className="flex justify-center">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="border-4 border-blue-500 rounded-xl bg-black p-4 shadow-lg w-full max-w-sm"
-                >
-                  <div id="qr-reader" className="aspect-square w-full" />
-                </motion.div>
-              </div>
-              <p className="text-center text-blue-700 text-sm mt-2 animate-pulse">
-                Scanner is active... hold QR code in front of the camera
-              </p>
-            </>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="relative border-4 border-blue-400 rounded-xl overflow-hidden shadow-md bg-black p-4 flex justify-center"
+            >
+              <div id="qr-reader" className="w-full max-w-xs aspect-square neon-border"></div>
+            </motion.div>
           )}
 
-          {/* Success Result */}
           {scanResult && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -144,24 +120,9 @@ export default function AdminDashboard() {
                 <p><strong>Phone:</strong> {scanResult.leaderPhone}</p>
                 <p><strong>Email:</strong> {scanResult.leaderEmail}</p>
               </div>
-
-              {/* Reset Button */}
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={() => {
-                    setScanResult(null);
-                    setError(null);
-                    setScannerReady(true);
-                  }}
-                  className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-all"
-                >
-                  Scan Another QR
-                </button>
-              </div>
             </motion.div>
           )}
 
-          {/* Error Message */}
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
