@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { CheckCircle, AlertCircle, ScanLine } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [scanResult, setScanResult] = useState(null);
@@ -14,11 +15,13 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    if (scannerReady && !scanResult) {
-      const scanner = new Html5QrcodeScanner("qr-reader", {
-        fps: 10,
+    if (scannerReady && !scannerRef.current) {
+      const scanner = new Html5QrcodeScanner('qr-reader', {
+        fps: 15,
         qrbox: { width: 250, height: 250 },
       });
+
+      scannerRef.current = scanner;
 
       scanner.render(
         async (text) => {
@@ -29,7 +32,6 @@ export default function AdminDashboard() {
 
             const decoded = decodeURIComponent(dataParam);
             const qrPayload = JSON.parse(decoded);
-
             const { registrationId, memberType, token } = qrPayload;
 
             const response = await api.post('/api/qr/verify-qr', {
@@ -39,93 +41,138 @@ export default function AdminDashboard() {
             });
 
             setScanResult(response.data);
-            scanner.clear();
+            scanner.clear().then(() => (scannerRef.current = null));
           } catch (err) {
             console.error(err);
-            setError(err.message || "Failed to scan QR code");
+            setError(err.message || 'Failed to scan QR code');
           }
         },
         (err) => {
-          console.warn("QR Scan Error:", err);
+          console.warn('QR Scan Error:', err);
         }
       );
     }
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(console.error);
+        scannerRef.current = null;
+      }
+    };
   }, [scannerReady]);
 
-  const handleReset = () => {
-    setScanResult(null);
-    setError(null);
-    setScannerReady(false);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-100 via-blue-200 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-6 font-sans flex justify-center items-center">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="w-full max-w-4xl bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-blue-100"
       >
-        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-600 p-8 text-white text-center">
-          <h1 className="text-4xl font-extrabold">🎫 QR Code Verification</h1>
-          <p className="mt-2 text-lg opacity-90">Scan participant QR codes to verify registration</p>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight">QR Verification Portal</h1>
+          <p className="mt-2 text-lg opacity-90">Scan participant QR codes to confirm identity</p>
         </div>
 
-        <div className="p-6 space-y-6">
+        {/* Content Area */}
+        <div className="p-8 space-y-6">
           {!scannerReady && !scanResult && (
-            <button
-              onClick={() => setScannerReady(true)}
-              className="w-full py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold text-lg rounded-xl shadow-md hover:shadow-lg transition"
-            >
-              🚀 Start QR Scanner
-            </button>
-          )}
-
-          {scannerReady && !scanResult && (
-            <div className="relative border-4 border-blue-400 rounded-2xl overflow-hidden shadow-inner bg-black p-3">
-              <div id="qr-reader" className="w-full aspect-square" />
+            <div className="flex justify-center">
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.03 }}
+                onClick={() => {
+                  setError(null);
+                  setScannerReady(true);
+                }}
+                className="px-6 py-4 bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xl font-semibold rounded-2xl shadow-lg hover:shadow-indigo-400/70 transition-all flex items-center justify-center gap-3"
+              >
+                <ScanLine size={24} />
+                Start Scanning
+              </motion.button>
             </div>
           )}
 
+          {/* Scanner Section */}
+          {scannerReady && !scanResult && (
+            <>
+              <div className="flex justify-center">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="border-4 border-blue-500 rounded-xl bg-black p-4 shadow-lg w-full max-w-sm"
+                >
+                  <div id="qr-reader" className="aspect-square w-full" />
+                </motion.div>
+              </div>
+              <p className="text-center text-blue-700 text-sm mt-2 animate-pulse">
+                Scanner is active... hold QR code in front of the camera
+              </p>
+            </>
+          )}
+
+          {/* Success Result */}
           {scanResult && (
-            <div className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 border border-indigo-200 rounded-2xl p-6 shadow-md">
-              <h2 className="text-2xl font-bold text-indigo-700 mb-4">{scanResult.projectTitle}</h2>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="border border-gray-300 rounded-xl p-6 bg-white shadow-md"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <CheckCircle size={28} className="text-green-600" />
+                <h2 className="text-2xl font-bold text-gray-800">Verified Project</h2>
+              </div>
+              <h3 className="text-xl font-semibold text-blue-800">{scanResult.projectTitle}</h3>
 
               {scanResult.memberName && (
-                <div className="mb-4">
-                  <span className="text-sm text-white bg-green-500 px-3 py-1 rounded-full font-semibold inline-block mb-2">
-                    ✅ Team Member
+                <div className="mt-4">
+                  <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium inline-block mb-2">
+                    Team Member
                   </span>
                   <p><strong>Name:</strong> {scanResult.memberName}</p>
                   <p><strong>Institution:</strong> {scanResult.memberInstitution}</p>
                 </div>
               )}
 
-              <div className="border-t pt-4 mt-4">
-                <span className="text-sm text-white bg-blue-500 px-3 py-1 rounded-full font-semibold inline-block mb-2">
-                  👤 Team Leader
+              <div className="mt-6">
+                <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium inline-block mb-2">
+                  Team Leader
                 </span>
                 <p><strong>Name:</strong> {scanResult.leader}</p>
                 <p><strong>Institution:</strong> {scanResult.institution}</p>
                 <p><strong>Phone:</strong> {scanResult.leaderPhone}</p>
                 <p><strong>Email:</strong> {scanResult.leaderEmail}</p>
               </div>
-            </div>
+
+              {/* Reset Button */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => {
+                    setScanResult(null);
+                    setError(null);
+                    setScannerReady(true);
+                  }}
+                  className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-all"
+                >
+                  Scan Another QR
+                </button>
+              </div>
+            </motion.div>
           )}
 
-          {(scanResult || error) && (
-            <button
-              onClick={handleReset}
-              className="w-full mt-4 py-3 bg-gradient-to-r from-pink-500 to-red-600 text-white font-semibold text-lg rounded-xl shadow-md hover:shadow-lg transition"
-            >
-              🔁 Reset Scanner
-            </button>
-          )}
-
+          {/* Error Message */}
           {error && (
-            <div className="p-4 mt-4 bg-red-50 border-l-4 border-red-600 text-red-700 rounded-md shadow">
-              ⚠️ {error}
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-start gap-3 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md"
+            >
+              <AlertCircle className="mt-1" />
+              <div>
+                <strong>Error:</strong> <span>{error}</span>
+              </div>
+            </motion.div>
           )}
         </div>
       </motion.div>
