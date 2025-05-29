@@ -25,5 +25,6 @@ testDatabaseConnection();
 module.exports = {
   getConnection: () => pool.getConnection(),
   query: (...args) => pool.query(...args),
+  execute: (...args) => pool.execute(...args),
   end: () => pool.end()
 };

@@ -44,11 +44,14 @@ async function generateAllQRCodes() {
 
 async function generateQR(registrationId, memberType) {
   const token = uuidv4();
-  const qrContent = JSON.stringify({
-    registrationId,
-    memberType,
-    token
-  });
+  const qrPayload = {
+  registrationId,
+  memberType,
+  token
+};
+
+const qrContent = `https://www.wicebd.com/admin/qr-code?data=${encodeURIComponent(JSON.stringify(qrPayload))}`;
+
 
   try {
     // Save to DB
