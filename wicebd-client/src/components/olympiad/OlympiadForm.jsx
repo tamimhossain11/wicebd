@@ -76,8 +76,17 @@ const OlympiadForm = () => {
                 <h2 className="mb-0">WICE Olympiad Registration</h2>
                 <p className="mb-0">Join our prestigious academic competition</p>
               </Card.Header>
+
+              <Card.Body className="p-4 p-md-5 text-center">
+  <h4 className="text-danger mb-3">Registration Closed</h4>
+  <p className="mb-0">
+    We are sorry to say that the registration for the WICE Olympiad has been closed.  
+    You cannot participate anymore.
+  </p>
+</Card.Body>
+
               
-              <Card.Body className="p-4 p-md-5">
+              {/*<Card.Body className="p-4 p-md-5">
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
                   <Form.Group className="mb-4 olympiad-form-group">
                     <Form.Label>Full Name *</Form.Label>
@@ -190,6 +199,7 @@ const OlympiadForm = () => {
                   </div>
                 </Form>
               </Card.Body>
+              */}
             </Card>
           </Col>
         </Row>

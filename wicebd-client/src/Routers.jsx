@@ -25,6 +25,7 @@ import AdminRoute from './components/admin/AdminRoute';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Olympiad from './pages/innerPages/Olympiad';
+import QrCode from './pages/admin/QrCode'
 
 
 const Routers = () => {
@@ -59,6 +60,16 @@ const Routers = () => {
                     element={
                         <AdminRoute>
                             <AdminDashboard />
+
+                        </AdminRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/qr-code"
+                    element={
+                        <AdminRoute>
+                            <QrCode />
                         </AdminRoute>
                     }
                 />
