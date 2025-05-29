@@ -11,10 +11,13 @@
     "express": "^5.1.0",
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.18.1",
+    "html5-qrcode": "^2.3.8",
+    "jimp": "^0.16.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",
+    "qrcode": "^1.5.4",
     "uuid": "^11.1.0"
   },
   "scripts": {

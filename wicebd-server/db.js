@@ -22,5 +22,8 @@ async function testDatabaseConnection() {
 
 testDatabaseConnection();
 
-module.exports = pool;
-//working as expected
+module.exports = {
+  getConnection: () => pool.getConnection(),
+  query: (...args) => pool.query(...args),
+  end: () => pool.end()
+};
