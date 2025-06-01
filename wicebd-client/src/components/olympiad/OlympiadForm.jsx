@@ -30,7 +30,7 @@ const OlympiadForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-    
+
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
@@ -39,10 +39,10 @@ const OlympiadForm = () => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const response = await axios.post(`${backendUrl}/api/olympiad/register`, formData);
-      
+
       if (response.data.success) {
         toast.success('Registration submitted successfully!');
         // Reset form after successful submission
@@ -78,14 +78,14 @@ const OlympiadForm = () => {
               </Card.Header>
 
               <Card.Body className="p-4 p-md-5 text-center">
-  <h4 className="text-danger mb-3">Registration Closed</h4>
-  <p className="mb-0">
-    We are sorry to say that the registration for the WICE Olympiad has been closed.  
-    You cannot participate anymore.
-  </p>
-</Card.Body>
+                <h4 className="text-danger mb-3">Registration Closed</h4>
+                <p className="mb-0">
+                  We are sorry to say that the registration for the WICE Olympiad has been closed.
+                  You cannot participate anymore.
+                </p>
+              </Card.Body>
 
-              
+
               {/*<Card.Body className="p-4 p-md-5">
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
                   <Form.Group className="mb-4 olympiad-form-group">

@@ -163,8 +163,7 @@ const Registration = () => {
     <Container className="mt-5 mb-5">
       <ToastContainer />
       <h2 className="mb-4 text-center">WICE 2025 Registration Form</h2>
-      <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        {/* Biodata Section */}
+      {/**<Form noValidate validated={validated} onSubmit={handleSubmit}>
         <h4>Biodata</h4>
         <Row>
           <Col md={6}>
@@ -254,7 +253,7 @@ const Registration = () => {
           </Col>
         </Row>
 
-        {/* Team Leader Information */}
+        
         <h4>Team Leader Information</h4>
         <Row className="mb-3">
           <Col md={6}>
@@ -377,9 +376,9 @@ const Registration = () => {
           </Col>
         </Row>
 
-        {/* Team Members Section */}
+      
         <h4>Team Member's Information (Optional)</h4>
-        {/* Member 2 */}
+
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="member2">
@@ -422,7 +421,6 @@ const Registration = () => {
           </Form.Group>
         </Col>
 
-        {/* Member 3 */}
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="member3">
@@ -465,7 +463,7 @@ const Registration = () => {
           </Form.Group>
         </Col>
 
-        {/* Project Details */}
+     
         <h4>Project Details</h4>
         <Form.Group className="mb-3" controlId="projectTitle">
           <Form.Label>Project Title</Form.Label>
@@ -570,7 +568,15 @@ const Registration = () => {
             Submit and Proceed to Payment
           </Button>
         </div>
-      </Form>
+      </Form>}
+      */}
+      <Card.Body className="p-4 p-md-5 text-center">
+        <h4 className="text-danger mb-3">Registration Closed</h4>
+        <p className="mb-0">
+          We are sorry to say that the registration for the WICE Project Display and Wall Magazine has been closed.  
+          You cannot participate anymore.
+        </p>
+      </Card.Body>
       <ToastContainer />
     </Container>
   );
