@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { NavHashLink as Link } from 'react-router-hash-link'
 import SearchPopup from '../others/SearchPopup';
 import MainMenu from './MainMenu';
-import ColorsPalate from '../others/ColorsPalate';
 
 const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
 
@@ -110,7 +109,6 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
                 </div>
             </header>
             <SearchPopup openSearch={openSearch} searchClose={searchClose} />
-            <ColorsPalate />
         </>
     );
 };

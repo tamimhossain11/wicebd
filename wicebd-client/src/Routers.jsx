@@ -26,6 +26,8 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Olympiad from './pages/innerPages/Olympiad';
 import QrCode from './pages/admin/QrCode'
+import SelectedTeams from './pages/innerPages/SelectedTeams';
+import Announcements from './pages/innerPages/Announcements';
 
 
 const Routers = () => {
@@ -43,6 +45,8 @@ const Routers = () => {
                 <Route path='/schedule' element={<Schedule />}></Route>
                 <Route path='/event-detail/:parentId/:childId' element={<EventDetails />}></Route>
                 <Route path='/buy-ticket' element={<BuyTicket />}></Route>
+                <Route path='/selected-teams' element={<SelectedTeams />}></Route>
+                <Route path='/announcements' element={<Announcements />}></Route>
                 <Route path='/blog-sidebar' element={<BlogSidebar />}></Route>
                 <Route path='/blog-grid' element={<BlogGrid />}></Route>
                 <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
