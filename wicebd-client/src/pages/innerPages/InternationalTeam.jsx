@@ -195,7 +195,7 @@ const InternationalTeam = () => {
 
       {/* Hero Section */}
       <section className="py-5" style={{ 
-        background: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)', 
+        background: 'linear-gradient(135deg,rgb(106, 41, 41) 0%,rgb(164, 83, 83) 100%)', 
         color: 'white' 
       }}>
         <Container>
