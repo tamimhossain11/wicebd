@@ -8,17 +8,33 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                 <li className={`dropdown ${parentMenu === 'home' ? 'current' : ''} `}>
                     <Link to="/#">Home</Link>
                 </li>
-                <li className={`dropdown ${parentMenu === 'schedule' ? 'current' : ''}`}>
-                     <Link to={void (0)} onClick={toggleMenu}>Registration</Link>
+                <li className={`dropdown ${parentMenu === 'register' ? 'current' : ''}`}>
+                     <Link to={void (0)} onClick={toggleMenu}>Register</Link>
                     <ul className='sub-menu'>
-                        <li><Link to="/buy-ticket#" >project and Wall magazine</Link></li>
+                        <li><Link to="/buy-ticket#" >Project</Link></li>
                         <li><Link to="/olympiad#" >Olympiad</Link></li>
                     </ul>
                    
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>
-                <li><Link to="/selected-teams#">Selected Teams</Link></li>
-                <li><Link to="/announcements#">Announcements</Link></li>
+                <li className={`dropdown ${parentMenu === 'teams' ? 'current' : ''}`}>
+                     <Link to={void (0)} onClick={toggleMenu}>Teams</Link>
+                    <ul className='sub-menu'>
+                        <li><Link to="/selected-teams#" >Selected</Link></li>
+                        <li><Link to="/international-team#" >International</Link></li>
+                    </ul>
+                   
+                    <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
+                </li>
+                <li className={`dropdown ${parentMenu === 'updates' ? 'current' : ''}`}>
+                     <Link to={void (0)} onClick={toggleMenu}>Updates</Link>
+                    <ul className='sub-menu'>
+                        <li><Link to="/announcements#" >News</Link></li>
+                        <li><Link to="/blog-details#" >Blog</Link></li>
+                    </ul>
+                   
+                    <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
+                </li>
                 <li><Link to="/contact#">Contact</Link></li> 
                <li className={`dropdown ${parentMenu === 'about' ? 'current' : ''}`}>
                     <Link to="/about-us#">About</Link>
