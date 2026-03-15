@@ -1,7 +1,7 @@
 import React from 'react';
 import CountUp from 'react-countup';
 import { motion } from 'framer-motion';
-import { Card, Col } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const SingleFactV2 = ({ fact }) => {
@@ -10,83 +10,61 @@ const SingleFactV2 = ({ fact }) => {
     return (
         <Col lg={3} md={6} sm={12} className="mb-4">
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ 
-                    type: 'spring', 
-                    stiffness: 100,
-                    delay: fact.delay ? fact.delay / 1000 : 0 
-                }}
-                whileHover={{
-                    y: -5,
-                    scale: 1.03,
-                    boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+                transition={{ type: 'spring', stiffness: 90, delay: fact.delay ? fact.delay / 1000 : 0 }}
+                whileHover={{ y: -8, scale: 1.03 }}
+                style={{
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    backdropFilter: 'blur(22px)',
+                    WebkitBackdropFilter: 'blur(22px)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderTop: '3px solid var(--primary-maroon, #800020)',
+                    borderRadius: '20px',
+                    padding: '40px 28px',
+                    textAlign: 'center',
+                    boxShadow: '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
+                    cursor: 'default',
+                    transition: 'box-shadow 0.3s ease',
                 }}
             >
-                <Card 
-                    className="h-100 border-0 shadow-sm text-center p-4"
+                {/* Icon */}
+                <motion.div
                     style={{
-                        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-                        borderRadius: '15px',
-                        overflow: 'hidden'
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '16px',
+                        background: 'rgba(128, 0, 32, 0.2)',
+                        border: '1px solid rgba(128, 0, 32, 0.4)',
+                        marginBottom: '20px',
                     }}
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                    <div className="position-relative">
-                        <motion.div
-                            className="position-absolute"
-                            style={{
-                                top: -20,
-                                right: -20,
-                                width: 60,
-                                height: 60,
-                                background: 'rgba(13, 110, 253, 0.1)',
-                                borderRadius: '50%',
-                                zIndex: 0
-                            }}
-                            animate={{
-                                scale: [1, 1.2, 1],
-                                opacity: [0.3, 0.5, 0.3]
-                            }}
-                            transition={{
-                                duration: 3,
-                                repeat: Infinity,
-                                ease: 'easeInOut'
-                            }}
-                        />
-                        <i className={`${icon} ${iconColor}`} style={{
-                            fontSize: '2.5rem',
-                            position: 'relative',
-                            zIndex: 1,
-                            marginBottom: '1rem'
-                        }}></i>
-                    </div>
-                    
-                    <h2 className="display-5 fw-bold mb-3" style={{ color: '#212529' }}>
-                        <CountUp 
-                            end={end} 
-                            enableScrollSpy 
-                            duration={3} 
-                            suffix="+"
-                        />
-                    </h2>
-                    
-                    <h5 className="text-muted" style={{ minHeight: '3rem' }}>
-                        {title}
-                    </h5>
-                    
-                    <motion.div
-                        className="mx-auto"
-                        style={{
-                            height: '3px',
-                            width: '50px',
-                            background: 'linear-gradient(90deg, #0d6efd, #6f42c1)'
-                        }}
-                        initial={{ scaleX: 0 }}
-                        whileInView={{ scaleX: 1 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                    />
-                </Card>
+                    <i className={`${icon}`} style={{ fontSize: '1.8rem', color: '#ffffff' }}></i>
+                </motion.div>
+
+                {/* Count */}
+                <div style={{ fontSize: '3rem', fontWeight: 800, color: '#ffffff', lineHeight: 1, marginBottom: '10px' }}>
+                    <CountUp end={end} enableScrollSpy duration={2.5} suffix="+" />
+                </div>
+
+                {/* Label */}
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>
+                    {title}
+                </div>
+
+                {/* Accent line */}
+                <motion.div
+                    style={{ height: '2px', background: 'linear-gradient(90deg, transparent, #800020, transparent)', marginTop: '18px', borderRadius: '2px' }}
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                />
             </motion.div>
         </Col>
     );

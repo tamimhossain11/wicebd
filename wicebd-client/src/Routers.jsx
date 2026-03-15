@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import Home2 from './pages/homePages/Home2';
 import AboutUs from './pages/innerPages/AboutUs';
 import Pricing from './pages/innerPages/Pricing';
@@ -30,6 +30,8 @@ import SelectedTeams from './pages/innerPages/SelectedTeams';
 import Announcements from './pages/innerPages/Announcements';
 import BlogDetails from './pages/innerPages/BlogDetails';
 import InternationalTeam from './pages/innerPages/InternationalTeam';
+import OrganizingPanel from './pages/innerPages/OrganizingPanel';
+import RegistrationPage from './pages/innerPages/RegistrationPage';
 
 
 const Routers = () => {
@@ -46,11 +48,13 @@ const Routers = () => {
                 <Route path='/speakers-detail/:id' element={<SpeakersDetail />}></Route>
                 <Route path='/schedule' element={<Schedule />}></Route>
                 <Route path='/event-detail/:parentId/:childId' element={<EventDetails />}></Route>
-                <Route path='/buy-ticket' element={<BuyTicket />}></Route>
+                <Route path='/buy-ticket' element={<Navigate to="/registration" replace />} />
+                <Route path='/registration' element={<RegistrationPage />} />
                 <Route path='/selected-teams' element={<SelectedTeams />}></Route>
                 <Route path='/announcements' element={<Announcements />}></Route>
                 <Route path='/blog-details' element={<BlogDetails />}></Route>
                 <Route path='/international-team' element={<InternationalTeam />}></Route>
+                <Route path='/organizing-panel' element={<OrganizingPanel />}></Route>
                 <Route path='/blog-sidebar' element={<BlogSidebar />}></Route>
                 <Route path='/blog-grid' element={<BlogGrid />}></Route>
                 <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
@@ -60,7 +64,7 @@ const Routers = () => {
                 <Route path='/thank-you' element={<ThankYou />}></Route>
                 <Route path="/payment-error" element={<PaymentError />} />
                 <Route path="/payment-cancelled" element={<PaymentCancelled />} />
-                <Route path="/olympiad" element={<Olympiad />} />
+                <Route path="/olympiad" element={<Navigate to="/registration?tab=olympiad" replace />} />
                 {/*Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route

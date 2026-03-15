@@ -11,8 +11,8 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                 <li className={`dropdown ${parentMenu === 'register' ? 'current' : ''}`}>
                      <Link to={void (0)} onClick={toggleMenu}>Register</Link>
                     <ul className='sub-menu'>
-                        <li><Link to="/buy-ticket#" >Project</Link></li>
-                        <li><Link to="/olympiad#" >Olympiad</Link></li>
+                        <li><Link to="/registration#">Project</Link></li>
+                        <li><Link to="/registration?tab=olympiad#">Olympiad</Link></li>
                     </ul>
                    
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
@@ -35,7 +35,15 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                    
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                 </li>
-                <li><Link to="/contact#">Contact</Link></li> 
+                <li className={`dropdown ${parentMenu === 'organizing' ? 'current' : ''}`}>
+                    <Link to={void (0)} onClick={toggleMenu}>Organizing Panel</Link>
+                    <ul className='sub-menu'>
+                        <li><Link to="/organizing-panel#">Executives</Link></li>
+                        <li><Link to="/organizing-panel#organizers">Organizers</Link></li>
+                    </ul>
+                    <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
+                </li>
+                <li><Link to="/contact#">Contact</Link></li>
                <li className={`dropdown ${parentMenu === 'about' ? 'current' : ''}`}>
                     <Link to="/about-us#">About</Link>
                     </li>

@@ -113,7 +113,7 @@ const EventScheduleTable = () => {
         maxWidth: '950px',
         mx: 'auto',
         p: 4,
-        background: 'linear-gradient(to bottom, #ec407a, #6a0f24)',
+        background: 'linear-gradient(160deg, #0d0006 0%, #1a000a 60%, #2a0010 100%)',
         borderRadius: '16px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -153,9 +153,9 @@ const EventScheduleTable = () => {
                 mr: 2,
                 color: 'white' 
               }} />
-              7th World Invention Competition
+              8th World Invention Competition
               <br />
-              and Exhibition 2025
+              and Exhibition — WICEBD 2025
             </Typography>
             <Chip 
               label="Bangladesh National Round" 

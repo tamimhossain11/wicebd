@@ -1,428 +1,364 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { HashLink as Link } from 'react-router-hash-link';
 import HeaderV1 from '../../components/header/HeaderV1';
-import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
-import FooterV1 from '../../components/footer/FooterV1';
-import { Container, Row, Col, Card } from 'react-bootstrap';
-import { Gallery, Item } from 'react-photoswipe-gallery';
+import FooterV2 from '../../components/footer/FooterV2';
 
 const blogSections = [
-  {
-    id: 1,
-    title: "Introduction",
-    content: "Among global competitions based on science, technology, and innovation, the World Invention Competition and Exhibition (WICE) stands out as a prestigious platform. Talented young innovators from around the world showcase their research, creative thinking, and technological solutions here.\n\nFor years, Dreams of Bangladesh (DoB) has been relentlessly working to highlight the talents of Bangladeshi youth on this international stage. In 2023 and 2024, Dreams of Bangladesh consecutively won Gold Medals, proving that with proper guidance, hard work, and dedication, Bangladeshi students can excel in global competitions.\n\nFollowing this tradition, in 2025, a special Boot Camp was organized to further prepare selected teams for international participation.",
-    image: "/images/blog/introduction.jpg",
-    icon: "fa fa-star",
-    bgColor: "#fef7f7"
-  },
-  {
-    id: 2,
-    title: "WICE National Round",
-    content: "On May 30, 2025, Dreams of Bangladesh successfully organized the WICE National Round Bangladesh. Teams from across the country presented their innovative projects, competing for the top positions.\n\nFrom this national round, a select few highly promising teams were chosen to represent Bangladesh at WICE 2025 in Malaysia. However, the goal was not just selection; Dreams of Bangladesh aimed to prepare each team to achieve Gold Medal-worthy projects at the international level.",
-    image: "/images/blog/national-round.jpg",
-    icon: "fa fa-trophy",
-    bgColor: "#fdf5f5"
-  },
-  {
-    id: 3,
-    title: "Purpose of the Boot Camp",
-    content: "Participating in an international competition requires more than just creating a project. Teams must also:\n\n• Present their projects effectively\n• Prepare documentation\n• Answer judges' questions confidently\n• Showcase the project's functionality\n\nTo guide the teams on these aspects, Dreams of Bangladesh organized a Boot Camp:\n\nDate: August 11, 2025\nVenue: Convention Hall, Mirpur\nTime: 4 PM – 8 PM",
-    image: "/images/blog/bootcamp-purpose.jpg",
-    icon: "fa fa-bullseye",
-    bgColor: "#fcf4f4"
-  },
-  {
-    id: 4,
-    title: "Preparation and Effort",
-    content: "To ensure the Boot Camp's success, the executives and organizers of Dreams of Bangladesh worked tirelessly for 3–4 days.\n\n• Each team received formal invitations\n• Guardian permissions were obtained\n• The venue was arranged with all necessary technical equipment for project presentations\n\nThe event was more than just a program; it became a platform to prepare the future innovators of Bangladesh.",
-    image: "/images/blog/preparation.jpg",
-    icon: "fa fa-tools",
-    bgColor: "#fef6f6"
-  },
-  {
-    id: 5,
-    title: "Boot Camp Activities",
-    content: "The Boot Camp began officially at 4 PM, attended by all DoB executives, organizers, participating teams, and their guardians.\n\nKey activities included:\n\n1. Motivational Session – Inspiring young innovators\n2. Project Guidance – How to elevate a project to international standards\n3. Q&A Session – Helping participants resolve project-related challenges\n4. Experience Sharing – Learning from past Gold Medal winners\n5. Networking – Building connections between teams and guardians",
-    image: "/images/blog/activities.jpg",
-    icon: "fa fa-users",
-    bgColor: "#fdf3f3"
-  },
-  {
-    id: 6,
-    title: "Executive Director's Guidance",
-    content: "Executive Director Mahadir Islam played a pivotal role in the Boot Camp. He provided detailed guidance to each team, covering:\n\n• How to make a project Gold Medal-worthy\n• Strategies for presenting projects to international judges\n• Importance of teamwork and time management\n• Making innovation solution-oriented",
-    image: "/images/blog/executive-guidance.jpg",
-    icon: "fa fa-user-tie",
-    bgColor: "#fcf5f5"
-  },
-  {
-    id: 7,
-    title: "President's Experience Sharing",
-    content: "President Moin Uddin shared his experiences with the participants, explaining how Dreams of Bangladesh won consecutive Gold Medals in WICE 2023 and 2024.\n\nThrough his session, teams learned:\n\n• How competitions at the international level are conducted\n• Types of questions judges might ask\n• How to prepare mentally for success",
-    image: "/images/blog/president-sharing.jpg",
-    icon: "fa fa-microphone",
-    bgColor: "#fef4f4"
-  },
-  {
-    id: 8,
-    title: "Participant Reactions",
-    content: "The participating teams were highly enthusiastic about the Boot Camp.\n\n• Many were attending an international platform for the first time, making the experience life-changing\n• Guardians expressed satisfaction, seeing their children engage in a professional, safe, and organized environment",
-    image: "/images/blog/participant-reactions.jpg",
-    icon: "fa fa-heart",
-    bgColor: "#fdf6f6"
-  },
-  {
-    id: 9,
-    title: "Malaysia Trip Cost Details",
-    content: "During the Boot Camp, Executive Director Mahadir Islam provided detailed guidance on the cost of participating in WICE 2025 in Malaysia. He informed that each team member's total cost is approximately BDT 155,000. This includes:\n\n• Flight: Return ticket from Dhaka to Kuala Lumpur\n• Accommodation: 4–5 nights in comfortable hotels\n• Food and Local Travel: Three meals a day plus transportation\n• Project Presentation Materials: Stall setup and display requirements\n• Miscellaneous Costs: Visa, insurance, health protocols, and other expenses\n\nMahadir Islam emphasized that the costs were planned to allow each team to participate comfortably without financial burden.",
-    image: "/images/blog/malaysia-trip.jpg",
-    icon: "fa fa-calculator",
-    bgColor: "#fcf7f7"
-  },
-  {
-    id: 10,
-    title: "Future Plans",
-    content: "Dreams of Bangladesh does not intend to stop with the Boot Camp. Future initiatives include:\n\n• Regular online mentoring sessions\n• Specialized coaching for each team\n• Resource sharing platforms to help teams refine their projects\n\nThese measures aim to ensure that Bangladeshi teams are well-prepared and confident to represent the country at WICE 2025 in Malaysia.",
-    image: "/images/blog/future-plans.jpg",
-    icon: "fa fa-lightbulb",
-    bgColor: "#fef8f8"
-  },
-  {
-    id: 11,
-    title: "Conclusion",
-    content: "The Dreams of Bangladesh Boot Camp was a unique initiative. It not only provided project guidance but also instilled hope, inspiration, and vision among participants and their guardians.\n\nThe knowledge and motivation gained from this Boot Camp will guide the teams not only at WICE 2025 but also throughout their lives.\n\nDreams of Bangladesh firmly believes that Bangladesh's youth will illuminate the global stage with their talent, innovation, and confidence.",
-    image: "/images/blog/conclusion.jpg",
-    icon: "fa fa-check-circle",
-    bgColor: "#fef5f5"
-  }
+    {
+        id: 1, title: 'Introduction', icon: 'fa-star',
+        content: `Among global competitions based on science, technology, and innovation, the World Invention Competition and Exhibition (WICE) stands out as a prestigious platform. Talented young innovators from around the world showcase their research, creative thinking, and technological solutions here.
+
+For years, Dreams of Bangladesh (DoB) has been relentlessly working to highlight the talents of Bangladeshi youth on this international stage. In 2023 and 2025, Dreams of Bangladesh consecutively won Gold Medals, proving that with proper guidance, hard work, and dedication, Bangladeshi students can excel in global competitions.
+
+Following this tradition, a special Boot Camp was organized to further prepare selected teams for international participation.`,
+        image: '/images/blog/introduction.jpg',
+    },
+    {
+        id: 2, title: 'WICE National Round', icon: 'fa-trophy',
+        content: `Dreams of Bangladesh successfully organized the WICE National Round Bangladesh. Teams from across the country presented their innovative projects, competing for the top positions.
+
+From this national round, a select few highly promising teams were chosen to represent Bangladesh at WICE 2025 in Malaysia. However, the goal was not just selection; Dreams of Bangladesh aimed to prepare each team to achieve Gold Medal-worthy projects at the international level.`,
+        image: '/images/blog/national-round.jpg',
+    },
+    {
+        id: 3, title: 'Purpose of the Boot Camp', icon: 'fa-bullseye',
+        content: `Participating in an international competition requires more than just creating a project. Teams must also:
+
+• Present their projects effectively
+• Prepare documentation
+• Answer judges' questions confidently
+• Showcase the project's functionality
+
+To guide the teams on these aspects, Dreams of Bangladesh organized a Boot Camp at Convention Hall, Mirpur, running from 4 PM to 8 PM.`,
+        image: '/images/blog/bootcamp-purpose.jpg',
+    },
+    {
+        id: 4, title: 'Preparation and Effort', icon: 'fa-tools',
+        content: `To ensure the Boot Camp's success, the executives and organizers of Dreams of Bangladesh worked tirelessly for 3–4 days.
+
+• Each team received formal invitations
+• Guardian permissions were obtained
+• The venue was arranged with all necessary technical equipment for project presentations
+
+The event was more than just a program; it became a platform to prepare the future innovators of Bangladesh.`,
+        image: '/images/blog/preparation.jpg',
+    },
+    {
+        id: 5, title: 'Boot Camp Activities', icon: 'fa-users',
+        content: `The Boot Camp began officially at 4 PM, attended by all DoB executives, organizers, participating teams, and their guardians.
+
+Key activities included:
+
+1. Motivational Session – Inspiring young innovators
+2. Project Guidance – How to elevate a project to international standards
+3. Q&A Session – Helping participants resolve project-related challenges
+4. Experience Sharing – Learning from past Gold Medal winners
+5. Networking – Building connections between teams and guardians`,
+        image: '/images/blog/activities.jpg',
+    },
+    {
+        id: 6, title: "Executive Director's Guidance", icon: 'fa-user-tie',
+        content: `Executive Director Mahadir Islam played a pivotal role in the Boot Camp. He provided detailed guidance to each team, covering:
+
+• How to make a project Gold Medal-worthy
+• Strategies for presenting projects to international judges
+• Importance of teamwork and time management
+• Making innovation solution-oriented`,
+        image: '/images/blog/executive-guidance.jpg',
+    },
+    {
+        id: 7, title: "President's Experience Sharing", icon: 'fa-microphone',
+        content: `President Moin Uddin shared his experiences with the participants, explaining how Dreams of Bangladesh won consecutive Gold Medals in WICE 2023 and 2025.
+
+Through his session, teams learned:
+
+• How competitions at the international level are conducted
+• Types of questions judges might ask
+• How to prepare mentally for success`,
+        image: '/images/blog/president-sharing.jpg',
+    },
+    {
+        id: 8, title: 'Participant Reactions', icon: 'fa-heart',
+        content: `The participating teams were highly enthusiastic about the Boot Camp.
+
+• Many were attending an international platform for the first time, making the experience life-changing
+• Guardians expressed satisfaction, seeing their children engage in a professional, safe, and organized environment`,
+        image: '/images/blog/participant-reactions.jpg',
+    },
+    {
+        id: 9, title: 'Malaysia Trip Cost Details', icon: 'fa-calculator',
+        content: `During the Boot Camp, Executive Director Mahadir Islam provided detailed guidance on the cost of participating in WICE 2025 in Malaysia. He informed that each team member's total cost is approximately BDT 155,000. This includes:
+
+• Flight: Return ticket from Dhaka to Kuala Lumpur
+• Accommodation: 4–5 nights in comfortable hotels
+• Food and Local Travel: Three meals a day plus transportation
+• Project Presentation Materials: Stall setup and display requirements
+• Miscellaneous Costs: Visa, insurance, health protocols, and other expenses`,
+        image: '/images/blog/malaysia-trip.jpg',
+    },
+    {
+        id: 10, title: 'Future Plans', icon: 'fa-lightbulb',
+        content: `Dreams of Bangladesh does not intend to stop with the Boot Camp. Future initiatives include:
+
+• Regular online mentoring sessions
+• Specialized coaching for each team
+• Resource sharing platforms to help teams refine their projects
+
+These measures aim to ensure that Bangladeshi teams are well-prepared and confident to represent the country at WICE 2025 in Malaysia.`,
+        image: '/images/blog/future-plans.jpg',
+    },
+    {
+        id: 11, title: 'Conclusion', icon: 'fa-check-circle',
+        content: `The Dreams of Bangladesh Boot Camp was a unique initiative. It not only provided project guidance but also instilled hope, inspiration, and vision among participants and their guardians.
+
+The knowledge and motivation gained from this Boot Camp will guide the teams not only at WICE 2025 but also throughout their lives.
+
+Dreams of Bangladesh firmly believes that Bangladesh's youth will illuminate the global stage with their talent, innovation, and confidence.`,
+        image: '/images/blog/conclusion.jpg',
+    },
 ];
 
-const BlogDetails = () => {
-  return (
-    <div className="page-wrapper">
-      <span className="header-span"></span>
-      <HeaderV1 headerStyle="header-style-two" />
-      <BreadCrumb title="Blog Details" breadCrumb="blog-details" />
+const Orb = ({ style }) => (
+    <div style={{
+        position: 'absolute', borderRadius: '50%', pointerEvents: 'none',
+        background: 'radial-gradient(circle,rgba(128,0,32,0.2),transparent 70%)',
+        filter: 'blur(55px)', ...style,
+    }} />
+);
 
-      {/* Beautiful Hero Section */}
-      <section style={{ 
-        background: 'linear-gradient(135deg,rgb(185, 137, 153) 0%, #6B1426 100%)',
-        padding: '100px 0',
-        color: 'white',
-        textAlign: 'center'
-      }}>
-        <Container>
-          <Row className="justify-content-center">
-            <Col lg={8}>
-              <div style={{ marginBottom: '20px' }}>
-                <span style={{ 
-                  background: 'rgba(255,255,255,0.2)',
-                  padding: '8px 20px',
-                  borderRadius: '25px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  letterSpacing: '1px'
-                }}>
-                  DREAMS OF BANGLADESH
-                </span>
-              </div>
-              <h1 style={{ 
-                fontSize: '48px', 
-                fontWeight: '700', 
-                marginBottom: '25px',
-                lineHeight: '1.2'
-              }}>
-                Guiding the Innovators of Tomorrow
-              </h1>
-              <p style={{ 
-                fontSize: '20px', 
-                opacity: '0.9',
-                marginBottom: '30px'
-              }}>
-                Dreams of Bangladesh WICE Boot Camp 2025
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '15px' }}>
-                <span style={{ 
-                  background: 'rgba(255,255,255,0.15)',
-                  padding: '10px 20px',
-                  borderRadius: '20px',
-                  fontSize: '14px'
-                }}>
-                  <i className="fa fa-calendar me-2"></i>August 11, 2025
-                </span>
-                <span style={{ 
-                  background: 'rgba(255,255,255,0.15)',
-                  padding: '10px 20px',
-                  borderRadius: '20px',
-                  fontSize: '14px'
-                }}>
-                  <i className="fa fa-map-marker-alt me-2"></i>Convention Hall, Mirpur
-                </span>
-                <span style={{ 
-                  background: 'rgba(255,255,255,0.15)',
-                  padding: '10px 20px',
-                  borderRadius: '20px',
-                  fontSize: '14px'
-                }}>
-                  <i className="fa fa-trophy me-2"></i>WICE 2025
-                </span>
-              </div>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Blog Content */}
-      <section style={{ padding: '80px 0' }}>
-        <Container>
-          <Gallery>
-            {blogSections.map((section, index) => (
-              <div key={section.id} style={{ marginBottom: '60px' }}>
-                <Card style={{ 
-                  border: 'none', 
-                  borderRadius: '15px',
-                  overflow: 'hidden',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                  background: section.bgColor
-                }}>
-                  <Row className="g-0">
-                    {index % 2 === 0 ? (
-                      <>
-                        <Col lg={8}>
-                          <Card.Body style={{ padding: '50px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '25px' }}>
-                              <div style={{ 
-                                background: 'linear-gradient(135deg, #8B1538 0%, #6B1426 100%)',
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '20px'
-                              }}>
-                                <i className={section.icon} style={{ color: 'white', fontSize: '24px' }}></i>
-                              </div>
-                              <div>
-                                <h3 style={{ 
-                                  fontSize: '32px', 
-                                  fontWeight: '600', 
-                                  color: '#2c3e50',
-                                  marginBottom: '5px'
-                                }}>
-                                  {section.title}
-                                </h3>
-                                <span style={{ color: '#7f8c8d', fontSize: '14px', fontWeight: '500' }}>
-                                  Section {section.id}
-                                </span>
-                              </div>
-                            </div>
-                            <div style={{ 
-                              fontSize: '16px', 
-                              lineHeight: '1.8', 
-                              color: '#555',
-                              fontWeight: '400'
-                            }}>
-                              {section.content.split('\n').map((paragraph, i) => (
-                                <p key={i} style={{ marginBottom: '18px' }}>
-                                  {paragraph}
-                                </p>
-                              ))}
-                            </div>
-                          </Card.Body>
-                        </Col>
-                        <Col lg={4}>
-                          <div style={{ 
-                            height: '100%', 
-                            minHeight: '400px',
-                            background: 'linear-gradient(135deg, #8B1538 0%, #6B1426 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'relative'
-                          }}>
-                            <Item original={section.image} thumbnail={section.image} width={800} height={600}>
-                              {({ ref, open }) => (
-                                <img
-                                  ref={ref}
-                                  onClick={open}
-                                  src={section.image}
-                                  alt={section.title}
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover',
-                                    cursor: 'pointer'
-                                  }}
-                                  onError={(e) => { 
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.parentElement.innerHTML = `
-                                      <div style="text-align: center; color: white; padding: 60px 30px;">
-                                        <i class="${section.icon}" style="font-size: 64px; margin-bottom: 20px; display: block;"></i>
-                                        <h4 style="color: white; font-weight: 600; margin-bottom: 10px;">${section.title}</h4>
-                                        <p style="color: rgba(255,255,255,0.8); font-size: 14px;">Image coming soon</p>
-                                      </div>
-                                    `;
-                                  }}
-                                />
-                              )}
-                            </Item>
-                          </div>
-                        </Col>
-                      </>
-                    ) : (
-                      <>
-                        <Col lg={4}>
-                          <div style={{ 
-                            height: '100%', 
-                            minHeight: '400px',
-                            background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'relative'
-                          }}>
-                            <Item original={section.image} thumbnail={section.image} width={800} height={600}>
-                              {({ ref, open }) => (
-                                <img
-                                  ref={ref}
-                                  onClick={open}
-                                  src={section.image}
-                                  alt={section.title}
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover',
-                                    cursor: 'pointer'
-                                  }}
-                                  onError={(e) => { 
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.parentElement.innerHTML = `
-                                      <div style="text-align: center; color: white; padding: 60px 30px;">
-                                        <i class="${section.icon}" style="font-size: 64px; margin-bottom: 20px; display: block;"></i>
-                                        <h4 style="color: white; font-weight: 600; margin-bottom: 10px;">${section.title}</h4>
-                                        <p style="color: rgba(255,255,255,0.8); font-size: 14px;">Image coming soon</p>
-                                      </div>
-                                    `;
-                                  }}
-                                />
-                              )}
-                            </Item>
-                          </div>
-                        </Col>
-                        <Col lg={8}>
-                          <Card.Body style={{ padding: '50px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '25px' }}>
-                              <div style={{ 
-                                background: 'linear-gradient(135deg, #6B1426 0%, #8B1538 100%)',
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '20px'
-                              }}>
-                                <i className={section.icon} style={{ color: 'white', fontSize: '24px' }}></i>
-                              </div>
-                              <div>
-                                <h3 style={{ 
-                                  fontSize: '32px', 
-                                  fontWeight: '600', 
-                                  color: '#2c3e50',
-                                  marginBottom: '5px'
-                                }}>
-                                  {section.title}
-                                </h3>
-                                <span style={{ color: '#7f8c8d', fontSize: '14px', fontWeight: '500' }}>
-                                  Section {section.id}
-                                </span>
-                              </div>
-                            </div>
-                            <div style={{ 
-                              fontSize: '16px', 
-                              lineHeight: '1.8', 
-                              color: '#555',
-                              fontWeight: '400'
-                            }}>
-                              {section.content.split('\n').map((paragraph, i) => (
-                                <p key={i} style={{ marginBottom: '18px' }}>
-                                  {paragraph}
-                                </p>
-                              ))}
-                            </div>
-                          </Card.Body>
-                        </Col>
-                      </>
-                    )}
-                  </Row>
-                </Card>
-              </div>
-            ))}
-          </Gallery>
-
-          {/* Call to Action */}
-          <Card style={{ 
-            background: 'linear-gradient(135deg, #8B1538 0%, #6B1426 100%)',
-            border: 'none',
-            borderRadius: '20px',
-            marginTop: '80px',
-            color: 'white',
-            textAlign: 'center'
-          }}>
-            <Card.Body style={{ padding: '80px 60px' }}>
-              <div style={{ marginBottom: '30px' }}>
-                <i className="fa fa-lightbulb" style={{ fontSize: '80px', opacity: '0.9' }}></i>
-              </div>
-              <h3 style={{ 
-                fontSize: '42px', 
-                fontWeight: '700', 
-                marginBottom: '25px'
-              }}>
-                Ready to Join WICE 2025?
-              </h3>
-              <p style={{ 
-                fontSize: '18px', 
-                opacity: '0.9',
-                marginBottom: '40px',
-                maxWidth: '600px',
-                margin: '0 auto 40px'
-              }}>
-                Dreams of Bangladesh continues to guide and support young innovators. 
-                Be part of the next generation representing Bangladesh globally.
-              </p>
-              <a 
-                href="/buy-ticket" 
-                style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  padding: '18px 40px',
-                  borderRadius: '30px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  textDecoration: 'none',
-                  display: 'inline-block',
-                  border: '2px solid rgba(255,255,255,0.3)',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.3)';
-                  e.target.style.transform = 'translateY(-2px)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.2)';
-                  e.target.style.transform = 'translateY(0)';
-                }}
-              >
-                Register Now <i className="fa fa-arrow-right" style={{ marginLeft: '8px' }}></i>
-              </a>
-            </Card.Body>
-          </Card>
-        </Container>
-      </section>
-
-      <FooterV1 />
-    </div>
-  );
+const glassCard = {
+    background: 'rgba(255,255,255,0.05)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.09)',
+    borderRadius: 20,
+    boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
 };
+
+const BlogDetails = () => (
+    <div className="page-wrapper" style={{ background: 'linear-gradient(160deg,#0a0004 0%,#160008 60%,#220010 100%)' }}>
+        <span className="header-span" />
+        <HeaderV1 headerStyle="header-style-two" parentMenu="blog" />
+
+        {/* Hero */}
+        <section style={{
+            position: 'relative', padding: '160px 0 100px', overflow: 'hidden',
+            background: 'linear-gradient(160deg,#0d0006 0%,#1a000a 55%,#2a0010 100%)',
+        }}>
+            <Orb style={{ width: 560, height: 560, top: -180, right: -100 }} />
+            <Orb style={{ width: 360, height: 360, bottom: -120, left: -80 }} />
+            <div style={{
+                position: 'absolute', inset: 0, pointerEvents: 'none',
+                backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)',
+                backgroundSize: '60px 60px',
+            }} />
+
+            <div className="auto-container" style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
+                <motion.div initial={{ opacity: 0, scale: 0.75 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+                    style={{
+                        width: 90, height: 90, borderRadius: 24, margin: '0 auto 28px',
+                        background: 'linear-gradient(135deg,#800020,#4f0014)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 12px 36px rgba(128,0,32,0.5)',
+                    }}
+                >
+                    <i className="fa fa-feather-alt" style={{ color: '#fff', fontSize: 36 }} />
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.55 }}>
+                    <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.24em', fontWeight: 700, color: '#c0002a', display: 'block', marginBottom: 12 }}>
+                        Dreams of Bangladesh
+                    </span>
+                    <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(28px,5vw,54px)', margin: '0 0 18px', lineHeight: 1.1 }}>
+                        Guiding the<br />
+                        <span style={{
+                            background: 'linear-gradient(135deg,#fff 0%,#ffb8c8 100%)',
+                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                        }}>Innovators of Tomorrow</span>
+                    </h1>
+                    <p style={{ color: 'rgba(255,255,255,0.48)', fontSize: 16, lineHeight: 1.85, maxWidth: 520, margin: '0 auto 36px' }}>
+                        Dreams of Bangladesh WICE Boot Camp 2025 — A complete overview.
+                    </p>
+
+                    {/* Meta badges */}
+                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 12 }}>
+                        {[
+                            { icon: 'fa-calendar-alt', text: 'August 11, 2025' },
+                            { icon: 'fa-map-marker-alt', text: 'Convention Hall, Mirpur' },
+                            { icon: 'fa-trophy', text: 'WICE 2025' },
+                        ].map(b => (
+                            <span key={b.text} style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8,
+                                background: 'rgba(128,0,32,0.18)', border: '1px solid rgba(128,0,32,0.35)',
+                                borderRadius: 50, padding: '10px 20px', color: 'rgba(255,255,255,0.75)', fontSize: 14,
+                            }}>
+                                <i className={`fa ${b.icon}`} style={{ color: '#c0002a' }} /> {b.text}
+                            </span>
+                        ))}
+                    </div>
+                </motion.div>
+            </div>
+        </section>
+
+        {/* Blog content */}
+        <section style={{
+            background: 'linear-gradient(160deg,#0d0006 0%,#1a000a 55%,#2a0010 100%)',
+            padding: '72px 0 100px',
+        }}>
+            <div className="auto-container" style={{ maxWidth: 960 }}>
+                {blogSections.map((section, i) => (
+                    <motion.div key={section.id}
+                        initial={{ opacity: 0, y: 32 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: '-60px' }}
+                        transition={{ duration: 0.5 }}
+                        style={{ ...glassCard, marginBottom: 28, overflow: 'hidden' }}
+                    >
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: i % 2 === 0 ? '1fr 320px' : '320px 1fr',
+                            minHeight: 280,
+                        }} className="blog-detail-row">
+
+                            {/* Text */}
+                            {i % 2 === 0 ? (
+                                <>
+                                    <div style={{ padding: '40px 44px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                                            <div style={{
+                                                width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+                                                background: 'linear-gradient(135deg,#800020,#4f0014)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 6px 18px rgba(128,0,32,0.4)',
+                                            }}>
+                                                <i className={`fa ${section.icon}`} style={{ color: '#fff', fontSize: 20 }} />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: 11, color: '#c0002a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                                    Section {section.id}
+                                                </div>
+                                                <h3 style={{ color: '#fff', fontWeight: 800, fontSize: 22, margin: 0, lineHeight: 1.25 }}>
+                                                    {section.title}
+                                                </h3>
+                                            </div>
+                                        </div>
+                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 20 }}>
+                                            {section.content.split('\n').filter(Boolean).map((para, pi) => (
+                                                <p key={pi} style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14.5, lineHeight: 1.85, marginBottom: 10 }}>
+                                                    {para}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <SectionImage section={section} />
+                                </>
+                            ) : (
+                                <>
+                                    <SectionImage section={section} />
+                                    <div style={{ padding: '40px 44px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                                            <div style={{
+                                                width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+                                                background: 'linear-gradient(135deg,#800020,#4f0014)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 6px 18px rgba(128,0,32,0.4)',
+                                            }}>
+                                                <i className={`fa ${section.icon}`} style={{ color: '#fff', fontSize: 20 }} />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: 11, color: '#c0002a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                                    Section {section.id}
+                                                </div>
+                                                <h3 style={{ color: '#fff', fontWeight: 800, fontSize: 22, margin: 0, lineHeight: 1.25 }}>
+                                                    {section.title}
+                                                </h3>
+                                            </div>
+                                        </div>
+                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 20 }}>
+                                            {section.content.split('\n').filter(Boolean).map((para, pi) => (
+                                                <p key={pi} style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14.5, lineHeight: 1.85, marginBottom: 10 }}>
+                                                    {para}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
+                ))}
+
+                {/* CTA */}
+                <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                        ...glassCard,
+                        borderTop: '3px solid #800020',
+                        padding: '64px 48px',
+                        textAlign: 'center',
+                        marginTop: 16,
+                    }}
+                >
+                    <div style={{
+                        width: 80, height: 80, borderRadius: 20, margin: '0 auto 24px',
+                        background: 'linear-gradient(135deg,#800020,#4f0014)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 10px 32px rgba(128,0,32,0.5)',
+                    }}>
+                        <i className="fa fa-lightbulb" style={{ color: '#fff', fontSize: 32 }} />
+                    </div>
+                    <h3 style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(24px,4vw,38px)', margin: '0 0 16px', lineHeight: 1.2 }}>
+                        Ready to Join WICE 2026?
+                    </h3>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, lineHeight: 1.8, maxWidth: 540, margin: '0 auto 36px' }}>
+                        Dreams of Bangladesh continues to guide and support young innovators. Be part of the next generation representing Bangladesh globally.
+                    </p>
+                    <Link to="/registration#"
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 10,
+                            padding: '15px 44px', borderRadius: 50, border: 'none',
+                            background: 'linear-gradient(135deg,#800020,#c0002a)',
+                            color: '#fff', fontSize: 15, fontWeight: 700, letterSpacing: '0.05em',
+                            boxShadow: '0 8px 28px rgba(128,0,32,0.45)',
+                            textDecoration: 'none', transition: 'transform 0.2s ease',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+                    >
+                        Register Now <i className="fa fa-arrow-right" />
+                    </Link>
+                </motion.div>
+            </div>
+        </section>
+
+        <FooterV2 />
+    </div>
+);
+
+/* Image panel with icon fallback */
+function SectionImage({ section }) {
+    return (
+        <div style={{
+            background: 'linear-gradient(160deg,#1a000a,#2a0010)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            minHeight: 280, overflow: 'hidden', position: 'relative',
+        }}>
+            <img
+                src={section.image}
+                alt={section.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+                onError={e => { e.currentTarget.style.display = 'none'; }}
+            />
+            {/* Icon shown behind / as fallback */}
+            <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 32 }}>
+                <i className={`fa ${section.icon}`} style={{ fontSize: 52, color: 'rgba(128,0,32,0.35)' }} />
+            </div>
+        </div>
+    );
+}
 
 export default BlogDetails;
