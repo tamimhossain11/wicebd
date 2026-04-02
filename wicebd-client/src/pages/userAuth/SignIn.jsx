@@ -35,6 +35,9 @@ const inputSx = {
   '& .MuiInputAdornment-root .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.45)' },
 };
 
+const GOOGLE_ENABLED = import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+  import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id_here';
+
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -155,24 +158,26 @@ const SignIn = () => {
 
             {/* ── Social buttons ── */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-              {/* Google */}
-              <Box
-                sx={{
-                  borderRadius: '10px', overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  '& > div': { width: '100% !important' },
-                  '& iframe': { width: '100% !important' },
-                }}
-              >
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => toast.error('Google sign-in failed')}
-                  text="signin_with"
-                  shape="rectangular"
-                  theme="filled_black"
-                  width="440"
-                />
-              </Box>
+              {/* Google — only shown when client ID is configured */}
+              {GOOGLE_ENABLED && (
+                <Box
+                  sx={{
+                    borderRadius: '10px', overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    '& > div': { width: '100% !important' },
+                    '& iframe': { width: '100% !important' },
+                  }}
+                >
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => toast.error('Google sign-in failed')}
+                    text="signin_with"
+                    shape="rectangular"
+                    theme="filled_black"
+                    width="440"
+                  />
+                </Box>
+              )}
 
               {/* Facebook */}
               <Button

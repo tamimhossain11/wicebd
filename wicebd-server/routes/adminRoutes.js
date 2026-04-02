@@ -12,7 +12,7 @@ router.get('/participants', authenticateAdmin, async (req, res) => {
         competitionCategory,
         projectSubcategory,
         categories,
-        crRefrence,
+        crReference,
         leader,
         institution,
         leaderPhone,
@@ -32,9 +32,9 @@ router.get('/participants', authenticateAdmin, async (req, res) => {
         socialMedia,
         infoSource,
         paymentID,
-        createdAt
-      FROM registrations 
-      ORDER BY createdAt DESC
+        created_at as createdAt
+      FROM registrations
+      ORDER BY created_at DESC
     `);
     res.json(rows);
   } catch (error) {

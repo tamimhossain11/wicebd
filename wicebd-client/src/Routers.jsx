@@ -34,7 +34,9 @@ import OrganizingPanel from './pages/innerPages/OrganizingPanel';
 import RegistrationPage from './pages/innerPages/RegistrationPage';
 import SignIn from './pages/userAuth/SignIn';
 import SignUp from './pages/userAuth/SignUp';
+import UserProfile from './pages/userAuth/UserProfile';
 import UserDashboard from './pages/userDashboard/UserDashboard';
+import RoboSoccer from './pages/innerPages/RoboSoccer';
 import UserRoute from './components/user/UserRoute';
 
 
@@ -53,7 +55,14 @@ const Routers = () => {
                 <Route path='/schedule' element={<Schedule />}></Route>
                 <Route path='/event-detail/:parentId/:childId' element={<EventDetails />}></Route>
                 <Route path='/buy-ticket' element={<Navigate to="/registration" replace />} />
-                <Route path='/registration' element={<RegistrationPage />} />
+                <Route
+                  path='/registration'
+                  element={
+                    <UserRoute>
+                      <RegistrationPage />
+                    </UserRoute>
+                  }
+                />
                 <Route path='/selected-teams' element={<SelectedTeams />}></Route>
                 <Route path='/announcements' element={<Announcements />}></Route>
                 <Route path='/blog-details' element={<BlogDetails />}></Route>
@@ -74,14 +83,30 @@ const Routers = () => {
                     </UserRoute>
                   }
                 />
+                <Route
+                  path='/profile'
+                  element={
+                    <UserRoute>
+                      <UserProfile />
+                    </UserRoute>
+                  }
+                />
+                <Route
+                  path='/robo-soccer'
+                  element={
+                    <UserRoute>
+                      <RoboSoccer />
+                    </UserRoute>
+                  }
+                />
                 <Route path='/contact' element={<Contact />}></Route>
                 <Route path='/callback' element={<PaymentCallback />}></Route>
                 <Route path='/thank-you' element={<ThankYou />}></Route>
                 <Route path="/payment-error" element={<PaymentError />} />
                 <Route path="/payment-cancelled" element={<PaymentCancelled />} />
-                <Route path="/olympiad" element={<Navigate to="/registration?tab=olympiad" replace />} />
+                <Route path="/olympiad" element={<Navigate to="/sign-in" replace />} />
                 {/*Admin Routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/login" element={<Navigate to="/sign-in" replace />} />
                 <Route
                     path="/admin/dashboard"
                     element={

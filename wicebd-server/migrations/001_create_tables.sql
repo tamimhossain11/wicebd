@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS qr_verification (
 -- Generate a new hash with: node generate-hash.js
 -- ============================================================
 INSERT IGNORE INTO admins (username, password)
-VALUES ('admin', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+VALUES ('admin', '$2b$10$k994/.TTRFWOqq5mOSaelu90fE/X6Prrfpx0PQbY0hJ5t5Egn9ARy');
 
 -- ============================================================
 -- Done. All tables created successfully.

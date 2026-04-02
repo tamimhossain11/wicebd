@@ -108,14 +108,14 @@ const confirmPayment = async (req, res) => {
     // 5. Insert into final table
     await db.query(
       `INSERT INTO registrations (
-        competitionCategory, 
-        projectSubcategory, categories, crRefrence,
+        competitionCategory,
+        projectSubcategory, categories, crReference,
         leader, institution, leaderPhone, leaderWhatsApp,
         leaderEmail, tshirtSizeLeader, member2, institution2,
         tshirtSize2, member3, institution3, tshirtSize3,
         projectTitle, projectCategory, participatedBefore,
-        previousCompetition, socialMedia, infoSource, paymentID, transactionId, paymentStatus
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        previousCompetition, socialMedia, infoSource, paymentID, bkashTrxId
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         registration.competitionCategory, registration.projectSubcategory,
         registration.categories, registration.crRefrence, registration.leader,
@@ -124,8 +124,8 @@ const confirmPayment = async (req, res) => {
         registration.institution2, registration.tshirtSize2, registration.member3,
         registration.institution3, registration.tshirtSize3, registration.projectTitle,
         registration.projectCategory, registration.participatedBefore,
-        registration.previousCompetition, registration.socialMedia, 
-        registration.infoSource, paymentID, result.trxID, 'Completed'
+        registration.previousCompetition, registration.socialMedia,
+        registration.infoSource, paymentID, result.trxID
       ]
     );
 

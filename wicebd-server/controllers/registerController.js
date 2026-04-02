@@ -6,7 +6,7 @@ const startRegistration = async (req, res) => {
   const paymentID = uuidv4();
 
   const {
-    competitionCategory, projectSubcategory, categories, crRefrence,
+    competitionCategory, projectSubcategory, categories, crReference,
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
@@ -15,7 +15,7 @@ const startRegistration = async (req, res) => {
 
   const sql = `
   INSERT INTO temp_registrations (
-    paymentID, competitionCategory, projectSubcategory, categories, crRefrence,
+    paymentID, competitionCategory, projectSubcategory, categories, crReference,
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
@@ -24,7 +24,7 @@ const startRegistration = async (req, res) => {
 `;
 
 const values = [
-  paymentID, competitionCategory, projectSubcategory, categories, crRefrence,
+  paymentID, competitionCategory, projectSubcategory, categories, crReference,
   leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
   member2 || null, institution2 || null, tshirtSize2 || null,
   member3 || null, institution3 || null, tshirtSize3 || null,

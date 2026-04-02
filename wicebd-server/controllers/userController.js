@@ -1,7 +1,70 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const nodemailer = require('nodemailer');
 const db = require('../db');
+require('dotenv').config();
+
+// Email transporter (reuse Hostinger SMTP)
+const emailTransporter = nodemailer.createTransport({
+  host: 'smtp.hostinger.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.HOSTINGER_EMAIL_USER,
+    pass: process.env.HOSTINGER_EMAIL_PASSWORD,
+  },
+  tls: { rejectUnauthorized: false },
+});
+
+const sendWelcomeEmail = async (name, email) => {
+  try {
+    const frontendUrl = process.env.FRONTEND_BASE_URL || 'https://www.wicebd.com';
+    await emailTransporter.sendMail({
+      from: '"WICE Registration Team" <contact@wicebd.com>',
+      to: email,
+      subject: 'Welcome to WICE Bangladesh — Account Created!',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #0f0f1a; padding: 24px 20px; text-align: center;">
+            <img src="${frontendUrl}/images/logo-2.png" alt="WICE Bangladesh" style="height: 50px; object-fit: contain;" />
+          </div>
+          <div style="background: #fff; padding: 32px 28px;">
+            <h2 style="color: #0f0f1a; margin-top: 0;">Welcome, ${name}!</h2>
+            <p style="color: #444; line-height: 1.7;">
+              Your WICE Bangladesh account has been successfully created. You can now log in to your dashboard and register for our competitions.
+            </p>
+            <h3 style="color: #e94560;">Available Competitions</h3>
+            <ul style="color: #444; line-height: 2;">
+              <li><strong>Project Competition</strong> — Team projects in Technology, Science &amp; Social Innovation</li>
+              <li><strong>Science Olympiad</strong> — Individual olympiad for school &amp; college students</li>
+              <li><strong>Robo Soccer</strong> — Team robot-building &amp; programming tournament</li>
+            </ul>
+            <div style="margin: 28px 0; text-align: center;">
+              <a href="${frontendUrl}/dashboard"
+                style="background: #e94560; color: #fff; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px;">
+                Go to My Dashboard
+              </a>
+            </div>
+            <p style="color: #666; font-size: 13px;">
+              If you did not create this account, please ignore this email or contact us at
+              <a href="mailto:contact@wicebd.com" style="color: #e94560;">contact@wicebd.com</a>.
+            </p>
+          </div>
+          <div style="background: #f5f5f5; padding: 14px; text-align: center; font-size: 12px; color: #999;">
+            <p>WICE Bangladesh &copy; ${new Date().getFullYear()} &nbsp;|&nbsp;
+              <a href="${frontendUrl}" style="color: #e94560;">www.wicebd.com</a>
+            </p>
+          </div>
+        </div>
+      `,
+    });
+    console.log(`✅ Welcome email sent to ${email}`);
+  } catch (err) {
+    console.error('❌ Failed to send welcome email:', err.message);
+    // Non-fatal — don't throw
+  }
+};
 
 // Helper: generate a user JWT
 const signUserToken = (user) => {
@@ -40,6 +103,9 @@ const signUp = async (req, res) => {
 
     const user = { id: result.insertId, name: name.trim(), email: email.toLowerCase(), avatar: null };
     const token = signUserToken(user);
+
+    // Fire-and-forget welcome email
+    sendWelcomeEmail(user.name, user.email);
 
     res.status(201).json({
       success: true,

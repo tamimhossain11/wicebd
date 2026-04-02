@@ -57,6 +57,9 @@ const getStrength = (pwd) => {
 const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
 const strengthColor = ['', '#f44336', '#ff9800', '#ffeb3b', '#66bb6a', '#00e676'];
 
+const GOOGLE_ENABLED = import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+  import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id_here';
+
 const SignUp = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -180,23 +183,25 @@ const SignUp = () => {
 
             {/* ── Social buttons ── */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-              <Box
-                sx={{
-                  borderRadius: '10px', overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  '& > div': { width: '100% !important' },
-                  '& iframe': { width: '100% !important' },
-                }}
-              >
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => toast.error('Google sign-up failed')}
-                  text="signup_with"
-                  shape="rectangular"
-                  theme="filled_black"
-                  width="460"
-                />
-              </Box>
+              {GOOGLE_ENABLED && (
+                <Box
+                  sx={{
+                    borderRadius: '10px', overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    '& > div': { width: '100% !important' },
+                    '& iframe': { width: '100% !important' },
+                  }}
+                >
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => toast.error('Google sign-up failed')}
+                    text="signup_with"
+                    shape="rectangular"
+                    theme="filled_black"
+                    width="460"
+                  />
+                </Box>
+              )}
 
               <Button
                 fullWidth

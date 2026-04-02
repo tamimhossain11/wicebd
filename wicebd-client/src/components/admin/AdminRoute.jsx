@@ -19,12 +19,12 @@ const AdminRoute = ({ children }) => {
     
     // Token expired or wrong role - clear invalid token
     localStorage.removeItem('adminToken');
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/sign-in" replace />;
     
   } catch (err) {
     console.error('Invalid token:', err);
     localStorage.removeItem('adminToken');
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/sign-in" replace />;
   }
 };
 

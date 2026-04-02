@@ -90,7 +90,7 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
                                     <MainMenu parentMenu={parentMenu} />
                                 </div>
                             </nav>
-                            <div className="outer-box d-none d-lg-block">
+                            <div className="outer-box d-none d-lg-flex">
                                 <div className="search-box-outer">
                                     <div className="search-box-btn"><span className={`flaticon-search`} onClick={searchOpen}></span></div>
                                 </div>
