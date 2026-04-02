@@ -1061,7 +1061,8 @@ img {
 
 .main-header .main-box {
 	position: relative;
-	padding: 25px 0;
+	padding: 0;
+	background: transparent !important;
 	-webkit-transition: all 300ms ease;
 	-moz-transition: all 300ms ease;
 	-ms-transition: all 300ms ease;
@@ -1069,9 +1070,27 @@ img {
 	transition: all 300ms ease;
 }
 
+/* Flex layout lives on the direct parent of logo-box + nav-outer */
+.main-header .main-box .auto-container {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+/* Remove any Bootstrap or theme white background on the header */
+.main-header,
+.main-header .navbar,
+.main-header .navbar-light,
+.main-header .navbar-expand-lg,
+.main-header .collapse.navbar-collapse {
+	background: transparent !important;
+	background-color: transparent !important;
+}
+
 .main-header .logo-box {
 	position: relative;
-	float: left;
+	float: none;
+	flex-shrink: 0;
 	-webkit-transition: all 300ms ease;
 	-moz-transition: all 300ms ease;
 	-ms-transition: all 300ms ease;
@@ -1091,7 +1110,9 @@ img {
 
 .main-header .nav-outer {
 	position: relative;
-	float: right;
+	float: none;
+	display: flex;
+	align-items: center;
 	-webkit-transition: all 600ms ease;
 	-moz-transition: all 600ms ease;
 	-ms-transition: all 600ms ease;
@@ -1513,23 +1534,31 @@ img {
 ***/
 
 .header-span {
-	height: 90px;
-	display: block;
+	height: 0;
+	display: none;
 }
 
 
 .header-style-two .main-box {
 	padding: 0;
-	background: rgba(8, 0, 4, 0.52);
-	backdrop-filter: blur(22px);
-	-webkit-backdrop-filter: blur(22px);
-	border-bottom: 1px solid rgba(128, 0, 32, 0.28);
-	box-shadow: 0 4px 36px rgba(0, 0, 0, 0.3);
+	background: transparent;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	border-bottom: none;
+	box-shadow: none;
 	transition: background 0.35s ease, box-shadow 0.35s ease;
 }
 
 .header-style-two .outer-box,
-.header-style-two .logo-box,
+.header-style-two .logo-box {
+	padding: 16px 0;
+	-webkit-transition: all 300ms ease;
+	-moz-transition: all 300ms ease;
+	-ms-transition: all 300ms ease;
+	-o-transition: all 300ms ease;
+	transition: all 300ms ease;
+}
+
 .header-style-two .main-menu .navigation>li {
 	padding: 20px 0;
 	-webkit-transition: all 300ms ease;
@@ -1554,15 +1583,18 @@ img {
 }
 
 .main-header.header-style-two.fixed-header .main-box {
-	background: rgba(8, 0, 4, 0.78);
-	backdrop-filter: blur(28px);
-	-webkit-backdrop-filter: blur(28px);
-	border-bottom: 1px solid rgba(128, 0, 32, 0.4);
+	background: transparent;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	border-bottom: none;
 	padding: 0;
 }
 
 .header-style-two.fixed-header .outer-box,
-.header-style-two.fixed-header .logo-box,
+.header-style-two.fixed-header .logo-box {
+	padding: 10px 0;
+}
+
 .header-style-two.fixed-header .main-menu .navigation>li {
 	padding: 10px 0;
 }
@@ -1606,9 +1638,9 @@ img {
 
 .main-header.fixed-header .main-box {
 	padding: 10px 0;
-	background: rgba(8, 0, 4, 0.78);
-	backdrop-filter: blur(28px);
-	-webkit-backdrop-filter: blur(28px);
+	background: transparent !important;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
 }
 
 /*** 

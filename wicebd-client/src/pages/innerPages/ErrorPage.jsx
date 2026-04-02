@@ -2,7 +2,7 @@ import React from 'react';
 import HeaderV1 from '../../components/header/HeaderV1';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
 import ErrorPageContent from '../../components/errorPage/ErrorPageContent';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 
 const ErrorPage = () => {
     return (
@@ -12,7 +12,7 @@ const ErrorPage = () => {
                 <HeaderV1 headerStyle="header-style-two" parentMenu='blog' />
                 <BreadCrumb />
                 <ErrorPageContent />
-                <FooterV1 />
+                <FooterV2 />
             </div>
         </>
     );

@@ -2,7 +2,7 @@ import React from 'react';
 import HeaderV1 from '../../components/header/HeaderV1';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
 import Registration from '../../components/ticket/BuyTicketContent';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 
 const BuyTicket = () => {
     return (
@@ -12,7 +12,7 @@ const BuyTicket = () => {
                 <HeaderV1 headerStyle="header-style-two" parentMenu='schedule' />
                 <BreadCrumb title="Let's Get You Started!" breadCrumb="Register" />
                 <Registration />
-                <FooterV1 />
+                <FooterV2 />
             </div>
         </>
     );

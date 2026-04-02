@@ -20,9 +20,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle token expiration
-      localStorage.removeItem('adminToken');
-      window.location.href = '/admin/login';
+      // Handle token expiration — redirect to appropriate login page
+      if (localStorage.getItem('adminToken')) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+      } else if (localStorage.getItem('userToken')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userData');
+        window.location.href = '/sign-in';
+      }
     }
     return Promise.reject(error);
   }

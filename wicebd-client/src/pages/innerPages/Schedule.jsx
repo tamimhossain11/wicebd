@@ -3,7 +3,7 @@ import HeaderV1 from '../../components/header/HeaderV1';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
 import ScheduleV1 from '../../components/schedule/ScheduleV1';
 import SubscribeV2 from '../../components/subscribe/SubscribeV2';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 
 const Schedule = () => {
     return (
@@ -14,7 +14,7 @@ const Schedule = () => {
                 <BreadCrumb title="Schedule" breadCrumb="schedule" />
                 <ScheduleV1 />
                 <SubscribeV2 />
-                <FooterV1 />
+                <FooterV2 />
             </div>
         </>
     );

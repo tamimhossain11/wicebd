@@ -3,7 +3,7 @@ import HeaderV1 from '../../components/header/HeaderV1';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
 import FaqV1 from '../../components/faq/FaqV1';
 import FaqForm from '../../components/form/FaqForm';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 
 const Faq = () => {
     return (
@@ -14,7 +14,7 @@ const Faq = () => {
                 <BreadCrumb title="faq's" breadCrumb="faq" />
                 <FaqV1 />
                 <FaqForm />
-                <FooterV1 />
+                <FooterV2 />
             </div>
         </>
     );

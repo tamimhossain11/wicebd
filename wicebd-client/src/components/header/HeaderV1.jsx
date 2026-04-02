@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { NavHashLink as Link } from 'react-router-hash-link'
 import SearchPopup from '../others/SearchPopup';
 import MainMenu from './MainMenu';
+import { useAuth } from '../../context/AuthContext';
 
 const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
+    const { user, role, logout } = useAuth();
 
     // Sticky Menu 
     const [isSticky, setIsSticky] = useState(false);
@@ -92,6 +94,57 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
                                 <div className="search-box-outer">
                                     <div className="search-box-btn"><span className={`flaticon-search`} onClick={searchOpen}></span></div>
                                 </div>
+                                {user ? (
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginLeft: 16 }}>
+                                        <Link
+                                            to={role === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                                            style={{
+                                                color: 'rgba(255,255,255,0.9)',
+                                                fontSize: 14,
+                                                fontWeight: 600,
+                                                textDecoration: 'none',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 6,
+                                            }}
+                                        >
+                                            <span className="fa fa-user-circle" style={{ fontSize: 18 }}></span>
+                                            {user.name?.split(' ')[0]}
+                                        </Link>
+                                        <button
+                                            onClick={logout}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.12)',
+                                                border: '1px solid rgba(255,255,255,0.25)',
+                                                borderRadius: 4,
+                                                color: '#fff',
+                                                fontSize: 12,
+                                                padding: '4px 10px',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            Sign Out
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        to="/sign-in"
+                                        style={{
+                                            marginLeft: 16,
+                                            background: '#e94560',
+                                            color: '#fff',
+                                            padding: '8px 20px',
+                                            borderRadius: 4,
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            textDecoration: 'none',
+                                            display: 'inline-block',
+                                            transition: 'background 0.2s',
+                                        }}
+                                    >
+                                        Sign In
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>

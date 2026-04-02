@@ -4,12 +4,38 @@ import App from './App.jsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 import ScrollToTop from './components/others/ScrollToTop.jsx'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+import { AuthProvider } from './context/AuthContext.jsx'
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const FACEBOOK_APP_ID  = import.meta.env.VITE_FACEBOOK_APP_ID  || '';
+
+// Load Facebook JS SDK
+window.fbAsyncInit = function () {
+  window.FB.init({
+    appId: FACEBOOK_APP_ID,
+    cookie: true,
+    xfbml: true,
+    version: 'v19.0',
+  });
+};
+(function (d, s, id) {
+  if (d.getElementById(id)) return;
+  const js = d.createElement(s);
+  js.id = id;
+  js.src = 'https://connect.facebook.net/en_US/sdk.js';
+  d.getElementsByTagName('head')[0].appendChild(js);
+})(document, 'script', 'facebook-jssdk');
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-      <ScrollToTop />
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <BrowserRouter>
+          <App />
+          <ScrollToTop />
+        </BrowserRouter>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   </React.StrictMode>,
 )

@@ -6,7 +6,7 @@ import SpeakerV1Data from '../../jsonData/speaker/SpeakerV1Data.json'
 import SpeakerInfo from '../../components/speaker/SpeakerInfo';
 import FluidV1 from '../../components/fluid/FluidV1';
 import PriceV3 from '../../components/price/PriceV3';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 
 const SpeakersDetail = () => {
 
@@ -22,7 +22,7 @@ const SpeakersDetail = () => {
                 <SpeakerInfo speakerInfo={data} />
                 <FluidV1 />
                 <PriceV3 />
-                <FooterV1 />
+                <FooterV2 />
             </div>
         </>
     );

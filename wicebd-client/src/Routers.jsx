@@ -32,6 +32,10 @@ import BlogDetails from './pages/innerPages/BlogDetails';
 import InternationalTeam from './pages/innerPages/InternationalTeam';
 import OrganizingPanel from './pages/innerPages/OrganizingPanel';
 import RegistrationPage from './pages/innerPages/RegistrationPage';
+import SignIn from './pages/userAuth/SignIn';
+import SignUp from './pages/userAuth/SignUp';
+import UserDashboard from './pages/userDashboard/UserDashboard';
+import UserRoute from './components/user/UserRoute';
 
 
 const Routers = () => {
@@ -59,6 +63,17 @@ const Routers = () => {
                 <Route path='/blog-grid' element={<BlogGrid />}></Route>
                 <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
                 <Route path='/login' element={<Login />}></Route>
+                {/* User Auth & Dashboard */}
+                <Route path='/sign-in' element={<SignIn />} />
+                <Route path='/sign-up' element={<SignUp />} />
+                <Route
+                  path='/dashboard'
+                  element={
+                    <UserRoute>
+                      <UserDashboard />
+                    </UserRoute>
+                  }
+                />
                 <Route path='/contact' element={<Contact />}></Route>
                 <Route path='/callback' element={<PaymentCallback />}></Route>
                 <Route path='/thank-you' element={<ThankYou />}></Route>

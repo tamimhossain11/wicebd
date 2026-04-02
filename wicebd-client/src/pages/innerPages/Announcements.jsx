@@ -1,7 +1,7 @@
 import React from 'react';
 import HeaderV1 from '../../components/header/HeaderV1';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
 import { Gallery, Item } from 'react-photoswipe-gallery';
 
@@ -141,7 +141,7 @@ const Announcements = () => {
         </Container>
       </section>
 
-      <FooterV1 />
+      <FooterV2 />
     </div>
   );
 };

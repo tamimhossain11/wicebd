@@ -4,7 +4,7 @@ import PriceV1 from '../../components/price/PriceV1';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
 import PriceV2 from '../../components/price/PriceV2';
 import PriceV3 from '../../components/price/PriceV3';
-import FooterV1 from '../../components/footer/FooterV1';
+import FooterV2 from "../../components/footer/FooterV2";
 
 const Pricing = () => {
     return (
@@ -16,7 +16,7 @@ const Pricing = () => {
                 <PriceV1 />
                 <PriceV2 pricingClass="alternate" />
                 <PriceV3 />
-                <FooterV1 />
+                <FooterV2 />
             </div>
         </>
     );

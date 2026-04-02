@@ -8,6 +8,7 @@ const registrationRoutes = require('./routes/registerRoute');
 const olympiadRoutes = require('./routes/olympiadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
+const userAuthRoutes = require('./routes/userAuthRoutes');
 const qr = require('./routes/qr');
 
 // Parse JSON
@@ -33,6 +34,9 @@ app.use('/api/olympiad', olympiadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/qr', qr);
+
+// User auth routes
+app.use('/api/user-auth', userAuthRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
