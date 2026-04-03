@@ -1682,36 +1682,39 @@ img {
 	-webkit-backdrop-filter: none;
 }
 
-/* ── Scrolled header: white background with shadow ── */
+/* ── Scrolled header: glassmorphism ── */
 .main-header.scrolled-header {
-	background: #ffffff !important;
-	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12) !important;
+	background: rgba(6, 2, 14, 0.72) !important;
+	backdrop-filter: blur(22px) saturate(160%) !important;
+	-webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+	box-shadow: 0 1px 0 rgba(128, 0, 32, 0.25), 0 8px 40px rgba(0, 0, 0, 0.55) !important;
+	border-bottom: 1px solid rgba(128, 0, 32, 0.18) !important;
+	transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease !important;
 }
 
 .main-header.scrolled-header .main-box {
 	background: transparent !important;
 }
 
-/* Switch text colours to dark when header is white */
+/* Keep nav text white on glass header */
 .main-header.scrolled-header .main-menu .navigation > li > a {
-	color: #1a0a0a !important;
+	color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .main-header.scrolled-header .main-menu .navigation > li > a:hover,
 .main-header.scrolled-header .main-menu .navigation > li.current > a {
-	color: #800020 !important;
+	color: #fff !important;
 }
 
 .main-header.scrolled-header .search-box-btn,
 .main-header.scrolled-header .mobile-nav-toggler {
-	color: #1a0a0a !important;
+	color: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* User name / sign-in button in dark header */
 .main-header.scrolled-header .outer-box a,
 .main-header.scrolled-header .outer-box button,
 .main-header.scrolled-header .outer-box span {
-	color: #1a0a0a !important;
+	color: rgba(255, 255, 255, 0.85) !important;
 }
 
 /*** 

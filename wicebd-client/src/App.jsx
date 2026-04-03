@@ -22,21 +22,12 @@ import { ToastContainer } from 'react-toastify';
 import { Helmet } from 'react-helmet';
 import { useState } from 'react';
 
-const SOUND_KEY = 'wicebd_intro_sound_played';
-
 function App() {
-  // Intro runs every load; sound only plays the very first time (localStorage flag)
   const [showIntro, setShowIntro] = useState(true);
-  const withSound = !localStorage.getItem(SOUND_KEY);
-
-  const handleIntroComplete = () => {
-    if (withSound) localStorage.setItem(SOUND_KEY, '1');
-    setShowIntro(false);
-  };
 
   return (
     <>
-      {showIntro && <IntroVideo onComplete={handleIntroComplete} withSound={withSound} />}
+      {showIntro && <IntroVideo onComplete={() => setShowIntro(false)} />}
       <div className='app-wrapper'>
         <Helmet>
           <title>WICEBD - </title>

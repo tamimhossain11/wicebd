@@ -3,7 +3,7 @@
         "id": 1,
         "animation": "fade-up",
         "icon": "bi bi-people-fill",
-        "end": 800,
+        "end": 3000,
         "title": "Participants",
         "delay": 0,
         "iconColor": "text-primary"
@@ -32,9 +32,18 @@
         "id": 4,
         "animation": "fade-up",
         "icon": "bi bi-building",
-        "end": 80,
+        "end": 200,
         "title": "Institutes Represented",
         "delay": 600,
         "iconColor": "text-info"
+    },
+    {
+        "id": 5,
+        "animation": "fade-up",
+        "icon": "bi bi-camera-video-fill",
+        "end": 40,
+        "title": "Media Coverage",
+        "delay": 800,
+        "iconColor": "text-danger"
     }
 ]
