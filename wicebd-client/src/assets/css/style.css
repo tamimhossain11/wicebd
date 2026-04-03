@@ -2176,7 +2176,7 @@ img {
 	object-fit: cover;
 	object-position: center;
 	z-index: 0;
-	opacity: 0.35;
+	opacity: 0.55;
 }
 
 .banner-conference::before {
@@ -2184,10 +2184,10 @@ img {
 	position: absolute;
 	inset: 0;
 	background: linear-gradient(
-		135deg,
-		rgba(4, 0, 10, 0.78) 0%,
-		rgba(60, 0, 18, 0.65) 50%,
-		rgba(4, 0, 10, 0.80) 100%
+		160deg,
+		rgba(4, 0, 10, 0.70) 0%,
+		rgba(50, 0, 14, 0.55) 50%,
+		rgba(4, 0, 10, 0.72) 100%
 	);
 	z-index: 1;
 }
@@ -2701,43 +2701,45 @@ img {
 	margin-bottom: 36px;
 }
 
-/* ── Countdown timer: slim horizontal pill ── */
+/* ── Countdown timer: wide flat single-line bar ── */
 .banner-conference .time-countdown {
 	position: relative;
 	display: inline-flex;
-	align-items: center;
+	align-items: stretch;
 	gap: 0;
-	background: rgba(255, 255, 255, 0.08);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
-	border: 1px solid rgba(255, 255, 255, 0.18);
-	border-radius: 50px;
-	padding: 0;
+	background: rgba(10, 0, 20, 0.55);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 12px;
 	overflow: hidden;
 	flex-wrap: nowrap;
+	width: 100%;
+	max-width: 560px;
 }
 
 .banner-conference .time-countdown .counter-column {
 	position: relative;
+	flex: 1;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
-	padding: 10px 20px;
+	gap: 8px;
+	padding: 12px 0;
 	height: auto;
 	width: auto;
-	text-align: left;
-	font-size: 11px;
-	color: rgba(255, 255, 255, 0.65);
-	font-weight: 600;
-	letter-spacing: 0.1em;
+	text-align: center;
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.5);
+	font-weight: 700;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
 	background: transparent;
 	border: none;
 	border-radius: 0;
 	box-shadow: none;
-	border-right: 1px solid rgba(255, 255, 255, 0.12);
+	border-right: 1px solid rgba(255, 255, 255, 0.08);
 	transition: background 0.25s ease;
 }
 
@@ -2749,7 +2751,7 @@ img {
 .banner-conference .time-countdown .counter-column:hover {
 	transform: none;
 	box-shadow: none;
-	background: rgba(128, 0, 32, 0.2);
+	background: rgba(128, 0, 32, 0.18);
 }
 
 .banner-conference .time-countdown .counter-column:before,
@@ -2764,11 +2766,11 @@ img {
 .banner-conference .time-countdown .counter-column .count {
 	position: relative;
 	display: inline-block;
-	font-size: 22px;
+	font-size: 24px;
 	line-height: 1;
 	color: #ffffff;
 	font-weight: 800;
-	font-family: 'Orbitron', 'Courier New', monospace;
+	letter-spacing: -0.01em;
 }
 
 .banner-conference .content-box .btn-box {

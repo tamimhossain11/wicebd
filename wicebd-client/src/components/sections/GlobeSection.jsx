@@ -26,10 +26,10 @@ const GlobeCanvas = () => {
         const CITIES = [
             { name: 'Dhaka', lon: 90.4, lat: 23.7 },
             { name: 'Kuala Lumpur', lon: 101.7, lat: 3.1 },
-            { name: 'Geneva', lon: 6.1, lat: 46.2 },
-            { name: 'Seoul', lon: 126.9, lat: 37.5 },
-            { name: 'Tokyo', lon: 139.7, lat: 35.7 },
-            { name: 'Cairo', lon: 31.2, lat: 30.1 },
+            { name: 'Jakarta', lon: 106.8, lat: -6.2 },
+            { name: 'Bangkok', lon: 100.5, lat: 13.7 },
+            { name: 'Mumbai', lon: 72.8, lat: 19.0 },
+            { name: 'Mexico City', lon: -99.1, lat: 19.4 },
         ];
 
         const project = (lon, lat, rot) => {
@@ -149,12 +149,12 @@ const GlobeCanvas = () => {
    Reach data
 ───────────────────────────────────────── */
 const REACH = [
-    { icon: '🇧🇩', country: 'Bangladesh', role: 'Host Nation', medals: '14 Gold' },
-    { icon: '🇲🇾', country: 'Malaysia', role: 'ITEX — Kuala Lumpur', medals: 'Gold + Special' },
-    { icon: '🇨🇭', country: 'Switzerland', role: 'iENA — Geneva', medals: 'Gold' },
-    { icon: '🇰🇷', country: 'South Korea', role: 'SIIF — Seoul', medals: 'Silver' },
-    { icon: '🇯🇵', country: 'Japan', role: 'JIZAI — Tokyo', medals: 'Participation' },
-    { icon: '🇪🇬', country: 'Egypt', role: 'IIFME — Cairo', medals: 'Silver' },
+    { icon: '🇧🇩', country: 'Bangladesh', role: 'Representing Nation', medals: '14 Gold' },
+    { icon: '🇲🇾', country: 'Malaysia', role: 'Host Nation — ITEX', medals: 'Gold + Special' },
+    { icon: '🇮🇩', country: 'Indonesia', role: 'INNOPA — Jakarta', medals: 'Gold' },
+    { icon: '🇹🇭', country: 'Thailand', role: 'IPITEX — Bangkok', medals: 'Silver' },
+    { icon: '🇮🇳', country: 'India', role: 'IENA — Mumbai', medals: 'Bronze' },
+    { icon: '🇲🇽', country: 'Mexico', role: 'CONACYT — Mexico City', medals: 'Participation' },
 ];
 
 const GlobeSection = () => (
@@ -205,7 +205,7 @@ const GlobeSection = () => (
                     Bangladesh on the <span style={{ color: '#e94560' }}>World Stage</span>
                 </h2>
                 <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '15px', marginTop: '14px', maxWidth: '500px', margin: '14px auto 0', lineHeight: 1.75 }}>
-                    WICE teams have competed and won at international invention expos across 6 countries, carrying Bangladesh's flag to the global arena.
+                    WICE Bangladesh teams have competed and won at international invention expos hosted across 6 countries, proudly representing Bangladesh on the world stage.
                 </p>
             </motion.div>
 
