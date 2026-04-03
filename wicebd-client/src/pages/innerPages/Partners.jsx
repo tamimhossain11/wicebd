@@ -30,7 +30,7 @@ const PARTNER_CATEGORIES = [
             {
                 name: 'IFIA',
                 icon: 'bi-globe2',
-                desc: 'International Federation of Inventors' Associations — the global body that certifies and connects national invention competitions worldwide.',
+                desc: "International Federation of Inventors' Associations \u2014 the global body that certifies and connects national invention competitions worldwide.",
                 type: 'International Federation',
             },
             {
@@ -84,13 +84,13 @@ const PARTNER_CATEGORIES = [
             {
                 name: 'Daily Prothom Alo',
                 icon: 'bi-newspaper',
-                desc: 'Bangladesh's most-read national newspaper, covering WICE achievements and inspiring the next generation of innovators.',
+                desc: "Bangladesh's most-read national newspaper, covering WICE achievements and inspiring the next generation of innovators.",
                 type: 'Print Media',
             },
             {
                 name: 'The Daily Star',
                 icon: 'bi-journal-text',
-                desc: 'English-language newspaper covering WICE Bangladesh's international achievements and competition results.',
+                desc: "English-language newspaper covering WICE Bangladesh's international achievements and competition results.",
                 type: 'Print Media',
             },
             {

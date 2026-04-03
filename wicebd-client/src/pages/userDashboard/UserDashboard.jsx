@@ -176,8 +176,7 @@ export default function UserDashboard() {
             sx={{ mb: 3, '& .MuiTab-root': { color: 'rgba(255,255,255,0.45)', textTransform: 'none', fontWeight: 600 }, '& .Mui-selected': { color: '#e94560' }, '& .MuiTabs-indicator': { background: '#e94560' } }}>
             <Tab label="Competitions" icon={<Assignment sx={{ fontSize: 17 }} />} iconPosition="start" />
             <Tab label="My Registrations" icon={<CheckCircle sx={{ fontSize: 17 }} />} iconPosition="start" />
-            <Tab label="Announcements" icon={<Notifications sx={{ fontSize: 17 }} />} iconPosition="start"
-              iconPosition="start" />
+            <Tab label="Announcements" icon={<Notifications sx={{ fontSize: 17 }} />} iconPosition="start" />
             <Tab label="Schedule" icon={<CalendarMonth sx={{ fontSize: 17 }} />} iconPosition="start" />
           </Tabs>
 

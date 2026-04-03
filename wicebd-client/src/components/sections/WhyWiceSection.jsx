@@ -61,7 +61,7 @@ const PILLARS = [
     {
         icon: '🤝',
         title: 'Build Community',
-        body: 'Join a growing ecosystem of 800+ innovators, mentors, organizers, and industry leaders who believe in Bangladesh's potential.',
+        body: "Join a growing ecosystem of 800+ innovators, mentors, organizers, and industry leaders who believe in Bangladesh's potential.",
         color: '#0f3460',
     },
     {

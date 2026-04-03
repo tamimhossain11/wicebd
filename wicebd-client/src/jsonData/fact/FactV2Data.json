@@ -21,7 +21,7 @@
         "id": 3,
         "animation": "fade-up",
         "icon": "bi bi-trophy-fill",
-        "end": 3,
+        "end": 4,
         "title": "Competition Categories",
         "suffix": "",
         "delay": 400,
