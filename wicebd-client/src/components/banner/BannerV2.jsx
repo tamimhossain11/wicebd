@@ -17,6 +17,17 @@ const BannerV2 = () => {
 
     return (
         <section className="banner-conference">
+            {/* ── Tech video background ── */}
+            <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="banner-video-bg"
+            >
+                <source src="https://cdn.pixabay.com/video/2023/10/24/185994-877668278_large.mp4" type="video/mp4" />
+            </video>
+
             {/* Parallax floating icons */}
             <div className="icons parallax-scene-1" ref={sceneRef}>
                 {BannerV2Data.map(bannerIcon =>

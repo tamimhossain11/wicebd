@@ -1674,6 +1674,38 @@ img {
 	-webkit-backdrop-filter: none;
 }
 
+/* ── Scrolled header: white background with shadow ── */
+.main-header.scrolled-header {
+	background: #ffffff !important;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.main-header.scrolled-header .main-box {
+	background: transparent !important;
+}
+
+/* Switch text colours to dark when header is white */
+.main-header.scrolled-header .main-menu .navigation > li > a {
+	color: #1a0a0a !important;
+}
+
+.main-header.scrolled-header .main-menu .navigation > li > a:hover,
+.main-header.scrolled-header .main-menu .navigation > li.current > a {
+	color: #800020 !important;
+}
+
+.main-header.scrolled-header .search-box-btn,
+.main-header.scrolled-header .mobile-nav-toggler {
+	color: #1a0a0a !important;
+}
+
+/* User name / sign-in button in dark header */
+.main-header.scrolled-header .outer-box a,
+.main-header.scrolled-header .outer-box button,
+.main-header.scrolled-header .outer-box span {
+	color: #1a0a0a !important;
+}
+
 /*** 
 
 ====================================================================
@@ -2132,10 +2164,19 @@ img {
 	padding: 0;
 	min-height: 100vh;
 	overflow: hidden;
-	background-image: url(../images/main-bg1.jpg);
-	background-size: cover;
-	background-position: center top;
-	background-repeat: no-repeat;
+	background: #04000a;
+}
+
+/* ── Tech video background ── */
+.banner-video-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	z-index: 0;
+	opacity: 0.35;
 }
 
 .banner-conference::before {
@@ -2144,9 +2185,9 @@ img {
 	inset: 0;
 	background: linear-gradient(
 		135deg,
-		rgba(0, 0, 0, 0.72) 0%,
-		rgba(80, 0, 20, 0.60) 50%,
-		rgba(0, 0, 0, 0.65) 100%
+		rgba(4, 0, 10, 0.78) 0%,
+		rgba(60, 0, 18, 0.65) 50%,
+		rgba(4, 0, 10, 0.80) 100%
 	);
 	z-index: 1;
 }
@@ -2660,52 +2701,58 @@ img {
 	margin-bottom: 36px;
 }
 
+/* ── Countdown timer: slim horizontal pill ── */
 .banner-conference .time-countdown {
 	position: relative;
-	display: flex;
-	gap: 12px;
-	flex-wrap: wrap;
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+	background: rgba(255, 255, 255, 0.08);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 50px;
+	padding: 0;
+	overflow: hidden;
+	flex-wrap: nowrap;
 }
 
 .banner-conference .time-countdown .counter-column {
 	position: relative;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	width: 88px;
-	height: 96px;
-	text-align: center;
+	gap: 6px;
+	padding: 10px 20px;
+	height: auto;
+	width: auto;
+	text-align: left;
 	font-size: 11px;
-	color: rgba(255, 255, 255, 0.75);
+	color: rgba(255, 255, 255, 0.65);
 	font-weight: 600;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	background: rgba(255, 255, 255, 0.1);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-top: 2px solid var(--primary-maroon);
-	border-radius: 14px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-	gap: 4px;
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.banner-conference .time-countdown .counter-column:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 12px 32px rgba(128, 0, 32, 0.4);
-	border-color: rgba(255, 255, 255, 0.35);
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	border-right: 1px solid rgba(255, 255, 255, 0.12);
+	transition: background 0.25s ease;
 }
 
 .banner-conference .time-countdown .counter-column:last-child {
+	border-right: none;
 	margin-right: 0;
 }
 
-.banner-conference .time-countdown .counter-column:before {
-	display: none;
+.banner-conference .time-countdown .counter-column:hover {
+	transform: none;
+	box-shadow: none;
+	background: rgba(128, 0, 32, 0.2);
 }
 
+.banner-conference .time-countdown .counter-column:before,
 .banner-conference .time-countdown .counter-column:after {
 	display: none;
 }
@@ -2716,11 +2763,12 @@ img {
 
 .banner-conference .time-countdown .counter-column .count {
 	position: relative;
-	display: block;
-	font-size: 36px;
-	line-height: 1em;
+	display: inline-block;
+	font-size: 22px;
+	line-height: 1;
 	color: #ffffff;
-	font-weight: 700;
+	font-weight: 800;
+	font-family: 'Orbitron', 'Courier New', monospace;
 }
 
 .banner-conference .content-box .btn-box {

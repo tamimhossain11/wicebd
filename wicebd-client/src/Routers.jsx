@@ -32,6 +32,7 @@ import BlogDetails from './pages/innerPages/BlogDetails';
 import InternationalTeam from './pages/innerPages/InternationalTeam';
 import OrganizingPanel from './pages/innerPages/OrganizingPanel';
 import RegistrationPage from './pages/innerPages/RegistrationPage';
+import Partners from './pages/innerPages/Partners';
 import SignIn from './pages/userAuth/SignIn';
 import SignUp from './pages/userAuth/SignUp';
 import UserProfile from './pages/userAuth/UserProfile';
@@ -99,6 +100,7 @@ const Routers = () => {
                     </UserRoute>
                   }
                 />
+                <Route path='/partners' element={<Partners />} />
                 <Route path='/contact' element={<Contact />}></Route>
                 <Route path='/callback' element={<PaymentCallback />}></Route>
                 <Route path='/thank-you' element={<ThankYou />}></Route>

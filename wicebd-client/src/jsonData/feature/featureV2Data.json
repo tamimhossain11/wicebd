@@ -1,29 +1,38 @@
 [
     {
         "id": 1,
-        "animation": "fadeInUp",
-        "icon": "icon flaticon-search",
-        "name": "Wall Magazine",
-        "text": "Showcase your creativity through our wall magazine competition. Design informative and artistic displays that highlight important engineering concepts and innovations.",
-        "btnText": "Learn More",
-        "delay": 0
+        "icon": "bi bi-robot",
+        "name": "Robo Soccer",
+        "text": "Build and program autonomous robots to compete in a tournament-style soccer match. Teams engineer their machines from scratch, combining robotics, coding, and strategy.",
+        "color": "#f59e0b",
+        "badge": "Team Event",
+        "to": "/robo-soccer"
     },
     {
         "id": 2,
-        "animation": "fadeInUp",
-        "icon": "icon flaticon-diamond-1",
-        "name": "Project Display",
-        "text": "Present your innovative projects to peers and judges. This segment allows you to demonstrate practical applications of your knowledge and problem-solving skills.",
-        "btnText": "View Details",
-        "delay": 400
+        "icon": "bi bi-trophy-fill",
+        "name": "Science Olympiad",
+        "text": "Individual academic competition testing deep knowledge in science, mathematics, engineering, and logic across multiple disciplines and difficulty levels.",
+        "color": "#0f3460",
+        "badge": "Individual",
+        "to": "/registration?tab=olympiad"
     },
     {
         "id": 3,
-        "animation": "fadeInUp",
-        "icon": "icon flaticon-success",
-        "name": "Olympiad",
-        "text": "Test your theoretical knowledge and technical skills in our comprehensive Olympiad. Compete with the brightest minds in various engineering disciplines.",
-        "btnText": "Register Now",
-        "delay": 800
+        "icon": "bi bi-journal-richtext",
+        "name": "Wall Magazine",
+        "text": "Design and present a creative, informative wall magazine on a science or innovation topic. Judged on research depth, visual design, and originality of content.",
+        "color": "#10b981",
+        "badge": "Creative",
+        "to": "/registration"
+    },
+    {
+        "id": 4,
+        "icon": "bi bi-lightbulb-fill",
+        "name": "Project Display",
+        "text": "Showcase your innovation project to expert judges and peers. Demonstrate real-world problem-solving, technical skill, and the potential impact of your invention.",
+        "color": "#e94560",
+        "badge": "Innovation",
+        "to": "/registration"
     }
 ]

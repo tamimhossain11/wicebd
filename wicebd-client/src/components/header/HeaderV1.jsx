@@ -71,7 +71,7 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
 
     return (
         <>
-            <header className={`main-header ${headerStyle ? headerStyle : ""} ${isSticky ? "fixed-header" : ""}`}>
+            <header className={`main-header ${headerStyle ? headerStyle : ""} ${isSticky ? "fixed-header scrolled-header" : ""}`}>
                 <div className="main-box">
                     <div className="auto-container clearfix">
                         <div className="logo-box">

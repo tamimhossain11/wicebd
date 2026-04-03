@@ -5,7 +5,7 @@
         "icon": "bi bi-people-fill",
         "end": 800,
         "title": "Participants",
-        "delay": 800,
+        "delay": 0,
         "iconColor": "text-primary"
     },
     {
@@ -13,18 +13,20 @@
         "animation": "fade-up",
         "icon": "bi bi-lightning-charge-fill",
         "end": 50,
-        "title": "Executives and Organizers",
-        "delay": 800,
+        "title": "Executives & Organizers",
+        "delay": 200,
         "iconColor": "text-warning"
     },
     {
         "id": 3,
         "animation": "fade-up",
-        "icon": "bi bi-globe-americas",
-        "end": 54,
-        "title": "Segments",
-        "delay": 800,
-        "iconColor": "text-success"
+        "icon": "bi bi-trophy-fill",
+        "end": 3,
+        "title": "Competition Categories",
+        "suffix": "",
+        "delay": 400,
+        "iconColor": "text-success",
+        "noPlus": true
     },
     {
         "id": 4,
@@ -32,7 +34,7 @@
         "icon": "bi bi-building",
         "end": 80,
         "title": "Institutes Represented",
-        "delay": 1200,
+        "delay": 600,
         "iconColor": "text-info"
     }
 ]

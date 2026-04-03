@@ -50,7 +50,7 @@ const SingleFactV2 = ({ fact }) => {
 
                 {/* Count */}
                 <div style={{ fontSize: '3rem', fontWeight: 800, color: '#ffffff', lineHeight: 1, marginBottom: '10px' }}>
-                    <CountUp end={end} enableScrollSpy duration={2.5} suffix="+" />
+                    <CountUp end={end} enableScrollSpy duration={2.5} suffix={fact.noPlus ? '' : '+'} />
                 </div>
 
                 {/* Label */}
