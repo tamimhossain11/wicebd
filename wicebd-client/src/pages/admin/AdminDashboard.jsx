@@ -17,7 +17,7 @@ import {
   Logout, Refresh, FileDownload, Add, Delete, Send,
   People, Assignment, EmojiEvents, SportsEsports,
   Notifications, TrendingUp, AdminPanelSettings, Menu as MenuIcon,
-  ChevronLeft,
+  ChevronLeft, RecordVoiceOver, Edit as EditIcon,
 } from '@mui/icons-material';
 import api from '../../api/index';
 import { useAuth } from '../../context/AuthContext';
@@ -32,6 +32,7 @@ const NAV_ITEMS = [
   { label: 'Robo Soccer', icon: <SportsEsports /> },
   { label: 'Announcements', icon: <Notifications /> },
   { label: 'Users', icon: <People /> },
+  { label: 'Advisors', icon: <RecordVoiceOver /> },
 ];
 
 const StatCard = ({ icon, label, value, color, sub }) => (
@@ -76,6 +77,11 @@ export default function AdminDashboard() {
   const [annDialog, setAnnDialog] = useState(false);
   const [annForm, setAnnForm] = useState({ title: '', body: '', target_audience: 'all', send_email: false });
   const [annLoading, setAnnLoading] = useState(false);
+
+  const [advisors, setAdvisors] = useState([]);
+  const [advisorDialog, setAdvisorDialog] = useState(false);
+  const [advisorForm, setAdvisorForm] = useState({ name: '', title: '', institution: '', category: 'Academic', image: '' });
+  const [editingAdvisor, setEditingAdvisor] = useState(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -479,6 +485,69 @@ export default function AdminDashboard() {
             </Box>
           )}
 
+          {/* ══ ADVISORS ══ */}
+          {activeNav === 6 && (
+            <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Button startIcon={<Add />}
+                  onClick={() => { setAdvisorForm({ name: '', title: '', institution: '', category: 'Academic', image: '' }); setEditingAdvisor(null); setAdvisorDialog(true); }}
+                  variant="contained"
+                  sx={{ background: '#e94560', textTransform: 'none', borderRadius: 2, '&:hover': { background: '#cc3350' } }}>
+                  Add Advisor
+                </Button>
+              </Box>
+              {advisors.length === 0 ? (
+                <Paper sx={{ p: 6, textAlign: 'center', background: 'rgba(255,255,255,0.04)', borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <RecordVoiceOver sx={{ fontSize: 52, color: 'rgba(255,255,255,0.15)', mb: 1.5 }} />
+                  <Typography color="rgba(255,255,255,0.4)" fontSize={15}>No advisors added yet</Typography>
+                  <Typography color="rgba(255,255,255,0.25)" fontSize={13} mt={0.5}>Click "Add Advisor" to get started</Typography>
+                </Paper>
+              ) : (
+                <Grid container spacing={2}>
+                  {advisors.map((adv, i) => (
+                    <Grid item xs={12} sm={6} md={4} key={i}>
+                      <Paper sx={{
+                        p: 3, borderRadius: 3,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        display: 'flex', flexDirection: 'column', gap: 1.5,
+                        position: 'relative',
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar
+                            src={adv.image || undefined}
+                            sx={{ width: 52, height: 52, background: '#e94560', fontWeight: 700, fontSize: 20 }}>
+                            {adv.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                            <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adv.name}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adv.title}</Typography>
+                          </Box>
+                        </Box>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>{adv.institution}</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Chip label={adv.category} size="small" sx={{ background: 'rgba(233,69,96,0.15)', color: '#e94560', border: '1px solid rgba(233,69,96,0.25)', fontSize: 11 }} />
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <IconButton size="small"
+                              onClick={() => { setAdvisorForm({ ...adv }); setEditingAdvisor(i); setAdvisorDialog(true); }}
+                              sx={{ color: 'rgba(255,255,255,0.35)', '&:hover': { color: '#e94560' } }}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small"
+                              onClick={() => setAdvisors(prev => prev.filter((_, idx) => idx !== i))}
+                              sx={{ color: 'rgba(255,255,255,0.35)', '&:hover': { color: '#e94560' } }}>
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Box>
+          )}
+
           {/* ══ ANNOUNCEMENTS ══ */}
           {activeNav === 4 && (
             <Box>
@@ -526,6 +595,54 @@ export default function AdminDashboard() {
           )}
         </Box>
       </Box>
+
+      {/* ── Add / Edit Advisor Dialog ── */}
+      <Dialog open={advisorDialog} onClose={() => setAdvisorDialog(false)} maxWidth="sm" fullWidth
+        PaperProps={{ sx: { background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3 } }}>
+        <DialogTitle sx={{ color: '#fff', fontWeight: 700, pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <RecordVoiceOver sx={{ color: '#e94560' }} />
+            {editingAdvisor !== null ? 'Edit Advisor' : 'Add Advisor'}
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
+          <TextField label="Full Name" fullWidth value={advisorForm.name}
+            onChange={e => setAdvisorForm({ ...advisorForm, name: e.target.value })} sx={inputSx} />
+          <TextField label="Title / Designation" fullWidth value={advisorForm.title}
+            onChange={e => setAdvisorForm({ ...advisorForm, title: e.target.value })} sx={inputSx} />
+          <TextField label="Institution / Organisation" fullWidth value={advisorForm.institution}
+            onChange={e => setAdvisorForm({ ...advisorForm, institution: e.target.value })} sx={inputSx} />
+          <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
+            <InputLabel>Category</InputLabel>
+            <Select value={advisorForm.category} label="Category"
+              onChange={e => setAdvisorForm({ ...advisorForm, category: e.target.value })}
+              MenuProps={{ PaperProps: { sx: { background: '#1a1a2e', color: '#fff' } } }}>
+              {['Academic', 'Industry', 'Government', 'International', 'Technical'].map(v => (
+                <MenuItem key={v} value={v}>{v}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField label="Photo URL (optional)" fullWidth value={advisorForm.image}
+            onChange={e => setAdvisorForm({ ...advisorForm, image: e.target.value })} sx={inputSx} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button onClick={() => setAdvisorDialog(false)} sx={{ color: 'rgba(255,255,255,0.5)', textTransform: 'none' }}>Cancel</Button>
+          <Button
+            disabled={!advisorForm.name || !advisorForm.title}
+            onClick={() => {
+              if (editingAdvisor !== null) {
+                setAdvisors(prev => prev.map((a, i) => i === editingAdvisor ? { ...advisorForm } : a));
+              } else {
+                setAdvisors(prev => [...prev, { ...advisorForm }]);
+              }
+              setAdvisorDialog(false);
+            }}
+            variant="contained"
+            sx={{ background: '#e94560', textTransform: 'none', borderRadius: 2, px: 3, '&:hover': { background: '#cc3350' } }}>
+            {editingAdvisor !== null ? 'Save Changes' : 'Add Advisor'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* ── Create Announcement Dialog ── */}
       <Dialog open={annDialog} onClose={() => setAnnDialog(false)} maxWidth="sm" fullWidth

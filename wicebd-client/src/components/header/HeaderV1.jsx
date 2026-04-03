@@ -4,7 +4,7 @@ import SearchPopup from '../others/SearchPopup';
 import MainMenu from './MainMenu';
 import { useAuth } from '../../context/AuthContext';
 
-const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
+const HeaderV1 = ({ headerStyle, parentMenu }) => {
     const { user, role, logout } = useAuth();
 
     // Sticky Menu 
@@ -75,13 +75,14 @@ const HeaderV1 = ({ headerStyle, whiteLogo = false, parentMenu }) => {
                 <div className="main-box">
                     <div className="auto-container clearfix">
                         <div className="logo-box">
-                            {whiteLogo ?
-                                <>
-                                    <div className="logo"><Link to="/#"><img src="/images/logo-2.png" alt="image" /></Link></div>
-                                </>
-                                : <>
-                                    <div className="logo"><Link to="/#"><img src="/images/logo-2.png" alt="image" /></Link></div>
-                                </>}
+                            <div className="logo">
+                                <Link to="/#">
+                                    <img
+                                        src={isSticky ? "/images/logo-normal.PNG" : "/images/logo-static.PNG"}
+                                        alt="WICEBD"
+                                    />
+                                </Link>
+                            </div>
                         </div>
                         <div className="nav-outer clearfix">
                             <div className="mobile-nav-toggler" onClick={handleOpenMenu}><span className="icon flaticon-menu"></span></div>

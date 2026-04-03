@@ -16,38 +16,38 @@ import '../src/assets/css/responsive.css'
 import '../src/assets/css/moments.css'
 
 import Routers from './Routers';
-import Preloader from './components/others/Preloader';
+import IntroVideo from './components/others/IntroVideo';
 import ScrollUpBtn from './components/others/ScrollUpBtn';
 import { ToastContainer } from 'react-toastify';
 import { Helmet } from 'react-helmet';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
+const SOUND_KEY = 'wicebd_intro_sound_played';
 
 function App() {
+  // Intro runs every load; sound only plays the very first time (localStorage flag)
+  const [showIntro, setShowIntro] = useState(true);
+  const withSound = !localStorage.getItem(SOUND_KEY);
 
-  //  Preloader 
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1200)
-  }, [])
+  const handleIntroComplete = () => {
+    if (withSound) localStorage.setItem(SOUND_KEY, '1');
+    setShowIntro(false);
+  };
 
   return (
     <>
-      {isLoading ? <Preloader /> :
-        <div className='app-wrapper'>
-          <Helmet>
-            <title>WICEBD - </title>
-            <link rel="shortcut icon" href="../images/favicon.ico"></link>
-          </Helmet>
-          <Routers />
-          <ToastContainer />
-          <ScrollUpBtn />
-        </div>
-      }
+      {showIntro && <IntroVideo onComplete={handleIntroComplete} withSound={withSound} />}
+      <div className='app-wrapper'>
+        <Helmet>
+          <title>WICEBD - </title>
+          <link rel="shortcut icon" href="../images/favicon.ico"></link>
+        </Helmet>
+        <Routers />
+        <ToastContainer />
+        <ScrollUpBtn />
+      </div>
     </>
-  )
+  );
 }
 
 export default App

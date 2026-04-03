@@ -1114,6 +1114,9 @@ img {
 .main-header .logo-box .logo img {
 	display: inline-block;
 	max-width: 100%;
+	width: 120px;
+	height: 140px;
+	object-fit: contain;
 	-webkit-transition: all 300ms ease;
 	transition: all 300ms ease;
 }
@@ -1582,7 +1585,7 @@ img {
 
 .header-style-two .outer-box,
 .header-style-two .logo-box {
-	padding: 16px 0;
+	padding: 0;
 	-webkit-transition: all 300ms ease;
 	-moz-transition: all 300ms ease;
 	-ms-transition: all 300ms ease;
@@ -1624,6 +1627,11 @@ img {
 .header-style-two.fixed-header .outer-box,
 .header-style-two.fixed-header .logo-box {
 	padding: 10px 0;
+}
+
+.header-style-two.fixed-header .logo-box .logo img {
+	width: 120px;
+	height: 80px;
 }
 
 .header-style-two.fixed-header .main-menu .navigation>li {
@@ -2608,14 +2616,13 @@ img {
 .banner-conference .content-box.content-box-blur {
 	display: inline-block;
 	max-width: 720px;
-	padding: 48px 56px;
-	border-radius: 24px;
-	background: rgba(255, 255, 255, 0.06);
-	backdrop-filter: blur(28px);
-	-webkit-backdrop-filter: blur(28px);
-	border: 1px solid rgba(255, 255, 255, 0.18);
-	border-left: 5px solid var(--primary-maroon);
-	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+	padding: 44px 52px;
+	border-radius: 20px;
+	background: rgba(6, 0, 18, 0.38);
+	backdrop-filter: blur(7px);
+	-webkit-backdrop-filter: blur(7px);
+	border: none;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .banner-conference .auto-container {

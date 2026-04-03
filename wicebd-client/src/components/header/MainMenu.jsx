@@ -39,9 +39,12 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                     <ul className="sub-menu">
                         <li><Link to="/announcements#">News</Link></li>
                         <li><Link to="/blog-details#">Blog</Link></li>
-                        <li><Link to="/partners#">Partners</Link></li>
                     </ul>
                     <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
+                </li>
+
+                <li className={`${parentMenu === 'partners' ? 'current' : ''}`}>
+                    <Link to="/partners#">Partners</Link>
                 </li>
 
                 <li className={`dropdown ${parentMenu === 'organizing' ? 'current' : ''}`}>
