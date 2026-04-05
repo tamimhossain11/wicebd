@@ -17,8 +17,9 @@ import {
   Logout, Refresh, FileDownload, Add, Delete, Send,
   People, Assignment, EmojiEvents, SportsEsports,
   Notifications, TrendingUp, AdminPanelSettings, Menu as MenuIcon,
-  ChevronLeft, RecordVoiceOver, Edit as EditIcon,
+  ChevronLeft, RecordVoiceOver, Edit as EditIcon, Quiz,
 } from '@mui/icons-material';
+import OlympiadExamTab from '../../components/admin/OlympiadExamTab';
 import api from '../../api/index';
 import { useAuth } from '../../context/AuthContext';
 
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { label: 'Announcements', icon: <Notifications /> },
   { label: 'Users', icon: <People /> },
   { label: 'Advisors', icon: <RecordVoiceOver /> },
+  { label: 'Olympiad Exam', icon: <Quiz /> },
 ];
 
 const StatCard = ({ icon, label, value, color, sub }) => (
@@ -547,6 +549,9 @@ export default function AdminDashboard() {
               )}
             </Box>
           )}
+
+          {/* ══ OLYMPIAD EXAM ══ */}
+          {activeNav === 7 && <OlympiadExamTab />}
 
           {/* ══ ANNOUNCEMENTS ══ */}
           {activeNav === 4 && (

@@ -6,8 +6,6 @@ import CompetitionCategories from '../../components/sections/CompetitionCategori
 import FactV2 from '../../components/fact/FactV2';
 import MediaCoverage from '../../components/sections/MediaCoverage';
 import WhyWiceSection from '../../components/sections/WhyWiceSection';
-import WiceInfoSection from '../../components/sections/WiceInfoSection';
-import GlobeSection from '../../components/sections/GlobeSection';
 import SponsorsSection from '../../components/sections/SponsorsSection';
 
 import FooterV2 from '../../components/footer/FooterV2';
@@ -22,8 +20,6 @@ const Home2 = () => {
                 <HighlightMoments />
                 <CompetitionCategories />
                 <FactV2 />
-                <WiceInfoSection />
-                <GlobeSection />
                 <WhyWiceSection />
                 <MediaCoverage />
                 <SponsorsSection />

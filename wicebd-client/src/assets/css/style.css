@@ -1114,8 +1114,8 @@ img {
 .main-header .logo-box .logo img {
 	display: inline-block;
 	max-width: 100%;
-	width: 120px;
-	height: 140px;
+	width: 160px;
+	height: 100px;
 	object-fit: contain;
 	-webkit-transition: all 300ms ease;
 	transition: all 300ms ease;
@@ -1630,8 +1630,8 @@ img {
 }
 
 .header-style-two.fixed-header .logo-box .logo img {
-	width: 120px;
-	height: 80px;
+	width: 140px;
+	height: 88px;
 }
 
 .header-style-two.fixed-header .main-menu .navigation>li {

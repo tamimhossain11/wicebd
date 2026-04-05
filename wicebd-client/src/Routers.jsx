@@ -39,6 +39,7 @@ import UserProfile from './pages/userAuth/UserProfile';
 import UserDashboard from './pages/userDashboard/UserDashboard';
 import RoboSoccer from './pages/innerPages/RoboSoccer';
 import UserRoute from './components/user/UserRoute';
+import OlympiadExamPortal from './pages/userDashboard/OlympiadExamPortal';
 
 
 const Routers = () => {
@@ -107,6 +108,14 @@ const Routers = () => {
                 <Route path="/payment-error" element={<PaymentError />} />
                 <Route path="/payment-cancelled" element={<PaymentCancelled />} />
                 <Route path="/olympiad" element={<Navigate to="/sign-in" replace />} />
+                <Route
+                  path='/olympiad-exam'
+                  element={
+                    <UserRoute>
+                      <OlympiadExamPortal />
+                    </UserRoute>
+                  }
+                />
                 {/*Admin Routes */}
                 <Route path="/admin/login" element={<Navigate to="/sign-in" replace />} />
                 <Route
