@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, TextField, Typography, Grid, CircularProgress, FormHelperText } from '@mui/material';
+import { Box, TextField, Typography, Grid, CircularProgress, Checkbox } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -25,6 +26,7 @@ export default function OlympiadRegistrationForm() {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const onChange = e => {
@@ -41,6 +43,7 @@ export default function OlympiadRegistrationForm() {
         if (!/^\d{11}$/.test(form.phone.replace(/\D/g, ''))) errs.phone = 'Enter an 11-digit number';
         if (!form.address.trim()) errs.address = 'Required';
         if (!form.institution.trim()) errs.institution = 'Required';
+        if (!termsAccepted) errs.termsAccepted = 'You must accept the Terms & Conditions to proceed';
         setErrors(errs);
         if (Object.keys(errs).length) return;
 
@@ -109,6 +112,41 @@ export default function OlympiadRegistrationForm() {
                 </Grid>
                 <Grid item xs={12}>
                     <TextField fullWidth label="CR Reference (optional)" name="crReference" value={form.crReference} onChange={onChange} sx={f} />
+                </Grid>
+
+                {/* T&C acceptance */}
+                <Grid item xs={12}>
+                    <Box sx={{
+                        display: 'flex', alignItems: 'flex-start', gap: 1.5,
+                        p: 2.5, borderRadius: '12px',
+                        border: errors.termsAccepted ? '1px solid #ff7070' : '1px solid rgba(255,255,255,0.1)',
+                        background: 'rgba(255,255,255,0.025)',
+                    }}>
+                        <Checkbox
+                            checked={termsAccepted}
+                            onChange={e => { setTermsAccepted(e.target.checked); setErrors(p => ({ ...p, termsAccepted: '' })); }}
+                            sx={{
+                                p: 0, mt: '2px', color: 'rgba(255,255,255,0.3)',
+                                '&.Mui-checked': { color: '#800020' },
+                            }}
+                        />
+                        <Box>
+                            <Typography sx={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
+                                I have read and agree to the{' '}
+                                <Link to="/terms-and-conditions" target="_blank" style={{ color: '#c0002a' }}>Terms &amp; Conditions</Link>
+                                {', '}
+                                <Link to="/return-refund-policy" target="_blank" style={{ color: '#c0002a' }}>Return &amp; Refund Policy</Link>
+                                {', and '}
+                                <Link to="/privacy-policy" target="_blank" style={{ color: '#c0002a' }}>Privacy Policy</Link>
+                                {' of WICEBD.'}
+                            </Typography>
+                            {errors.termsAccepted && (
+                                <Typography sx={{ fontSize: '12px', color: '#ff7070', mt: 0.5 }}>
+                                    {errors.termsAccepted}
+                                </Typography>
+                            )}
+                        </Box>
+                    </Box>
                 </Grid>
             </Grid>
 

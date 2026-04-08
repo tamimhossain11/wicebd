@@ -40,6 +40,10 @@ import UserDashboard from './pages/userDashboard/UserDashboard';
 import RoboSoccer from './pages/innerPages/RoboSoccer';
 import UserRoute from './components/user/UserRoute';
 import OlympiadExamPortal from './pages/userDashboard/OlympiadExamPortal';
+import PrivacyPolicy from './pages/innerPages/PrivacyPolicy';
+import TermsAndConditions from './pages/innerPages/TermsAndConditions';
+import ReturnRefundPolicy from './pages/innerPages/ReturnRefundPolicy';
+import DeliveryPolicy from './pages/innerPages/DeliveryPolicy';
 
 
 const Routers = () => {
@@ -103,6 +107,10 @@ const Routers = () => {
                 />
                 <Route path='/partners' element={<Partners />} />
                 <Route path='/contact' element={<Contact />}></Route>
+                <Route path='/privacy-policy' element={<PrivacyPolicy />} />
+                <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
+                <Route path='/return-refund-policy' element={<ReturnRefundPolicy />} />
+                <Route path='/delivery-policy' element={<DeliveryPolicy />} />
                 <Route path='/callback' element={<PaymentCallback />}></Route>
                 <Route path='/thank-you' element={<ThankYou />}></Route>
                 <Route path="/payment-error" element={<PaymentError />} />

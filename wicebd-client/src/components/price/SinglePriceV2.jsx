@@ -62,7 +62,7 @@ const SinglePriceV2 = ({ price }) => {
                         whileInView={{ scale: 1 }}
                     >
                         <span className="display-4 fw-bold text-white">
-                            ${plan}
+                            ৳{plan}
                         </span>
                     </motion.div>
 

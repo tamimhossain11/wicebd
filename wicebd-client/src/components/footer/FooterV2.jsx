@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashLink as Link } from 'react-router-hash-link';
-import { motion } from 'framer-motion';
+import { Link as RouterLink } from 'react-router-dom';
 
 const QUICK_LINKS = [
     { label: 'Home',              to: '/#' },
@@ -15,6 +15,13 @@ const TEAM_LINKS = [
     { label: 'International Round',  to: '/international-team#' },
     { label: 'Science Olympiad',     to: '/registration?tab=olympiad#' },
     { label: 'Media Coverage',       to: '/#media' },
+];
+
+const POLICY_LINKS = [
+    { label: 'Privacy Policy',        to: '/privacy-policy' },
+    { label: 'Terms & Conditions',    to: '/terms-and-conditions' },
+    { label: 'Return & Refund',       to: '/return-refund-policy' },
+    { label: 'Delivery Policy',       to: '/delivery-policy' },
 ];
 
 const SOCIALS = [
@@ -54,7 +61,7 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
             {/* Main grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
                 gap: '48px 40px',
                 padding: '72px 0 52px',
             }}>
@@ -67,9 +74,14 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
                     </Link>
                     <p style={{
                         color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1.8,
-                        marginBottom: 28, maxWidth: 240,
+                        marginBottom: 16, maxWidth: 240,
                     }}>
                         World Invention Competition &amp; Exhibition Bangladesh — connecting young innovators to the global stage.
+                    </p>
+                    {/* Trade License */}
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+                        Trade License No:{' '}
+                        <span style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>TRAD/DNCC/049995/2024</span>
                     </p>
                     <div style={{ display: 'flex', gap: 10 }}>
                         {SOCIALS.map(s => (
@@ -154,20 +166,48 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
                     </ul>
                 </div>
 
-                {/* Event Info */}
+                {/* Legal */}
                 <div>
                     <h6 style={{
                         color: '#fff', fontWeight: 700, fontSize: 13,
                         textTransform: 'uppercase', letterSpacing: '0.16em',
                         marginBottom: 22, paddingBottom: 12,
                         borderBottom: '1px solid rgba(128,0,32,0.3)',
-                    }}>8th WICEBD</h6>
+                    }}>Legal</h6>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {POLICY_LINKS.map(l => (
+                            <li key={l.label} style={{ marginBottom: 11 }}>
+                                <RouterLink to={l.to} style={{
+                                    color: 'rgba(255,255,255,0.5)', fontSize: 14, textDecoration: 'none',
+                                    display: 'flex', alignItems: 'center', gap: 8,
+                                    transition: 'color 0.2s ease',
+                                }}
+                                    onMouseEnter={e => e.currentTarget.style.color = '#c0002a'}
+                                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+                                >
+                                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#800020', flexShrink: 0 }} />
+                                    {l.label}
+                                </RouterLink>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Contact & Event Info */}
+                <div>
+                    <h6 style={{
+                        color: '#fff', fontWeight: 700, fontSize: 13,
+                        textTransform: 'uppercase', letterSpacing: '0.16em',
+                        marginBottom: 22, paddingBottom: 12,
+                        borderBottom: '1px solid rgba(128,0,32,0.3)',
+                    }}>Contact Us</h6>
 
                     {[
-                        { icon: 'fa-calendar-alt', label: 'National Round', val: 'Date TBA · Bangladesh' },
-                        { icon: 'fa-globe-asia',   label: 'International Round', val: 'September 2026 · Malaysia' },
-                        { icon: 'fa-university',   label: 'Int\'l Venue', val: 'SEGI University, KL' },
-                        { icon: 'fa-envelope',     label: 'Contact', val: 'info@wicebd.com' },
+                        { icon: 'fa-map-marker-alt', label: 'Address', val: '737/728, West Shewrapara, Mirpur, Dhaka-1216' },
+                        { icon: 'fa-phone-alt',      label: 'Phone', val: '+880 1754-002201' },
+                        { icon: 'fa-envelope',       label: 'Email', val: 'contact@wicebd.com' },
+                        { icon: 'fa-calendar-alt',   label: 'National Round', val: 'Date TBA · Bangladesh' },
+                        { icon: 'fa-globe-asia',     label: 'International Round', val: 'September 2026 · Malaysia' },
                     ].map(item => (
                         <div key={item.label} style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
                             <div style={{
@@ -202,9 +242,15 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
                         Dreams of Bangladesh
                     </a>
                 </p>
-                <div style={{ display: 'flex', gap: 20 }}>
-                    {['Privacy Policy', 'Terms of Use'].map(t => (
-                        <span key={t} style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'default' }}>{t}</span>
+                <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                    {POLICY_LINKS.map(l => (
+                        <RouterLink key={l.label} to={l.to} style={{
+                            color: 'rgba(255,255,255,0.3)', fontSize: 12, textDecoration: 'none',
+                            transition: 'color 0.2s ease',
+                        }}
+                            onMouseEnter={e => e.currentTarget.style.color = '#c0002a'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                        >{l.label}</RouterLink>
                     ))}
                 </div>
             </div>

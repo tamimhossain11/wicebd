@@ -10,7 +10,7 @@ const SinglePriceV3 = ({ plan }) => {
             <ReactWOW animation={animationName}>
                 <div className="inner-box">
                     <div className="title">{title}</div>
-                    <h4 className="price">${price}</h4>
+                    <h4 className="price">৳{price}</h4>
                     <ul className="features">
                         <li>{featureList1}</li>
                         <li>{featureList2}</li>

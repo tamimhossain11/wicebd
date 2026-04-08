@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import {
     Box, TextField, MenuItem, FormControl, InputLabel, Select,
     Typography, Grid, FormHelperText, CircularProgress,
-    Step, Stepper, StepLabel,
+    Step, Stepper, StepLabel, Checkbox,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -98,6 +99,7 @@ export default function ProjectRegistrationForm() {
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const set = (name, value) => setForm(p => ({
@@ -132,6 +134,7 @@ export default function ProjectRegistrationForm() {
             if (form.socialMedia) {
                 try { new URL(form.socialMedia); } catch { errs.socialMedia = 'Enter a valid URL'; }
             }
+            if (!termsAccepted) errs.termsAccepted = 'You must accept the Terms & Conditions to proceed';
         }
         setErrors(errs);
         return Object.keys(errs).length === 0;
@@ -336,6 +339,41 @@ export default function ProjectRegistrationForm() {
                             <Grid item xs={12} sm={6}>
                                 <TextField fullWidth label="How did you hear about WICEBD? *" name="infoSource" value={form.infoSource} onChange={onChange}
                                     error={!!errors.infoSource} helperText={errors.infoSource} placeholder="e.g. Facebook, Teacher…" sx={f} />
+                            </Grid>
+
+                            {/* T&C acceptance */}
+                            <Grid item xs={12}>
+                                <Box sx={{
+                                    display: 'flex', alignItems: 'flex-start', gap: 1.5,
+                                    p: 2.5, borderRadius: '12px',
+                                    border: errors.termsAccepted ? '1px solid #ff7070' : '1px solid rgba(255,255,255,0.1)',
+                                    background: 'rgba(255,255,255,0.025)',
+                                }}>
+                                    <Checkbox
+                                        checked={termsAccepted}
+                                        onChange={e => { setTermsAccepted(e.target.checked); setErrors(p => ({ ...p, termsAccepted: '' })); }}
+                                        sx={{
+                                            p: 0, mt: '2px', color: 'rgba(255,255,255,0.3)',
+                                            '&.Mui-checked': { color: '#800020' },
+                                        }}
+                                    />
+                                    <Box>
+                                        <Typography sx={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
+                                            I have read and agree to the{' '}
+                                            <Link to="/terms-and-conditions" target="_blank" style={{ color: '#c0002a' }}>Terms &amp; Conditions</Link>
+                                            {', '}
+                                            <Link to="/return-refund-policy" target="_blank" style={{ color: '#c0002a' }}>Return &amp; Refund Policy</Link>
+                                            {', and '}
+                                            <Link to="/privacy-policy" target="_blank" style={{ color: '#c0002a' }}>Privacy Policy</Link>
+                                            {' of WICEBD.'}
+                                        </Typography>
+                                        {errors.termsAccepted && (
+                                            <Typography sx={{ fontSize: '12px', color: '#ff7070', mt: 0.5 }}>
+                                                {errors.termsAccepted}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                </Box>
                             </Grid>
                         </Grid>
                     )}

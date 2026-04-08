@@ -14,7 +14,7 @@ const SinglePriceV1 = ({ plan }) => {
                     </div>
                     <div className="price-box">
                         <div className="title">{title}</div>
-                        <h4 className="price">${price}</h4>
+                        <h4 className="price">৳{price}</h4>
                     </div>
                     <ul className="features">
                         <li className={list1Class}>{list1}</li>
