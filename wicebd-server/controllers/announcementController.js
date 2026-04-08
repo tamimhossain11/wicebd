@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 
 // Admin: create announcement
 const createAnnouncement = async (req, res) => {
-  const { title, body, target_audience = 'all', send_email = false } = req.body;
+  const { title, body, image_url = null, target_audience = 'all', send_email = false } = req.body;
   const admin_id = req.admin.id;
 
   if (!title || !body) {
@@ -23,9 +23,9 @@ const createAnnouncement = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      `INSERT INTO announcements (admin_id, title, body, target_audience, send_email, is_published)
-       VALUES (?, ?, ?, ?, ?, 1)`,
-      [admin_id, title, body, target_audience, send_email ? 1 : 0]
+      `INSERT INTO announcements (admin_id, title, body, image_url, target_audience, send_email, is_published)
+       VALUES (?, ?, ?, ?, ?, ?, 1)`,
+      [admin_id, title, body, image_url || null, target_audience, send_email ? 1 : 0]
     );
 
     const announcementId = result.insertId;
@@ -72,11 +72,11 @@ const deleteAnnouncement = async (req, res) => {
 const getPublishedAnnouncements = async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT id, title, body, target_audience, created_at
+      SELECT id, title, body, image_url, target_audience, created_at
       FROM announcements
       WHERE is_published = 1
       ORDER BY created_at DESC
-      LIMIT 20
+      LIMIT 50
     `);
     res.json({ success: true, announcements: rows });
   } catch (error) {

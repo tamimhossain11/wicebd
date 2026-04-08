@@ -77,7 +77,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [annDialog, setAnnDialog] = useState(false);
-  const [annForm, setAnnForm] = useState({ title: '', body: '', target_audience: 'all', send_email: false });
+  const [annForm, setAnnForm] = useState({ title: '', body: '', image_url: '', target_audience: 'all', send_email: false });
   const [annLoading, setAnnLoading] = useState(false);
 
   const [advisors, setAdvisors] = useState([]);
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
     try {
       await api.post('/api/announcements', annForm);
       setAnnDialog(false);
-      setAnnForm({ title: '', body: '', target_audience: 'all', send_email: false });
+      setAnnForm({ title: '', body: '', image_url: '', target_audience: 'all', send_email: false });
       fetchAll();
     } catch { setError('Failed to create announcement'); }
     finally { setAnnLoading(false); }
@@ -573,24 +573,42 @@ export default function AdminDashboard() {
                 )}
                 {announcements.map((ann) => (
                   <Grid item xs={12} md={6} key={ann.id}>
-                    <Paper sx={{ p: 3, borderRadius: 3, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                        <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', flex: 1, mr: 1 }}>{ann.title}</Typography>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
-                          <Chip label={ann.target_audience} size="small" sx={{ background: '#e9456022', color: '#e94560', fontSize: 11 }} />
-                          <IconButton size="small" onClick={() => handleDeleteAnn(ann.id)} sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: '#e94560' } }}>
-                            <Delete fontSize="small" />
-                          </IconButton>
+                    <Paper sx={{ borderRadius: 3, overflow: 'hidden', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      {/* Poster thumbnail */}
+                      {ann.image_url && (
+                        <Box sx={{ height: 160, overflow: 'hidden', position: 'relative' }}>
+                          <img
+                            src={ann.image_url}
+                            alt={ann.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            onError={e => { e.currentTarget.parentElement.style.display = 'none'; }}
+                          />
+                          <Box sx={{
+                            position: 'absolute', inset: 0,
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)',
+                          }} />
                         </Box>
-                      </Box>
-                      <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 1.6, mb: 1.5 }}>
-                        {ann.body.length > 180 ? ann.body.substring(0, 180) + '…' : ann.body}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <Typography variant="caption" color="rgba(255,255,255,0.3)">
-                          {new Date(ann.created_at).toLocaleDateString()} · by {ann.admin_name}
+                      )}
+                      <Box sx={{ p: 2.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                          <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', flex: 1, mr: 1 }}>{ann.title}</Typography>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
+                            <Chip label={ann.target_audience} size="small" sx={{ background: '#e9456022', color: '#e94560', fontSize: 11 }} />
+                            <IconButton size="small" onClick={() => handleDeleteAnn(ann.id)} sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: '#e94560' } }}>
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 1.6, mb: 1.5 }}>
+                          {ann.body.length > 160 ? ann.body.substring(0, 160) + '…' : ann.body}
                         </Typography>
-                        {ann.email_sent_at && <Chip label="Email Sent" size="small" color="success" sx={{ height: 18, fontSize: 10 }} />}
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <Typography variant="caption" color="rgba(255,255,255,0.3)">
+                            {new Date(ann.created_at).toLocaleDateString()} · by {ann.admin_name}
+                          </Typography>
+                          {ann.email_sent_at && <Chip label="Email Sent" size="small" color="success" sx={{ height: 18, fontSize: 10 }} />}
+                          {ann.image_url && <Chip label="Has Poster" size="small" sx={{ height: 18, fontSize: 10, background: '#0f346022', color: '#60a5fa' }} />}
+                        </Box>
                       </Box>
                     </Paper>
                   </Grid>
@@ -658,10 +676,36 @@ export default function AdminDashboard() {
           </Box>
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
-          <TextField label="Title" fullWidth value={annForm.title}
+          <TextField label="Title *" fullWidth value={annForm.title}
             onChange={e => setAnnForm({ ...annForm, title: e.target.value })} sx={inputSx} />
-          <TextField label="Message" fullWidth multiline rows={5} value={annForm.body}
+          <TextField label="Message *" fullWidth multiline rows={5} value={annForm.body}
             onChange={e => setAnnForm({ ...annForm, body: e.target.value })} sx={inputSx} />
+
+          {/* Poster / image URL */}
+          <TextField
+            label="Poster / Image URL (optional)"
+            fullWidth
+            value={annForm.image_url}
+            onChange={e => setAnnForm({ ...annForm, image_url: e.target.value })}
+            placeholder="https://example.com/poster.jpg"
+            sx={inputSx}
+          />
+          {annForm.image_url && (
+            <Box sx={{
+              borderRadius: 2, overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.12)',
+              maxHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(0,0,0,0.3)',
+            }}>
+              <img
+                src={annForm.image_url}
+                alt="Poster preview"
+                style={{ maxWidth: '100%', maxHeight: 220, objectFit: 'contain', display: 'block' }}
+                onError={e => { e.currentTarget.style.display = 'none'; }}
+              />
+            </Box>
+          )}
+
           <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
             <InputLabel>Target Audience</InputLabel>
             <Select value={annForm.target_audience} label="Target Audience"

@@ -2,10 +2,36 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─────────────────────────────────────────────
+   URL helpers
+   ───────────────────────────────────────────── */
+function isYouTube(url) {
+    return url.includes('youtu.be') || url.includes('youtube.com');
+}
+function getYouTubeId(url) {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^?&\s]+)/);
+    return m ? m[1] : null;
+}
+
+/* ─────────────────────────────────────────────
+   YouTube iframe player
+   ───────────────────────────────────────────── */
+const YouTubePlayer = ({ videoId }) => (
+    <div style={{
+        position: 'relative', width: '100%', paddingBottom: '56.25%',
+        background: '#000', borderRadius: '12px 12px 0 0', overflow: 'hidden',
+    }}>
+        <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+        />
+    </div>
+);
+
+/* ─────────────────────────────────────────────
    Facebook SDK video player component.
-   Uses <div class="fb-video"> + FB.XFBML.parse()
-   which is the official Facebook embed API and
-   supports share/v/ short URLs natively.
    ───────────────────────────────────────────── */
 const FBVideoPlayer = ({ url }) => {
     const ref = useRef(null);
@@ -41,122 +67,86 @@ const TABS = [
                 id: 1,
                 title: '8th WICEBD — Official Teaser',
                 desc: 'Exclusive teaser for the 8th World Invention Competition & Exhibition Bangladesh.',
-                url: 'https://www.facebook.com/share/v/1CCnJKaRKq/',
-            },
-            {
-                id: 2,
-                title: 'National Round — Video Report',
-                desc: 'Full video report of the WICEBD national round competition.',
-                url: 'https://www.facebook.com/share/v/1CPUApzw2U/',
+                url: 'https://youtu.be/7O4ItrqKKPk?si=sqVTEccC362xdyWu',
             },
         ],
     },
     {
         id: 'proud',
         label: '🏆 Proud Moment',
-        videos: [
-            {
-                id: 3,
-                title: 'Prize Ceremony — SEGI University, Kuala Lumpur',
-                desc: 'Our team sings the national anthem after winning prizes at SEGI University, Kuala Lumpur, Malaysia.',
-                url: 'https://www.facebook.com/share/v/1CSPHW6Vqe/',
-            },
-        ],
+        videos: [],
     },
     {
         id: 'before',
         label: '📡 Before Departure',
-        videos: [
-            {
-                id: 4,
-                title: 'Media Coverage — Before Departure (1)',
-                desc: 'Media interview and coverage before the team departed for the international competition.',
-                url: 'https://www.facebook.com/share/v/17jCCF5u8g/',
-            },
-            {
-                id: 5,
-                title: 'Media Coverage — Before Departure (2)',
-                desc: 'More pre-departure media spotlight on the WICEBD team.',
-                url: 'https://www.facebook.com/share/v/1CKtqpVcJr/',
-            },
-            {
-                id: 6,
-                title: 'Media Coverage — Before Departure (3)',
-                desc: "Television coverage ahead of the team's international journey.",
-                url: 'https://www.facebook.com/share/v/18aYXRQbo6/',
-            },
-            {
-                id: 7,
-                title: 'Media Coverage — Before Departure (4)',
-                desc: "Pre-competition feature highlighting the team's preparation and vision.",
-                url: 'https://www.facebook.com/share/v/1DYecxy3LD/',
-            },
-            {
-                id: 8,
-                title: 'Media Coverage — Before Departure (5)',
-                desc: 'Final pre-departure news coverage of the WICEBD delegation.',
-                url: 'https://www.facebook.com/share/v/17JYvEgtaC/',
-            },
-        ],
+        videos: [],
     },
     {
         id: 'after',
         label: '🎉 After Return',
         videos: [
             {
-                id: 9,
+                id: 2,
                 title: 'Media Reception — After Return (1)',
-                desc: "Grand media reception organized by Firm Fresh upon the team's return to Bangladesh.",
-                url: 'https://www.facebook.com/share/v/1CbLTXEtGP/',
+                desc: "Post-competition coverage celebrating Bangladesh's achievement at the international invention expo.",
+                url: 'https://youtu.be/vcPRWWwFw1k?si=kP1z5tJbg912eRI-',
             },
             {
-                id: 10,
+                id: 3,
                 title: 'Media Reception — After Return (2)',
-                desc: "Celebrating Bangladesh's historic achievement at the international invention expo.",
-                url: 'https://www.facebook.com/share/v/1AbxozszqU/',
+                desc: "Celebrating Bangladesh's historic gold medal win at the international competition.",
+                url: 'https://youtu.be/t2WLd7htJ3E?si=CNa6mdPNpLKUdnwP',
             },
             {
-                id: 11,
+                id: 4,
                 title: 'Media Reception — After Return (3)',
-                desc: 'Victory celebration coverage organized by Firm Fresh for the WICEBD champions.',
-                url: 'https://www.facebook.com/share/v/17Fjo6a9up/',
-            },
-            {
-                id: 12,
-                title: 'Media Reception — After Return (4)',
-                desc: 'Special media event honouring the gold medal winners from WICEBD.',
-                url: 'https://www.facebook.com/share/v/18gSzxwuH4/',
-            },
-            {
-                id: 13,
-                title: 'Media Reception — After Return (5)',
-                desc: 'Full coverage of the Firm Fresh–organised welcome ceremony for the WICEBD team.',
-                url: 'https://www.facebook.com/share/v/18eU6VRxeF/',
+                desc: 'Victory celebration coverage for the WICEBD champions returning home.',
+                url: 'https://youtu.be/BONweZ-JAxs?si=RqZVQ1l6H7sQ6avP',
             },
         ],
     },
 ];
 
 /* ─────────────────────────────────────────────
-   Single video card
+   Single video card — auto-detects YouTube vs FB
    ───────────────────────────────────────────── */
-const VideoCard = ({ video, index }) => (
-    <motion.div
-        className="mc-video-card"
-        initial={{ opacity: 0, y: 36 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        transition={{ delay: index * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-        whileHover={{ y: -6 }}
-    >
-        {/* Facebook SDK in-page video player */}
-        <FBVideoPlayer url={video.url} />
+const VideoCard = ({ video, index }) => {
+    const ytId = isYouTube(video.url) ? getYouTubeId(video.url) : null;
+    return (
+        <motion.div
+            className="mc-video-card"
+            initial={{ opacity: 0, y: 36 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ delay: index * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+            whileHover={{ y: -6 }}
+        >
+            {ytId ? <YouTubePlayer videoId={ytId} /> : <FBVideoPlayer url={video.url} />}
+            <div className="mc-card-info">
+                <h4 className="mc-card-title">{video.title}</h4>
+                <p className="mc-card-desc">{video.desc}</p>
+            </div>
+        </motion.div>
+    );
+};
 
-        {/* Card info */}
-        <div className="mc-card-info">
-            <h4 className="mc-card-title">{video.title}</h4>
-            <p className="mc-card-desc">{video.desc}</p>
+/* ─────────────────────────────────────────────
+   Empty / coming-soon state for blank tabs
+   ───────────────────────────────────────────── */
+const EmptyTabState = () => (
+    <motion.div
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+        transition={{ duration: 0.35 }}
+        style={{ textAlign: 'center', padding: '72px 20px' }}
+    >
+        <div style={{
+            width: 72, height: 72, borderRadius: '50%', margin: '0 auto 20px',
+            background: 'rgba(128,0,32,0.12)', border: '1px solid rgba(128,0,32,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+            <i className="fa fa-film" style={{ fontSize: 28, color: 'rgba(128,0,32,0.6)' }} />
         </div>
+        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 15, margin: 0 }}>Videos coming soon…</p>
     </motion.div>
 );
 
@@ -212,18 +202,22 @@ const MediaCoverage = () => {
 
                 {/* Video grid — animated tab switch */}
                 <AnimatePresence mode="wait">
-                    <motion.div
-                        key={activeTab}
-                        className={`mc-grid mc-grid-${current.videos.length === 1 ? 'single' : current.videos.length === 2 ? 'two' : 'multi'}`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                    >
-                        {current.videos.map((video, i) => (
-                            <VideoCard key={video.id} video={video} index={i} />
-                        ))}
-                    </motion.div>
+                    {current.videos.length === 0 ? (
+                        <EmptyTabState key={activeTab + '-empty'} />
+                    ) : (
+                        <motion.div
+                            key={activeTab}
+                            className={`mc-grid mc-grid-${current.videos.length === 1 ? 'single' : current.videos.length === 2 ? 'two' : 'multi'}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                        >
+                            {current.videos.map((video, i) => (
+                                <VideoCard key={video.id} video={video} index={i} />
+                            ))}
+                        </motion.div>
+                    )}
                 </AnimatePresence>
             </div>
         </section>

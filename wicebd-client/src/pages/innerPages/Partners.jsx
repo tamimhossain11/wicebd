@@ -2,22 +2,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import HeaderV1 from '../../components/header/HeaderV1';
 import FooterV2 from '../../components/footer/FooterV2';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 
+/* ─────────────────────────────────────────────
+   Partner data
+   logo: public path — null means text fallback
+   comingSoon: logo to be added later
+─────────────────────────────────────────────── */
 const PARTNER_CATEGORIES = [
     {
         cat: 'Official Organizer',
-        color: '#e94560',
+        color: '#c0002a',
         partners: [
             {
-                name: 'Firm Fresh',
-                icon: 'bi-building-fill',
+                name: 'Dreams of Bangladesh',
+                logo: '/images/partners/Dob logo.png',
                 desc: 'The official organizing body of WICE Bangladesh, driving the vision of connecting Bangladeshi innovators to the world stage.',
-                type: 'Prime Partner',
+                type: 'Prime Organizer',
             },
             {
                 name: 'Dhaka Imperial College',
-                icon: 'bi-mortarboard-fill',
+                logo: '/images/partners/Dhaka_Imperial_College.jpg',
                 desc: 'Host institution providing the venue and academic support for the national round of WICE Bangladesh.',
                 type: 'Host Institution',
             },
@@ -25,29 +29,24 @@ const PARTNER_CATEGORIES = [
     },
     {
         cat: 'International Bodies',
-        color: '#0f3460',
+        color: '#c0002a',
         partners: [
             {
-                name: 'IFIA',
-                icon: 'bi-globe2',
-                desc: "International Federation of Inventors' Associations \u2014 the global body that certifies and connects national invention competitions worldwide.",
-                type: 'International Federation',
-            },
-            {
                 name: 'SEGI University',
-                icon: 'bi-award-fill',
+                logo: '/images/partners/SEGi_University_Logo1.jpg',
                 desc: 'Kuala Lumpur-based university that hosted WICE Bangladesh teams at the prestigious ITEX international invention expo.',
                 type: 'Global Host',
             },
             {
-                name: 'INPEX',
-                icon: 'bi-stars',
-                desc: 'One of the largest invention expositions in the USA, where WICE Bangladesh has been represented with distinction.',
-                type: 'International Expo',
+                name: 'IYSA',
+                logo: '/images/partners/iysa.png',
+                desc: 'International Young Scientists Association — supporting young innovators in connecting science, technology, and global competition platforms.',
+                type: 'International Partner',
             },
             {
                 name: 'iENA',
-                icon: 'bi-trophy-fill',
+                logo: null,
+                initials: 'iENA',
                 desc: 'International Trade Fair — Ideas, Inventions and New Products, held in Nuremberg, Germany — a key international platform for WICE teams.',
                 type: 'European Expo',
             },
@@ -55,17 +54,24 @@ const PARTNER_CATEGORIES = [
     },
     {
         cat: 'Government & Institutional',
-        color: '#10b981',
+        color: '#c0002a',
         partners: [
             {
                 name: 'Ministry of Education',
-                icon: 'bi-bank',
+                logo: '/images/partners/ministry_of_education.webp',
                 desc: 'Government of Bangladesh, Ministry of Education — providing strategic backing and recognition for student innovation competitions.',
                 type: 'Government Body',
             },
             {
+                name: 'ICT Division',
+                logo: '/images/partners/Information_and_Communication_Technology_Division.svg.png',
+                desc: 'Information and Communication Technology Division of Bangladesh — supporting digital innovation and technology-driven youth initiatives.',
+                type: 'Govt. Partner',
+            },
+            {
                 name: 'Bangladesh Shishu Academy',
-                icon: 'bi-people-fill',
+                logo: null,
+                initials: 'BSA',
                 desc: 'National institution supporting youth development and creative talent across Bangladesh.',
                 type: 'Youth Institution',
             },
@@ -73,29 +79,35 @@ const PARTNER_CATEGORIES = [
     },
     {
         cat: 'Media Partners',
-        color: '#f59e0b',
+        color: '#c0002a',
         partners: [
             {
                 name: 'Channel i',
-                icon: 'bi-camera-video-fill',
+                logo: null,
+                initials: 'i',
+                comingSoon: true,
                 desc: 'Leading Bangladeshi television channel providing exclusive broadcast coverage of WICE Bangladesh events and ceremonies.',
                 type: 'TV Partner',
             },
             {
                 name: 'Daily Prothom Alo',
-                icon: 'bi-newspaper',
+                logo: null,
+                initials: 'PA',
+                comingSoon: true,
                 desc: "Bangladesh's most-read national newspaper, covering WICE achievements and inspiring the next generation of innovators.",
                 type: 'Print Media',
             },
             {
                 name: 'The Daily Star',
-                icon: 'bi-journal-text',
+                logo: null,
+                initials: 'DS',
                 desc: "English-language newspaper covering WICE Bangladesh's international achievements and competition results.",
                 type: 'Print Media',
             },
             {
                 name: 'BTV',
-                icon: 'bi-display',
+                logo: null,
+                initials: 'BTV',
                 desc: 'Bangladesh Television — national broadcaster providing coverage of WICE competitions and award ceremonies.',
                 type: 'National TV',
             },
@@ -103,6 +115,9 @@ const PARTNER_CATEGORIES = [
     },
 ];
 
+/* ─────────────────────────────────────────────
+   Partner card
+─────────────────────────────────────────────── */
 const PartnerCard = ({ partner, color, index }) => (
     <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -114,7 +129,7 @@ const PartnerCard = ({ partner, color, index }) => (
             background: 'rgba(255,255,255,0.04)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            border: `1px solid ${color}25`,
+            border: `1px solid ${color}22`,
             borderTop: `3px solid ${color}`,
             borderRadius: '20px',
             padding: '32px 28px',
@@ -131,23 +146,62 @@ const PartnerCard = ({ partner, color, index }) => (
         <div style={{
             position: 'absolute', top: -20, right: -20, width: 100, height: 100,
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${color}20, transparent 70%)`,
+            background: `radial-gradient(circle, ${color}18, transparent 70%)`,
             filter: 'blur(20px)', pointerEvents: 'none',
         }} />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Coming soon badge */}
+        {partner.comingSoon && (
             <div style={{
-                width: 56, height: 56, borderRadius: '14px', flexShrink: 0,
-                background: `${color}18`, border: `1px solid ${color}35`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'absolute', top: 14, right: 14,
+                fontSize: 9, fontWeight: 700, textTransform: 'uppercase',
+                letterSpacing: '0.12em', color: color,
+                background: `${color}15`, border: `1px solid ${color}35`,
+                borderRadius: 50, padding: '3px 9px',
             }}>
-                <i className={partner.icon} style={{ fontSize: '1.5rem', color: color }}></i>
+                Logo Coming Soon
             </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Logo / initials box */}
+            <div style={{
+                width: 80, height: 64, borderRadius: '14px', flexShrink: 0,
+                background: partner.logo ? 'rgba(255,255,255,0.93)' : `${color}18`,
+                border: partner.logo ? 'none' : `1px solid ${color}35`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: partner.logo ? '8px 10px' : 0,
+                overflow: 'hidden',
+            }}>
+                {partner.logo ? (
+                    <img
+                        src={partner.logo}
+                        alt={partner.name}
+                        style={{
+                            maxWidth: '100%', maxHeight: '100%',
+                            width: 'auto', height: 'auto',
+                            objectFit: 'contain', display: 'block',
+                        }}
+                    />
+                ) : (
+                    <span style={{
+                        fontWeight: 900,
+                        fontSize: partner.initials?.length > 3 ? 14 : 20,
+                        color,
+                        letterSpacing: '0.03em',
+                    }}>
+                        {partner.initials}
+                    </span>
+                )}
+            </div>
+
             <div>
-                <div style={{ fontWeight: 700, color: '#fff', fontSize: '17px', marginBottom: '3px' }}>{partner.name}</div>
+                <div style={{ fontWeight: 700, color: '#fff', fontSize: '17px', marginBottom: '4px' }}>
+                    {partner.name}
+                </div>
                 <span style={{
                     fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                    letterSpacing: '0.12em', color: color,
+                    letterSpacing: '0.12em', color,
                     background: `${color}15`, border: `1px solid ${color}30`,
                     borderRadius: '50px', padding: '3px 10px',
                 }}>
@@ -155,12 +209,16 @@ const PartnerCard = ({ partner, color, index }) => (
                 </span>
             </div>
         </div>
+
         <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', lineHeight: 1.75, margin: 0 }}>
             {partner.desc}
         </p>
     </motion.div>
 );
 
+/* ─────────────────────────────────────────────
+   Page
+─────────────────────────────────────────────── */
 const Partners = () => (
     <>
         <div className="page-wrapper">
@@ -174,7 +232,6 @@ const Partners = () => (
                 padding: '140px 0 90px',
                 overflow: 'hidden',
             }}>
-                {/* Grid overlay */}
                 <div style={{
                     position: 'absolute', inset: 0, pointerEvents: 'none',
                     backgroundImage: `
@@ -197,11 +254,7 @@ const Partners = () => (
                 />
 
                 <div className="auto-container" style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
-                    <motion.div
-                        initial={{ opacity: 0, y: -30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7 }}
-                    >
+                    <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
                         <span style={{
                             display: 'inline-flex', alignItems: 'center', gap: '8px',
                             fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.22em',
