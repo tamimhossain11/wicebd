@@ -1,12 +1,12 @@
 [
     {
         "id": 1,
-        "icon": "bi bi-robot",
-        "name": "Robo Soccer",
-        "text": "Build and program autonomous robots to compete in a tournament-style soccer match. Teams engineer their machines from scratch, combining robotics, coding, and strategy.",
-        "color": "#f59e0b",
-        "badge": "Team Event",
-        "to": "/robo-soccer"
+        "icon": "bi bi-stars",
+        "name": "Surprise Segment",
+        "text": "Something exciting is coming. A brand-new competition segment will be revealed soon — stay tuned for the big announcement from WICE Bangladesh.",
+        "color": "#800020",
+        "badge": "Coming Soon",
+        "to": "/surprise-segment"
     },
     {
         "id": 2,
@@ -24,7 +24,7 @@
         "text": "Design and present a creative, informative wall magazine on a science or innovation topic. Judged on research depth, visual design, and originality of content.",
         "color": "#10b981",
         "badge": "Creative",
-        "to": "/registration"
+        "to": "/registration?tab=wall-magazine"
     },
     {
         "id": 4,

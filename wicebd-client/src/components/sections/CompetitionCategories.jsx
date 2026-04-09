@@ -10,7 +10,8 @@ const CATEGORIES = [
         description:
             'Present original inventions that solve real-world problems. Projects are judged on novelty, feasibility, and societal impact.',
         eligibility: 'All age groups',
-        prize: 'Gold / Silver / Bronze + International Expo Entry',
+        prize: 'Prize Pool: ৳2,00,000',
+        fee: '৳999 Early Bird · ৳1,200 Default',
         icon: (
             <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
                 <circle cx="24" cy="20" r="11" stroke="#800020" strokeWidth="2.2" />
@@ -22,20 +23,19 @@ const CATEGORIES = [
     },
     {
         id: '02',
-        title: 'Robo Soccer',
-        subtitle: 'Build · Code · Compete',
+        title: 'Surprise Segment',
+        subtitle: 'Stay · Tuned · Soon',
         description:
-            'Autonomous robots face off on a football pitch. Teams design, program, and pit their machines against rivals in real-time matches.',
-        eligibility: 'Junior · Standard · Advanced',
-        prize: 'Championship Trophy + Regional Qualifier',
+            'Something exciting is coming. A brand-new competition segment will be revealed soon — stay tuned for the big announcement.',
+        eligibility: 'To be announced',
+        prize: 'To be announced',
+        fee: 'To be announced',
         icon: (
             <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
-                <rect x="10" y="14" width="28" height="22" rx="5" stroke="#800020" strokeWidth="2.2" />
-                <rect x="16" y="20" width="6" height="8" rx="2" fill="rgba(128,0,32,0.2)" stroke="#800020" strokeWidth="1.6" />
-                <rect x="26" y="20" width="6" height="8" rx="2" fill="rgba(128,0,32,0.2)" stroke="#800020" strokeWidth="1.6" />
-                <path d="M10 27h4M34 27h4" stroke="#800020" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="24" cy="10" r="3" stroke="#800020" strokeWidth="2" />
-                <path d="M24 13v1" stroke="#800020" strokeWidth="1.5" />
+                <circle cx="24" cy="24" r="16" stroke="#800020" strokeWidth="2.2" strokeDasharray="4 3" />
+                <path d="M24 14v2M24 32v2M14 24h2M32 24h2" stroke="#800020" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="24" cy="24" r="5" fill="rgba(128,0,32,0.25)" stroke="#800020" strokeWidth="1.8" />
+                <path d="M24 21v3l2 2" stroke="#800020" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
         ),
     },
@@ -46,7 +46,8 @@ const CATEGORIES = [
         description:
             'Research-driven projects covering physics, chemistry, biology, and engineering. Demonstrate experiments and findings to expert judges.',
         eligibility: 'School · College · University',
-        prize: 'Best Research Award + Publication Feature',
+        prize: 'Prize Pool: ৳30,000',
+        fee: '৳399',
         icon: (
             <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
                 <path d="M18 10v16l-8 12h20L22 26V10" stroke="#800020" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -64,7 +65,8 @@ const CATEGORIES = [
         description:
             'Software applications, mobile apps, websites, and digital solutions that address community challenges or push creative boundaries.',
         eligibility: 'Open to all',
-        prize: 'Best Digital Innovation + Mentorship Grant',
+        prize: 'Prize Pool: ৳10,000',
+        fee: '৳50',
         icon: (
             <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
                 <rect x="6" y="10" width="36" height="24" rx="4" stroke="#800020" strokeWidth="2.2" />
@@ -410,30 +412,20 @@ const CompetitionCategories = () => {
 
                             {/* Meta rows */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                                    <span style={{
-                                        flexShrink: 0, fontSize: '10px', fontWeight: 700,
-                                        color: '#800020', letterSpacing: '0.1em',
-                                        textTransform: 'uppercase', paddingTop: '2px',
-                                    }}>
-                                        Who
-                                    </span>
-                                    <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.5 }}>
-                                        {cat.eligibility}
-                                    </span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                                    <span style={{
-                                        flexShrink: 0, fontSize: '10px', fontWeight: 700,
-                                        color: '#800020', letterSpacing: '0.1em',
-                                        textTransform: 'uppercase', paddingTop: '2px',
-                                    }}>
-                                        Win
-                                    </span>
-                                    <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.5 }}>
-                                        {cat.prize}
-                                    </span>
-                                </div>
+                                {[
+                                    { key: 'Who', val: cat.eligibility },
+                                    { key: 'Win',  val: cat.prize },
+                                    { key: 'Fee',  val: cat.fee },
+                                ].map(({ key, val }) => val && (
+                                    <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                        <span style={{ flexShrink: 0, fontSize: '10px', fontWeight: 700, color: '#800020', letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '2px' }}>
+                                            {key}
+                                        </span>
+                                        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.5 }}>
+                                            {val}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </motion.div>
                     ))}

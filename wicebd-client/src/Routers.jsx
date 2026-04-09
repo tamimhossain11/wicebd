@@ -37,7 +37,7 @@ import SignIn from './pages/userAuth/SignIn';
 import SignUp from './pages/userAuth/SignUp';
 import UserProfile from './pages/userAuth/UserProfile';
 import UserDashboard from './pages/userDashboard/UserDashboard';
-import RoboSoccer from './pages/innerPages/RoboSoccer';
+import SurpriseSegment from './pages/innerPages/SurpriseSegment';
 import UserRoute from './components/user/UserRoute';
 import OlympiadExamPortal from './pages/userDashboard/OlympiadExamPortal';
 import PrivacyPolicy from './pages/innerPages/PrivacyPolicy';
@@ -97,14 +97,7 @@ const Routers = () => {
                     </UserRoute>
                   }
                 />
-                <Route
-                  path='/robo-soccer'
-                  element={
-                    <UserRoute>
-                      <RoboSoccer />
-                    </UserRoute>
-                  }
-                />
+                <Route path='/surprise-segment' element={<SurpriseSegment />} />
                 <Route path='/partners' element={<Partners />} />
                 <Route path='/contact' element={<Contact />}></Route>
                 <Route path='/privacy-policy' element={<PrivacyPolicy />} />

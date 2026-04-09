@@ -12,7 +12,6 @@ const userAuthRoutes = require('./routes/userAuthRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
-const roboSoccerRoutes = require('./routes/roboSoccerRoutes');
 const qr = require('./routes/qr');
 const olympiadExamRoutes = require('./routes/olympiadExamRoutes');
 
@@ -60,7 +59,6 @@ app.use('/api/user-auth', userAuthRoutes);
 app.use('/api/user-profile', userProfileRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/announcements', announcementRoutes);
-app.use('/api/robo-soccer', roboSoccerRoutes);
 app.use('/api/olympiad-exam', olympiadExamRoutes);
 
 const PORT = process.env.PORT || 5000;

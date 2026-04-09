@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const TICKER_ITEMS = [
     '🏆 WICE Bangladesh 2025',
     '⚡ Innovation · Technology · Science',
-    '🤖 Robo Soccer',
+    '🎯 Surprise Segment',
     '📐 Science Olympiad',
     '💡 Project Display',
     '📰 Wall Magazine',

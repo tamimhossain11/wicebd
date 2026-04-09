@@ -17,11 +17,25 @@ const darkTheme = createTheme({
     components: { MuiOutlinedInput: { styleOverrides: { root: { borderRadius: 10 } } } },
 });
 
+const EARLY_BIRD_DEADLINE = new Date('2026-04-14T23:59:59');
+const isEarlyBird = new Date() <= EARLY_BIRD_DEADLINE;
+
 const TABS = [
-    { id: 'project',      label: 'Project',         badge: 'Team' },
-    { id: 'wall-magazine', label: 'Wall Magazine',   badge: 'Team' },
-    { id: 'olympiad',     label: 'Science Olympiad', badge: 'Individual' },
+    { id: 'project',       label: 'Project',         badge: 'Team' },
+    { id: 'wall-magazine', label: 'Wall Magazine',    badge: 'Team' },
+    { id: 'olympiad',      label: 'Science Olympiad', badge: 'Individual' },
 ];
+
+const FEE_INFO = {
+    project: {
+        fee: isEarlyBird ? 999 : 1200,
+        label: isEarlyBird ? 'Early Bird Fee' : 'Registration Fee',
+        note: isEarlyBird ? 'Early Bird ends April 14 · Default ৳1,200' : null,
+        prize: '৳2,00,000',
+    },
+    'wall-magazine': { fee: 399, label: 'Registration Fee', note: null, prize: '৳30,000' },
+    olympiad:        { fee: 50,  label: 'Registration Fee', note: null, prize: '৳10,000' },
+};
 
 export default function RegistrationPage() {
     const location = useLocation();
@@ -101,9 +115,52 @@ export default function RegistrationPage() {
                                 <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '20px', mb: 0.5 }}>
                                     {tab === 'project' ? 'Project Registration' : tab === 'wall-magazine' ? 'Wall Magazine Registration' : 'Science Olympiad Registration'}
                                 </Typography>
-                                <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', mb: 4 }}>
+                                <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', mb: 2.5 }}>
                                     8th WICEBD — Bangladesh National Round
                                 </Typography>
+
+                                {/* Fee + prize info bar */}
+                                {FEE_INFO[tab] && (
+                                    <div style={{
+                                        display: 'flex', gap: 12, flexWrap: 'wrap',
+                                        marginBottom: 28,
+                                    }}>
+                                        {/* Fee */}
+                                        <div style={{
+                                            flex: 1, minWidth: 140,
+                                            background: 'rgba(128,0,32,0.12)',
+                                            border: '1px solid rgba(128,0,32,0.28)',
+                                            borderRadius: 12, padding: '14px 18px',
+                                        }}>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                                {FEE_INFO[tab].label}
+                                            </div>
+                                            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>
+                                                ৳{FEE_INFO[tab].fee.toLocaleString()}
+                                            </div>
+                                            {FEE_INFO[tab].note && (
+                                                <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600, marginTop: 3 }}>
+                                                    {FEE_INFO[tab].note}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Prize pool */}
+                                        <div style={{
+                                            flex: 1, minWidth: 140,
+                                            background: 'rgba(255,255,255,0.04)',
+                                            border: '1px solid rgba(255,255,255,0.09)',
+                                            borderRadius: 12, padding: '14px 18px',
+                                        }}>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                                Prize Pool
+                                            </div>
+                                            <div style={{ fontSize: 24, fontWeight: 800, color: '#800020' }}>
+                                                {FEE_INFO[tab].prize}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {tab === 'project' && <ProjectRegistrationForm />}
                                 {tab === 'wall-magazine' && <WallMagazineRegistrationForm />}
