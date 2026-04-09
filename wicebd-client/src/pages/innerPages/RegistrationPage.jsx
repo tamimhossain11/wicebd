@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import HeaderV1 from '../../components/header/HeaderV1';
 import FooterV2 from '../../components/footer/FooterV2';
 import ProjectRegistrationForm from '../../components/registration/ProjectRegistrationForm';
+import WallMagazineRegistrationForm from '../../components/registration/WallMagazineRegistrationForm';
 import OlympiadRegistrationForm from '../../components/registration/OlympiadRegistrationForm';
 
 const darkTheme = createTheme({
@@ -17,8 +18,9 @@ const darkTheme = createTheme({
 });
 
 const TABS = [
-    { id: 'project',  label: 'Project & Wall Magazine', badge: 'Team' },
-    { id: 'olympiad', label: 'Science Olympiad',         badge: 'Individual' },
+    { id: 'project',      label: 'Project',         badge: 'Team' },
+    { id: 'wall-magazine', label: 'Wall Magazine',   badge: 'Team' },
+    { id: 'olympiad',     label: 'Science Olympiad', badge: 'Individual' },
 ];
 
 export default function RegistrationPage() {
@@ -27,7 +29,8 @@ export default function RegistrationPage() {
 
     useEffect(() => {
         const p = new URLSearchParams(location.search);
-        if (p.get('tab') === 'olympiad') setTab('olympiad');
+        const t = p.get('tab');
+        if (t === 'olympiad' || t === 'wall-magazine' || t === 'project') setTab(t);
     }, [location.search]);
 
     return (
@@ -96,13 +99,15 @@ export default function RegistrationPage() {
                                 }}
                             >
                                 <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '20px', mb: 0.5 }}>
-                                    {tab === 'project' ? 'Project & Wall Magazine' : 'Science Olympiad'}
+                                    {tab === 'project' ? 'Project Registration' : tab === 'wall-magazine' ? 'Wall Magazine Registration' : 'Science Olympiad Registration'}
                                 </Typography>
                                 <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', mb: 4 }}>
                                     8th WICEBD — Bangladesh National Round
                                 </Typography>
 
-                                {tab === 'project' ? <ProjectRegistrationForm /> : <OlympiadRegistrationForm />}
+                                {tab === 'project' && <ProjectRegistrationForm />}
+                                {tab === 'wall-magazine' && <WallMagazineRegistrationForm />}
+                                {tab === 'olympiad' && <OlympiadRegistrationForm />}
                             </motion.div>
                         </AnimatePresence>
                     </div>

@@ -50,9 +50,14 @@ const PARTNERS = [
         cat: 'Event Organizer',
     },
     {
+        name: 'Northern University Bangladesh',
+        logo: '/images/partners/nub.webp',
+        cat: 'Host Institution',
+    },
+    {
         name: 'Dhaka Imperial College',
         logo: '/images/partners/Dhaka_Imperial_College.jpg',
-        cat: 'Host Institution',
+        cat: 'Partner Institution',
     },
     {
         name: 'SEGI University',
@@ -75,42 +80,14 @@ const PARTNERS = [
         cat: 'International Partner',
     },
     {
-        name: 'iENA',
-        logo: null,
-        cat: 'European Expo',
-        initials: 'iENA',
-    },
-    {
-        name: 'Bangladesh Shishu Academy',
-        logo: null,
-        cat: 'Youth Institution',
-        initials: 'BSA',
-    },
-    {
-        name: 'The Daily Star',
-        logo: null,
+        name: 'Jagoron',
+        logo: '/images/partners/jagoron.png',
         cat: 'Media Partner',
-        initials: 'DS',
     },
     {
-        name: 'BTV',
-        logo: null,
-        cat: 'National TV',
-        initials: 'BTV',
-    },
-    {
-        name: 'Channel i',
-        logo: null,
+        name: 'Nagorik TV',
+        logo: '/images/partners/nagorik-tv.png',
         cat: 'Media Partner',
-        initials: 'i',
-        comingSoon: true,
-    },
-    {
-        name: 'Daily Prothom Alo',
-        logo: null,
-        cat: 'Media Partner',
-        initials: 'PA',
-        comingSoon: true,
     },
 ];
 

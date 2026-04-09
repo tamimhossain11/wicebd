@@ -39,9 +39,8 @@ const MP = {
     },
 };
 
-const STEPS = ['Competition', 'Team Info', 'Project'];
+const STEPS = ['Competition', 'Team Info', 'Magazine'];
 
-const SUBCATS = ['IT and Robotics', 'Environmental Science', 'Innovative Social Science', 'Applied Physics and Engineering', 'Applied Life Science'];
 const EDU_LEVELS = [
     { value: 'Primary School', label: 'Elementary (Class 1–5)' },
     { value: 'High School', label: 'High School (Class 6–10)' },
@@ -87,14 +86,14 @@ const NavRow = ({ step, total, onBack, loading, lastLabel }) => (
     </Box>
 );
 
-export default function ProjectRegistrationForm() {
+export default function WallMagazineRegistrationForm() {
     const [step, setStep] = useState(0);
     const [form, setForm] = useState({
-        competitionCategory: 'Project', projectSubcategory: '', categories: '', crRefrence: '',
+        competitionCategory: 'Megazine', categories: '', crRefrence: '',
         leader: '', institution: '', leaderPhone: '', leaderWhatsApp: '', leaderEmail: '',
         tshirtSizeLeader: '', member2: '', institution2: '', tshirtSize2: '',
         member3: '', institution3: '', tshirtSize3: '',
-        projectTitle: '', projectCategory: '', participatedBefore: '',
+        projectTitle: '', participatedBefore: '',
         previousCompetition: '', socialMedia: '', infoSource: '',
     });
     const [errors, setErrors] = useState({});
@@ -112,7 +111,6 @@ export default function ProjectRegistrationForm() {
     const validateStep = () => {
         const errs = {};
         if (step === 0) {
-            if (!form.projectSubcategory) errs.projectSubcategory = 'Required';
             if (!form.categories) errs.categories = 'Required';
             if (!form.crRefrence.trim()) errs.crRefrence = 'Required';
         }
@@ -126,7 +124,6 @@ export default function ProjectRegistrationForm() {
         }
         if (step === 2) {
             if (!form.projectTitle.trim()) errs.projectTitle = 'Required';
-            if (!form.projectCategory) errs.projectCategory = 'Required';
             if (!form.participatedBefore) errs.participatedBefore = 'Required';
             if (!form.infoSource.trim()) errs.infoSource = 'Required';
             if (form.socialMedia) {
@@ -194,16 +191,6 @@ export default function ProjectRegistrationForm() {
                     {/* ── Step 0: Competition ── */}
                     {step === 0 && (
                         <Grid container spacing={3}>
-                            <Grid item xs={12} sm={6}>
-                                <FormControl fullWidth sx={f} error={!!errors.projectSubcategory}>
-                                    <InputLabel>Subcategory *</InputLabel>
-                                    <Select name="projectSubcategory" value={form.projectSubcategory} onChange={onChange} label="Subcategory *" MenuProps={MP}>
-                                        {SUBCATS.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                                    </Select>
-                                    {errors.projectSubcategory && <FormHelperText>{errors.projectSubcategory}</FormHelperText>}
-                                </FormControl>
-                            </Grid>
-
                             <Grid item xs={12} sm={6}>
                                 <FormControl fullWidth sx={f} error={!!errors.categories}>
                                     <InputLabel>Education Level *</InputLabel>
@@ -284,23 +271,13 @@ export default function ProjectRegistrationForm() {
                         </Box>
                     )}
 
-                    {/* ── Step 2: Project ── */}
+                    {/* ── Step 2: Magazine ── */}
                     {step === 2 && (
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
-                                <TextField fullWidth label="Project Title *" name="projectTitle" value={form.projectTitle} onChange={onChange}
+                                <TextField fullWidth label="Magazine Title *" name="projectTitle" value={form.projectTitle} onChange={onChange}
                                     error={!!errors.projectTitle} helperText={errors.projectTitle || `${form.projectTitle.length}/160`}
                                     inputProps={{ maxLength: 160 }} sx={f} />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <FormControl fullWidth sx={f} error={!!errors.projectCategory}>
-                                    <InputLabel>Project Category *</InputLabel>
-                                    <Select name="projectCategory" value={form.projectCategory} onChange={onChange} label="Project Category *" MenuProps={MP}>
-                                        <MenuItem value="Innovation">Innovation</MenuItem>
-                                        <MenuItem value="Research">Research</MenuItem>
-                                    </Select>
-                                    {errors.projectCategory && <FormHelperText>{errors.projectCategory}</FormHelperText>}
-                                </FormControl>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <FormControl fullWidth sx={f} error={!!errors.participatedBefore}>

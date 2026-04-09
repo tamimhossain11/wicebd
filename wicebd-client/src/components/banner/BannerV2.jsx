@@ -289,7 +289,7 @@ const CountdownBar = ({ expiryTimestamp }) => {
 
 /* ── Banner ── */
 const BannerV2 = () => {
-    const time = new Date('May 30 2025');
+    const time = new Date('May 9 2026 08:00:00');
 
     return (
         <section className="banner-conference" style={{ position: 'relative' }}>
@@ -302,33 +302,52 @@ const BannerV2 = () => {
                 <span className="hero-orb hero-orb-3"></span>
             </div>
 
-            {/* Main content — bottom-left, with clear gap above countdown bar */}
+            {/* Main content — horizontally centred, close to timer */}
             <div style={{
                 position: 'absolute',
-                bottom: 136,          /* 96px bar + 40px gap */
+                bottom: 106,
                 left: 0,
                 right: 0,
                 zIndex: 10,
-                padding: '0 48px',
+                padding: '0 20px',
+                display: 'flex',
+                justifyContent: 'center',
             }}>
                 {/* Animated border wrapper */}
-                <div className="banner-glass-border" style={{ display: 'inline-block', borderRadius: 22, padding: 1.5 }}>
-                    <div className="content-box content-box-blur" style={{ maxWidth: 600, borderRadius: 20 }}>
-                        <span className="title">8th Edition &nbsp;·&nbsp; Date TBA &nbsp;·&nbsp; Dhaka</span>
+                <div className="banner-glass-border" style={{ borderRadius: 18, padding: 1.5, width: '100%', maxWidth: 1380 }}>
+                    <div className="content-box content-box-blur" style={{
+                        borderRadius: 16,
+                        width: '100%',
+                        maxWidth: '100%',
+                        padding: '14px 40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 48,
+                        boxSizing: 'border-box',
+                    }}>
+                        {/* Left — text */}
+                        <div style={{ flex: 1 }}>
+                            <span className="title">8th Edition &nbsp;·&nbsp; Date TBA &nbsp;·&nbsp; Dhaka</span>
+                            <h2 style={{ margin: '12px 0 0' }}>World Invention<br />Competition &amp; Exhibition<br />Bangladesh</h2>
+                        </div>
 
-                        <h2>World Invention<br />Competition &amp; Exhibition<br />Bangladesh</h2>
+                        {/* Divider */}
+                        <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
 
-                        <p className="banner-subtitle">
-                            The 8th edition of WICEBD — showcasing innovation, science &amp; technology
-                            from Bangladesh to the global stage.
-                        </p>
+                        {/* Right — subtitle */}
+                        <div style={{ flex: 1 }}>
+                            <p className="banner-subtitle" style={{ margin: 0 }}>
+                                The 8th edition of WICEBD — showcasing innovation, science &amp; technology
+                                from Bangladesh to the global stage.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Scroll hint */}
             <div style={{
-                position: 'absolute', bottom: 140, right: 52,
+                position: 'absolute', bottom: 112, right: 52,
                 zIndex: 10, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', gap: 6,
                 color: 'rgba(255,255,255,0.3)', fontSize: 10,
