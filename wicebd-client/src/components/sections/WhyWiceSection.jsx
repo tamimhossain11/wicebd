@@ -387,11 +387,7 @@ const WhyWiceSection = () => {
                 </motion.div>
 
                 {/* ── Pillars Grid ── */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 20, marginBottom: 72,
-                }}>
+                <div className="wice-pillars-grid">
                     {PILLARS.map((p, i) => (
                         <motion.div
                             key={i}
@@ -472,12 +468,11 @@ const WhyWiceSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
+                    className="wice-cta-band"
                     style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        flexWrap: 'wrap', gap: 24,
                         background: 'rgba(128,0,32,0.09)',
                         border: '1px solid rgba(128,0,32,0.28)',
-                        borderRadius: 22, padding: '34px 44px',
+                        borderRadius: 22,
                         position: 'relative', overflow: 'hidden',
                     }}
                 >

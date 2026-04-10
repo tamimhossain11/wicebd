@@ -308,7 +308,7 @@ const CompetitionCategories = () => {
                 </motion.div>
 
                 {/* ── Robot ── */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+                <div className="wice-robot-wrapper" style={{ marginBottom: '0px' }}>
                     <motion.div
                         initial={{ opacity: 0, scale: 0.7 }}
                         animate={inView ? { opacity: 1, scale: 1 } : {}}
@@ -325,14 +325,10 @@ const CompetitionCategories = () => {
                 </div>
 
                 {/* ── Tree connectors ── */}
-                <TreeConnectors />
+                <div className="wice-tree-connectors"><TreeConnectors /></div>
 
                 {/* ── Category cards ── */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '18px',
-                }}>
+                <div className="wice-comp-grid">
                     {CATEGORIES.map((cat, i) => (
                         <motion.div
                             key={cat.id}

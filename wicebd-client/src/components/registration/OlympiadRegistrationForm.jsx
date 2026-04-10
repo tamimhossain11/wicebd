@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import ReferenceSearch from './ReferenceSearch';
 
 const f = {
     '& .MuiOutlinedInput-root': {
@@ -22,7 +23,7 @@ const f = {
 };
 
 export default function OlympiadRegistrationForm() {
-    const [form, setForm] = useState({ fullName: '', email: '', phone: '', address: '', institution: '', crReference: '' });
+    const [form, setForm] = useState({ fullName: '', email: '', phone: '', address: '', institution: '', crReference: '', ca_code: '', club_code: '' });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
@@ -78,7 +79,7 @@ export default function OlympiadRegistrationForm() {
                     <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', maxWidth: 380, mx: 'auto', lineHeight: 1.8 }}>
                         Your Olympiad registration was received. We'll reach out via email with further details.
                     </Typography>
-                    <button onClick={() => { setDone(false); setForm({ fullName: '', email: '', phone: '', address: '', institution: '', crReference: '' }); }}
+                    <button onClick={() => { setDone(false); setForm({ fullName: '', email: '', phone: '', address: '', institution: '', crReference: '', ca_code: '', club_code: '' }); }}
                         style={{ marginTop: 28, padding: '11px 32px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.18)', background: 'transparent', color: 'rgba(255,255,255,0.7)', fontSize: '14px', cursor: 'pointer' }}>
                         Register another
                     </button>
@@ -112,6 +113,31 @@ export default function OlympiadRegistrationForm() {
                 </Grid>
                 <Grid item xs={12}>
                     <TextField fullWidth label="CR Reference (optional)" name="crReference" value={form.crReference} onChange={onChange} sx={f} />
+                </Grid>
+
+                {/* ── Campus Ambassador & Club Partner search ── */}
+                <Grid item xs={12}>
+                    <Box sx={{ height: '1px', background: 'rgba(255,255,255,0.07)', my: 1 }} />
+                    <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 2 }}>
+                        <Box sx={{ width: 3, height: 14, borderRadius: 2, background: '#800020' }} />
+                        <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>
+                            Reference (Optional)
+                        </Typography>
+                    </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <ReferenceSearch
+                        type="ca"
+                        value={form.ca_code}
+                        onChange={(code) => setForm(p => ({ ...p, ca_code: code }))}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <ReferenceSearch
+                        type="club"
+                        value={form.club_code}
+                        onChange={(code) => setForm(p => ({ ...p, club_code: code }))}
+                    />
                 </Grid>
 
                 {/* T&C acceptance */}

@@ -418,14 +418,14 @@ const FactV2 = () => {
                 </motion.div>
 
                 {/* Stat cards — row 1: 3 cards */}
-                <div style={{ display: 'flex', gap: 20, marginBottom: 20 }}>
+                <div className="wice-fact-row-1">
                     {STATS.slice(0, 3).map((stat, i) => (
                         <StatCard key={i} stat={stat} index={i} />
                     ))}
                 </div>
 
                 {/* Stat cards — row 2: 2 cards centered */}
-                <div style={{ display: 'flex', gap: 20, justifyContent: 'center' }}>
+                <div className="wice-fact-row-2">
                     {STATS.slice(3).map((stat, i) => (
                         <div key={i} style={{ flex: '0 0 calc(33.333% - 14px)', maxWidth: 'calc(33.333% - 14px)' }}>
                             <StatCard stat={stat} index={i + 3} />

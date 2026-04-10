@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import ReferenceSearch from './ReferenceSearch';
 
 /* ─── Shared field style ─── */
 const f = {
@@ -90,6 +91,7 @@ export default function WallMagazineRegistrationForm() {
     const [step, setStep] = useState(0);
     const [form, setForm] = useState({
         competitionCategory: 'Megazine', categories: '', crRefrence: '',
+        ca_code: '', club_code: '',
         leader: '', institution: '', leaderPhone: '', leaderWhatsApp: '', leaderEmail: '',
         tshirtSizeLeader: '', member2: '', institution2: '', tshirtSize2: '',
         member3: '', institution3: '', tshirtSize3: '',
@@ -204,6 +206,23 @@ export default function WallMagazineRegistrationForm() {
                             <Grid item xs={12} sm={6}>
                                 <TextField fullWidth label="CR Reference *" name="crRefrence" value={form.crRefrence} onChange={onChange}
                                     error={!!errors.crRefrence} helperText={errors.crRefrence} sx={f} placeholder="Your CR's name" />
+                            </Grid>
+
+                            {/* ── Campus Ambassador & Club Partner search ── */}
+                            <Grid item xs={12}>
+                                <Box sx={{ height: '1px', background: 'rgba(255,255,255,0.07)', my: 1 }} />
+                                <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 2 }}>
+                                    <Box sx={{ width: 3, height: 14, borderRadius: 2, background: '#800020' }} />
+                                    <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>
+                                        Reference (Optional)
+                                    </Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <ReferenceSearch type="ca" value={form.ca_code} onChange={(code) => set('ca_code', code)} />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <ReferenceSearch type="club" value={form.club_code} onChange={(code) => set('club_code', code)} />
                             </Grid>
                         </Grid>
                     )}

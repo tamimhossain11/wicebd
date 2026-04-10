@@ -82,7 +82,10 @@ const SignIn = () => {
   };
 
   const handleFacebookLogin = () => {
-    if (typeof window.FB === 'undefined') { toast.error('Facebook SDK not loaded.'); return; }
+    if (typeof window.FB === 'undefined' || !window._fbReady) {
+      toast.error('Facebook SDK not ready yet. Please wait a moment and try again.');
+      return;
+    }
     // FB.login does NOT accept async callbacks — use .then()/.catch() instead
     window.FB.login((response) => {
       if (response.authResponse) {
@@ -248,12 +251,14 @@ const SignIn = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="off"
                 required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailOutlined />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailOutlined />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
                 sx={inputSx}
               />
@@ -267,19 +272,21 @@ const SignIn = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="off"
                 required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockOutlined />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.45)' }}>
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlined />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.45)' }}>
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
                 }}
                 sx={inputSx}
               />

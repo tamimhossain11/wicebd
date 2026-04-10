@@ -148,38 +148,20 @@ const CountdownBar = ({ expiryTimestamp }) => {
     return (
         <div style={{
             position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
+            bottom: 0, left: 0, right: 0,
             zIndex: 10,
             background: 'rgba(4,0,10,0.72)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             borderTop: '1px solid rgba(255,255,255,0.08)',
         }}>
-            <div style={{
-                maxWidth: 1300,
-                margin: '0 auto',
-                padding: '0 40px',
-                display: 'flex',
-                alignItems: 'stretch',
-                justifyContent: 'space-between',
-                minHeight: 96,
-            }}>
+            <div className="wice-countdown-inner">
                 {/* Left — event label */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    paddingRight: 32,
-                    borderRight: '1px solid rgba(255,255,255,0.07)',
-                }}>
+                <div className="wice-countdown-label">
                     <div style={{
-                        width: 4,
-                        height: 36,
+                        width: 4, height: 36,
                         background: 'linear-gradient(180deg, #e94560, #800020)',
-                        borderRadius: 2,
-                        flexShrink: 0,
+                        borderRadius: 2, flexShrink: 0,
                     }} />
                     <div>
                         <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 2 }}>
@@ -192,44 +174,28 @@ const CountdownBar = ({ expiryTimestamp }) => {
                 </div>
 
                 {/* Centre — timer units */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 0, flex: 1, justifyContent: 'center' }}>
+                <div className="wice-countdown-timer">
                     {units.map((u, i) => (
                         <React.Fragment key={i}>
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                padding: '0 28px',
+                            <div className="wice-countdown-timer-unit" style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 28px',
                             }}>
                                 <span style={{
                                     fontFamily: 'monospace',
-                                    fontSize: 'clamp(28px, 3.5vw, 44px)',
-                                    fontWeight: 800,
-                                    color: '#fff',
-                                    lineHeight: 1,
-                                    letterSpacing: '0.04em',
+                                    fontSize: 'clamp(22px, 3.5vw, 44px)',
+                                    fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '0.04em',
                                 }}>
                                     {u.value}
                                 </span>
                                 <span style={{
-                                    fontSize: 10,
-                                    fontWeight: 600,
-                                    color: '#800020',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.18em',
-                                    marginTop: 5,
+                                    fontSize: 10, fontWeight: 600, color: '#800020',
+                                    textTransform: 'uppercase', letterSpacing: '0.18em', marginTop: 5,
                                 }}>
                                     {u.label}
                                 </span>
                             </div>
                             {i < units.length - 1 && (
-                                <div style={{
-                                    color: 'rgba(255,255,255,0.18)',
-                                    fontSize: 28,
-                                    fontWeight: 300,
-                                    lineHeight: 1,
-                                    userSelect: 'none',
-                                }}>
+                                <div style={{ color: 'rgba(255,255,255,0.18)', fontSize: 28, fontWeight: 300, lineHeight: 1, userSelect: 'none' }}>
                                     :
                                 </div>
                             )}
@@ -238,27 +204,16 @@ const CountdownBar = ({ expiryTimestamp }) => {
                 </div>
 
                 {/* Right — CTAs */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 14,
-                    paddingLeft: 32,
-                    borderLeft: '1px solid rgba(255,255,255,0.07)',
-                }}>
+                <div className="wice-countdown-cta">
                     <Link
                         to="/buy-ticket#"
+                        className="wice-register-btn"
                         style={{
                             background: 'linear-gradient(135deg, #800020, #c0002a)',
-                            color: '#fff',
-                            padding: '12px 28px',
-                            borderRadius: 6,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            textDecoration: 'none',
-                            whiteSpace: 'nowrap',
-                            boxShadow: '0 4px 20px rgba(128,0,32,0.5)',
-                            transition: 'transform 0.2s',
-                            display: 'inline-block',
+                            color: '#fff', padding: '12px 28px', borderRadius: 6,
+                            fontSize: 14, fontWeight: 700, textDecoration: 'none',
+                            whiteSpace: 'nowrap', boxShadow: '0 4px 20px rgba(128,0,32,0.5)',
+                            transition: 'transform 0.2s', display: 'inline-block',
                         }}
                         onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                         onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
@@ -267,14 +222,10 @@ const CountdownBar = ({ expiryTimestamp }) => {
                     </Link>
                     <Link
                         to="/about-us#"
+                        className="wice-learn-more-btn"
                         style={{
-                            color: 'rgba(255,255,255,0.65)',
-                            fontSize: 13,
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                            whiteSpace: 'nowrap',
-                            letterSpacing: '0.04em',
-                            transition: 'color 0.2s',
+                            color: 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 600,
+                            textDecoration: 'none', whiteSpace: 'nowrap', letterSpacing: '0.04em', transition: 'color 0.2s',
                         }}
                         onMouseEnter={e => e.currentTarget.style.color = '#fff'}
                         onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.65)'}
@@ -303,40 +254,22 @@ const BannerV2 = () => {
             </div>
 
             {/* Main content — horizontally centred, close to timer */}
-            <div style={{
-                position: 'absolute',
-                bottom: 106,
-                left: 0,
-                right: 0,
-                zIndex: 10,
-                padding: '0 20px',
-                display: 'flex',
-                justifyContent: 'center',
-            }}>
+            <div className="wice-banner-content-wrap">
                 {/* Animated border wrapper */}
                 <div className="banner-glass-border" style={{ borderRadius: 18, padding: 1.5, width: '100%', maxWidth: 1380 }}>
-                    <div className="content-box content-box-blur" style={{
-                        borderRadius: 16,
-                        width: '100%',
-                        maxWidth: '100%',
-                        padding: '14px 40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 48,
-                        boxSizing: 'border-box',
-                    }}>
+                    <div className="content-box content-box-blur wice-banner-content-inner">
                         {/* Left — text */}
                         <div style={{ flex: 1 }}>
                             <span className="title">8th Edition &nbsp;·&nbsp; Date TBA &nbsp;·&nbsp; Dhaka</span>
-                            <h2 style={{ margin: '12px 0 0' }}>World Invention<br />Competition &amp; Exhibition<br />Bangladesh</h2>
+                            <h2 className="wice-banner-title" style={{ margin: '12px 0 0' }}>World Invention<br />Competition &amp; Exhibition<br />Bangladesh</h2>
                         </div>
 
                         {/* Divider */}
-                        <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
+                        <div className="wice-banner-divider" />
 
                         {/* Right — subtitle */}
                         <div style={{ flex: 1 }}>
-                            <p className="banner-subtitle" style={{ margin: 0 }}>
+                            <p className="banner-subtitle wice-banner-subtitle" style={{ margin: 0 }}>
                                 The 8th edition of WICEBD — showcasing innovation, science &amp; technology
                                 from Bangladesh to the global stage.
                             </p>
@@ -346,13 +279,7 @@ const BannerV2 = () => {
             </div>
 
             {/* Scroll hint */}
-            <div style={{
-                position: 'absolute', bottom: 112, right: 52,
-                zIndex: 10, display: 'flex', flexDirection: 'column',
-                alignItems: 'center', gap: 6,
-                color: 'rgba(255,255,255,0.3)', fontSize: 10,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-            }}>
+            <div className="wice-scroll-hint">
                 <span style={{
                     width: 1, height: 40,
                     background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.3))',

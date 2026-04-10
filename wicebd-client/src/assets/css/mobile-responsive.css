@@ -1,0 +1,376 @@
+/* ==========================================================
+   WICEBD — Mobile Responsive Overrides
+   Breakpoints: 991px (tablet) · 767px (mobile) · 575px (small)
+   ========================================================== */
+
+/* ── Fix iOS parallax scroll bug ── */
+@media (max-width: 991px) {
+  .wice-highlight-section,
+  .wice-parallax-bg {
+    background-attachment: scroll !important;
+  }
+}
+
+/* ── Auto-container padding on small screens ── */
+@media (max-width: 575px) {
+  .auto-container { padding: 0 16px !important; }
+}
+
+/* ============================================================
+   BANNER
+   ============================================================ */
+
+.banner-conference {
+  min-height: 100svh;
+  min-height: 100vh;
+}
+
+/* Main glass content box */
+.wice-banner-content-wrap {
+  position: absolute;
+  bottom: 106px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.wice-banner-content-inner {
+  border-radius: 16px;
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  box-sizing: border-box;
+}
+
+.wice-banner-divider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.wice-scroll-hint {
+  position: absolute;
+  bottom: 112px;
+  right: 52px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.3);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Countdown bar */
+.wice-countdown-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 96px;
+}
+
+.wice-countdown-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 32px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+
+.wice-countdown-timer {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.wice-countdown-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 32px;
+  border-left: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+  .wice-countdown-inner {
+    padding: 0 20px;
+    min-height: 76px;
+  }
+  .wice-countdown-label {
+    padding-right: 18px;
+  }
+  .wice-countdown-cta {
+    padding-left: 18px;
+  }
+  .wice-learn-more-btn { display: none !important; }
+  .wice-banner-content-inner {
+    gap: 24px;
+    padding: 14px 24px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .wice-banner-content-wrap {
+    bottom: 80px !important;
+    padding: 0 12px;
+  }
+  .wice-banner-content-inner {
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 16px 18px !important;
+    align-items: flex-start !important;
+  }
+  .wice-banner-divider { display: none !important; }
+  .wice-banner-title { font-size: 20px !important; line-height: 1.3 !important; margin: 6px 0 0 !important; }
+  .wice-banner-subtitle { font-size: 12px !important; margin: 0 !important; }
+  .wice-scroll-hint { display: none !important; }
+
+  /* Countdown */
+  .wice-countdown-inner {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    min-height: auto !important;
+    padding: 8px 12px !important;
+    gap: 4px !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  .wice-countdown-label { display: none !important; }
+  .wice-countdown-cta {
+    padding-left: 0 !important;
+    border-left: none !important;
+    flex-shrink: 0;
+  }
+  .wice-countdown-timer {
+    flex: none !important;
+  }
+  .wice-countdown-timer-unit {
+    padding: 0 10px !important;
+  }
+  .wice-register-btn {
+    padding: 9px 18px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .wice-banner-title { font-size: 17px !important; }
+}
+
+/* ============================================================
+   HIGHLIGHT MOMENTS
+   ============================================================ */
+
+.wice-highlight-section {
+  background-attachment: fixed;
+}
+
+.wice-highlight-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 80px;
+}
+
+@media (max-width: 767px) {
+  .wice-highlight-section {
+    background-attachment: scroll !important;
+    padding: 70px 0 60px !important;
+  }
+  .wice-highlight-cards {
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin-bottom: 0 !important;
+  }
+  .wice-highlight-cards > div {
+    padding: 28px 20px !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* ============================================================
+   COMPETITION CATEGORIES
+   ============================================================ */
+
+.wice-comp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.wice-tree-connectors { display: block; }
+.wice-robot-wrapper { display: flex; justify-content: center; }
+
+@media (max-width: 991px) {
+  .wice-comp-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  .wice-tree-connectors { display: none !important; }
+}
+
+@media (max-width: 575px) {
+  .wice-comp-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .wice-robot-wrapper { display: none !important; }
+}
+
+/* ============================================================
+   FACT / STATS
+   ============================================================ */
+
+.wice-fact-row-1 {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.wice-fact-row-2 {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .wice-fact-row-1,
+  .wice-fact-row-2 {
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+  .wice-fact-row-1 { margin-bottom: 14px !important; }
+  .wice-fact-row-2 > div {
+    flex: 1 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ============================================================
+   WHY WICE
+   ============================================================ */
+
+.wice-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 72px;
+}
+
+.wice-cta-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 34px 44px;
+}
+
+@media (max-width: 991px) {
+  .wice-pillars-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .wice-pillars-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    margin-bottom: 40px !important;
+  }
+  .wice-cta-band {
+    padding: 24px 18px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    border-radius: 16px !important;
+  }
+  .wice-cta-band h3 { font-size: 20px !important; }
+  .wice-cta-band > div:last-child {
+    justify-content: center !important;
+  }
+}
+
+/* ============================================================
+   SPONSORS
+   ============================================================ */
+
+@media (max-width: 767px) {
+  .wice-sponsors-header h2 {
+    font-size: clamp(24px, 7vw, 36px) !important;
+  }
+  .wice-sponsors-ticker { padding: 10px 0 !important; }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.wice-footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 22px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wice-footer-policy-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 575px) {
+  .wice-footer-bottom {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 20px 0 !important;
+    gap: 14px !important;
+  }
+  .wice-footer-policy-links {
+    justify-content: center !important;
+    gap: 12px !important;
+  }
+}
+
+/* ============================================================
+   MEDIA COVERAGE — extra tweaks
+   ============================================================ */
+
+@media (max-width: 575px) {
+  .mc-tab-btn { font-size: 11px !important; padding: 8px 12px !important; }
+  .media-section-title { font-size: 26px !important; }
+}
+
+/* ============================================================
+   GENERAL SECTION HEADING SIZES
+   ============================================================ */
+
+@media (max-width: 575px) {
+  section h2 { font-size: clamp(24px, 7vw, 34px) !important; }
+}
+
+/* ============================================================
+   HEADER — ensure mobile menu works
+   ============================================================ */
+
+@media (max-width: 991px) {
+  .main-header .outer-box .search-box-outer { display: none; }
+}

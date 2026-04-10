@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavHashLink as Link } from 'react-router-hash-link'
+import { HashLink as Link } from 'react-router-hash-link'
 import SearchPopup from '../others/SearchPopup';
 import MainMenu from './MainMenu';
 import { useAuth } from '../../context/AuthContext';

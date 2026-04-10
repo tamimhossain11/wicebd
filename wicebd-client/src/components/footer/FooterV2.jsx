@@ -30,7 +30,7 @@ const SOCIALS = [
     { icon: 'fa-instagram',   href: 'https://www.instagram.com/wicebd' },
 ];
 
-const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
+const FooterV2 = () => (
     <footer style={{
         background: 'linear-gradient(160deg,#0a0004 0%,#160008 60%,#220010 100%)',
         borderTop: '1px solid rgba(128,0,32,0.25)',
@@ -227,12 +227,7 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
             </div>
 
             {/* Bottom bar */}
-            <div style={{
-                borderTop: '1px solid rgba(255,255,255,0.06)',
-                padding: '22px 0',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                flexWrap: 'wrap', gap: 12,
-            }}>
+            <div className="wice-footer-bottom">
                 <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, margin: 0 }}>
                     &copy; {new Date().getFullYear()} WICEBD. All rights reserved.{' '}
                     <span style={{ color: 'rgba(128,0,32,0.7)' }}>·</span>{' '}
@@ -242,7 +237,7 @@ const FooterV2 = ({ hasIcon = false, footerStyle, darkLogo = false }) => (
                         Dreams of Bangladesh
                     </a>
                 </p>
-                <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                <div className="wice-footer-policy-links">
                     {POLICY_LINKS.map(l => (
                         <RouterLink key={l.label} to={l.to} style={{
                             color: 'rgba(255,255,255,0.3)', fontSize: 12, textDecoration: 'none',

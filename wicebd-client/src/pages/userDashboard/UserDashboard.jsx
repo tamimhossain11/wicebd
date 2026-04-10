@@ -16,6 +16,8 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/index';
+import EventPassCard from '../../components/eventPass/EventPassCard';
+import { CardMembership } from '@mui/icons-material';
 
 /* ── Brand colours ── */
 const C = {
@@ -48,12 +50,13 @@ const MP2 = { PaperProps: { sx: { background: '#1a000a', border: '1px solid rgba
 
 /* ── Sidebar nav items ── */
 const NAV = [
-  { id: 'overview',       label: 'Dashboard',        icon: <Dashboard      sx={{ fontSize: 19 }} /> },
-  { id: 'competitions',   label: 'Competitions',      icon: <Assignment     sx={{ fontSize: 19 }} /> },
-  { id: 'registrations',  label: 'My Registrations',  icon: <CheckCircle    sx={{ fontSize: 19 }} /> },
-  { id: 'announcements',  label: 'Announcements',     icon: <Notifications  sx={{ fontSize: 19 }} /> },
-  { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth  sx={{ fontSize: 19 }} /> },
-  { id: 'profile',        label: 'Profile',           icon: <Person         sx={{ fontSize: 19 }} /> },
+  { id: 'overview',       label: 'Dashboard',        icon: <Dashboard       sx={{ fontSize: 19 }} /> },
+  { id: 'competitions',   label: 'Competitions',      icon: <Assignment      sx={{ fontSize: 19 }} /> },
+  { id: 'registrations',  label: 'My Registrations',  icon: <CheckCircle     sx={{ fontSize: 19 }} /> },
+  { id: 'event-pass',     label: 'Event Pass',        icon: <CardMembership  sx={{ fontSize: 19 }} /> },
+  { id: 'announcements',  label: 'Announcements',     icon: <Notifications   sx={{ fontSize: 19 }} /> },
+  { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} /> },
+  { id: 'profile',        label: 'Profile',           icon: <Person          sx={{ fontSize: 19 }} /> },
 ];
 
 /* ── Sidebar ── */
@@ -487,23 +490,23 @@ export default function UserDashboard() {
 
               {/* Stat cards */}
               <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Registrations" value={totalRegs} color={C.primary} icon={<Assignment sx={{ fontSize: 20 }} />} />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Announcements" value={announcements.length} color="#0f3460" icon={<Notifications sx={{ fontSize: 20 }} />} />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Profile" value={profileComplete ? '100%' : `${progressPct}%`} color="#10b981" icon={<Person sx={{ fontSize: 20 }} />} />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Edition" value="8th" color="#f59e0b" icon={<EmojiEvents sx={{ fontSize: 20 }} />} />
                 </Grid>
               </Grid>
 
               {/* Journey + Quick Links */}
               <Grid container spacing={2.5}>
-                <Grid item xs={12} md={5}>
+                <Grid size={{ xs: 12, md: 5 }}>
                   <Paper sx={{ p: 3, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, height: '100%' }}>
                     <Typography fontWeight={700} sx={{ color: '#fff', mb: 2.5, fontSize: 15 }}>Your Journey</Typography>
                     <StepItem done label="Create Account" desc="Account successfully created" />
@@ -511,7 +514,7 @@ export default function UserDashboard() {
                     <StepItem done={hasProject || hasOlympiad} label="Register for Event" desc="Choose and register for a competition" />
                   </Paper>
                 </Grid>
-                <Grid item xs={12} md={7}>
+                <Grid size={{ xs: 12, md: 7 }}>
                   <Paper sx={{ p: 3, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, height: '100%' }}>
                     <Typography fontWeight={700} sx={{ color: '#fff', mb: 2, fontSize: 15 }}>Quick Links</Typography>
                     <Grid container spacing={1.2}>
@@ -524,7 +527,7 @@ export default function UserDashboard() {
                         { label: 'Complete Profile', to: null },
                         { label: 'Register Now', to: '/registration' },
                       ].map(({ label, to }) => (
-                        <Grid item key={label}>
+                        <Grid key={label}>
                           <Button
                             {...(to ? { component: Link, to } : { onClick: () => setActive('profile') })}
                             size="small" sx={{
@@ -562,7 +565,7 @@ export default function UserDashboard() {
                 <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>Register for WICE Bangladesh 2025 events.</Typography>
               </Box>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
                     icon={<Assignment sx={{ color: '#fff', fontSize: 22 }} />} color="#800020"
                     title="Project Competition"
@@ -574,7 +577,7 @@ export default function UserDashboard() {
                     prizePool="2,00,000"
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
                     icon={<Assignment sx={{ color: '#fff', fontSize: 22 }} />} color="#10b981"
                     title="Wall Magazine"
@@ -585,7 +588,7 @@ export default function UserDashboard() {
                     prizePool="30,000"
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
                     icon={<EmojiEvents sx={{ color: '#fff', fontSize: 22 }} />} color="#0f3460"
                     title="Science Olympiad"
@@ -597,7 +600,7 @@ export default function UserDashboard() {
                     prizePool="10,000"
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
                     icon={<span style={{ fontSize: 22, color: '#fff' }}>🎯</span>} color="#800020"
                     title="Surprise Segment"
@@ -651,6 +654,11 @@ export default function UserDashboard() {
             </Box>
           )}
 
+          {/* ══ EVENT PASS ══ */}
+          {active === 'event-pass' && (
+            <EventPassCard user={user} />
+          )}
+
           {/* ══ ANNOUNCEMENTS ══ */}
           {active === 'announcements' && (
             <Box>
@@ -665,7 +673,7 @@ export default function UserDashboard() {
                   </Paper>
                 : <Grid container spacing={2}>
                     {announcements.map(ann => (
-                      <Grid item xs={12} md={6} key={ann.id}>
+                      <Grid size={{ xs: 12, md: 6 }} key={ann.id}>
                         <Paper sx={{ p: 3, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, height: '100%' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                             <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14, lineHeight: 1.4, flex: 1, mr: 1 }}>{ann.title}</Typography>
@@ -755,19 +763,19 @@ export default function UserDashboard() {
                     <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Personal Information</Typography>
                   </Box>
                   <Grid container spacing={2.5}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Institution / School / University" fullWidth value={profileForm.institution} onChange={setField('institution')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><School /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Class / Grade" fullWidth value={profileForm.class_grade} onChange={setField('class_grade')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><School /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Date of Birth" type="date" fullWidth value={profileForm.date_of_birth} onChange={setField('date_of_birth')} sx={fSx}
                         slotProps={{ inputLabel: { shrink: true }, input: { startAdornment: <InputAdornment position="start"><Cake /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField select label="Gender" fullWidth value={profileForm.gender} onChange={setField('gender')} sx={fSx}
                         slotProps={{ select: { MenuProps: MP2 } }}>
                         {['male', 'female', 'other'].map(g => (
@@ -775,7 +783,7 @@ export default function UserDashboard() {
                         ))}
                       </TextField>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField label="Address" fullWidth value={profileForm.address} onChange={setField('address')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><Home /></InputAdornment> } }} />
                     </Grid>
@@ -789,23 +797,23 @@ export default function UserDashboard() {
                     <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Family Information</Typography>
                   </Box>
                   <Grid container spacing={2.5}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Father's Name" fullWidth value={profileForm.father_name} onChange={setField('father_name')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><Person /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Father's Occupation" fullWidth value={profileForm.father_occupation} onChange={setField('father_occupation')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><Work /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Mother's Name" fullWidth value={profileForm.mother_name} onChange={setField('mother_name')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><Person /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Mother's Occupation" fullWidth value={profileForm.mother_occupation} onChange={setField('mother_occupation')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><Work /></InputAdornment> } }} />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField label="Guardian Phone" fullWidth value={profileForm.guardian_phone} onChange={setField('guardian_phone')} sx={fSx}
                         slotProps={{ input: { startAdornment: <InputAdornment position="start"><Phone /></InputAdornment> } }} />
                     </Grid>

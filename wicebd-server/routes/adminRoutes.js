@@ -7,7 +7,7 @@ const authenticateAdmin = require('../middleware/auth');
 router.get('/participants', authenticateAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT 
+      SELECT
         id,
         competitionCategory,
         projectSubcategory,
@@ -31,6 +31,8 @@ router.get('/participants', authenticateAdmin, async (req, res) => {
         previousCompetition,
         socialMedia,
         infoSource,
+        ca_code,
+        club_code,
         paymentID,
         created_at as createdAt
       FROM registrations
@@ -56,6 +58,21 @@ router.get('/participants/export', authenticateAdmin, async (req, res) => {
     res.send(csv);
   } catch (error) {
     res.status(500).json({ error: 'Export failed' });
+  }
+});
+
+// Get all registered users
+router.get('/users', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT id, name, email, provider, is_verified, created_at
+      FROM users
+      ORDER BY created_at DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    res.status(500).json({ error: 'Database error' });
   }
 });
 

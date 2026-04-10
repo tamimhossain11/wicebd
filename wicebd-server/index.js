@@ -14,6 +14,9 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const qr = require('./routes/qr');
 const olympiadExamRoutes = require('./routes/olympiadExamRoutes');
+const campusAmbassadorRoutes = require('./routes/campusAmbassadorRoutes');
+const clubPartnerRoutes = require('./routes/clubPartnerRoutes');
+const eventPassRoutes = require('./routes/eventPassRoutes');
 
 // CORS — raw middleware, runs before everything
 const allowedOrigins = [
@@ -60,6 +63,9 @@ app.use('/api/user-profile', userProfileRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/olympiad-exam', olympiadExamRoutes);
+app.use('/api/campus-ambassador', campusAmbassadorRoutes);
+app.use('/api/club-partner', clubPartnerRoutes);
+app.use('/api/event-pass', eventPassRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

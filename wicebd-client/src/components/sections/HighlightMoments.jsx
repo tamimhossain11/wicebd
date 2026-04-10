@@ -138,6 +138,7 @@ const HighlightMoments = () => {
     return (
         <section
             ref={sectionRef}
+            className="wice-highlight-section"
             style={{
                 position: 'relative',
                 backgroundImage: 'url(/images/coverage.jpeg)',
@@ -239,7 +240,7 @@ const HighlightMoments = () => {
                 </div>
 
                 {/* Stat cards */}
-                <div style={{ display: 'flex', gap: 20, marginBottom: 80 }}>
+                <div className="wice-highlight-cards">
                     <StatCard number={14} suffix="" label="Gold Medals" color="#D4AF37" icon="🥇" delay={0.1} />
                     <StatCard number={3} suffix="" label="Silver Medals" color="#C0C0C0" icon="🥈" delay={0.22} />
                     <StatCard number={5} suffix="+" label="Special International Awards" color="#800020" icon="⭐" delay={0.34} />

@@ -3,17 +3,32 @@ const db = require('../db');
 const getAnalytics = async (req, res) => {
   try {
     // Total counts
-    const [[{ totalProject }]] = await db.query('SELECT COUNT(*) as totalProject FROM registrations');
+    const [[{ totalProject }]] = await db.query(
+      "SELECT COUNT(*) as totalProject FROM registrations WHERE competitionCategory != 'Megazine'"
+    );
+    const [[{ totalMagazine }]] = await db.query(
+      "SELECT COUNT(*) as totalMagazine FROM registrations WHERE competitionCategory = 'Megazine'"
+    );
     const [[{ totalOlympiad }]] = await db.query('SELECT COUNT(*) as totalOlympiad FROM olympiad_registrations');
-    const [[{ totalRoboSoccer }]] = await db.query('SELECT COUNT(*) as totalRoboSoccer FROM robo_soccer_registrations');
     const [[{ totalUsers }]] = await db.query('SELECT COUNT(*) as totalUsers FROM users');
     const [[{ totalAnnouncements }]] = await db.query('SELECT COUNT(*) as totalAnnouncements FROM announcements WHERE is_published = 1');
 
-    // Daily registrations last 14 days (project)
+    // Daily registrations last 14 days (project — excludes magazine)
     const [projectDaily] = await db.query(`
       SELECT DATE(created_at) as date, COUNT(*) as count
       FROM registrations
       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+        AND competitionCategory != 'Megazine'
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `);
+
+    // Daily registrations last 14 days (wall magazine)
+    const [magazineDaily] = await db.query(`
+      SELECT DATE(created_at) as date, COUNT(*) as count
+      FROM registrations
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+        AND competitionCategory = 'Megazine'
       GROUP BY DATE(created_at)
       ORDER BY date ASC
     `);
@@ -27,19 +42,11 @@ const getAnalytics = async (req, res) => {
       ORDER BY date ASC
     `);
 
-    // Daily registrations last 14 days (robo soccer)
-    const [roboDaily] = await db.query(`
-      SELECT DATE(created_at) as date, COUNT(*) as count
-      FROM robo_soccer_registrations
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-      GROUP BY DATE(created_at)
-      ORDER BY date ASC
-    `);
-
-    // Competition category breakdown for project
+    // Competition category breakdown for project (excludes magazine)
     const [categoryBreakdown] = await db.query(`
       SELECT competitionCategory as category, COUNT(*) as count
       FROM registrations
+      WHERE competitionCategory != 'Megazine'
       GROUP BY competitionCategory
       ORDER BY count DESC
     `);
@@ -57,16 +64,16 @@ const getAnalytics = async (req, res) => {
       success: true,
       totals: {
         project: totalProject,
+        magazine: totalMagazine,
         olympiad: totalOlympiad,
-        roboSoccer: totalRoboSoccer,
         users: totalUsers,
         announcements: totalAnnouncements,
-        all: totalProject + totalOlympiad + totalRoboSoccer,
+        all: totalProject + totalMagazine + totalOlympiad,
       },
       charts: {
         projectDaily,
+        magazineDaily,
         olympiadDaily,
-        roboDaily,
         categoryBreakdown,
         userGrowth,
       },

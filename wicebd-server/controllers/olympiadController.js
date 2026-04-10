@@ -21,13 +21,15 @@ const emailTransporter = nodemailer.createTransport({
 });
 
 const registerParticipant = async (req, res) => {
-  const { 
-    fullName, 
-    email, 
-    phone, 
-    address, 
-    institution, 
-    crReference = '' 
+  const {
+    fullName,
+    email,
+    phone,
+    address,
+    institution,
+    crReference = '',
+    ca_code = null,
+    club_code = null,
   } = req.body;
 
   // Basic validation
@@ -65,8 +67,10 @@ const registerParticipant = async (req, res) => {
         address,
         institution,
         cr_reference,
+        ca_code,
+        club_code,
         status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         registrationId,
         fullName,
@@ -75,7 +79,9 @@ const registerParticipant = async (req, res) => {
         address,
         institution,
         crReference,
-        'registered' // initial status
+        ca_code || null,
+        club_code || null,
+        'registered',
       ]
     );
 
@@ -150,9 +156,9 @@ const sendConfirmationEmail = async ({ fullName, email, registrationId }) => {
 const getOlympiadParticipants = async (req, res) => {
   try {
     const [results] = await db.query(`
-      SELECT id, registration_id, full_name, email, phone, 
-             institution, address, cr_reference, status, 
-             created_at 
+      SELECT id, registration_id, full_name, email, phone,
+             institution, address, cr_reference,
+             ca_code, club_code, status, created_at
       FROM olympiad_registrations
       ORDER BY created_at DESC
     `);

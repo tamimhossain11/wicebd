@@ -10,7 +10,7 @@ const startRegistration = async (req, res) => {
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
-    socialMedia, infoSource
+    socialMedia, infoSource, ca_code, club_code
   } = data;
 
   const sql = `
@@ -19,8 +19,8 @@ const startRegistration = async (req, res) => {
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
-    socialMedia, infoSource
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    socialMedia, infoSource, ca_code, club_code
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 const values = [
@@ -29,7 +29,7 @@ const values = [
   member2 || null, institution2 || null, tshirtSize2 || null,
   member3 || null, institution3 || null, tshirtSize3 || null,
   projectTitle, projectCategory, participatedBefore, previousCompetition,
-  socialMedia, infoSource
+  socialMedia, infoSource, ca_code || null, club_code || null
 ];
 
 

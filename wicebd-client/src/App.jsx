@@ -14,6 +14,7 @@ import '../src/assets/css/animate.css'
 import '../src/assets/css/style.css'
 import '../src/assets/css/responsive.css'
 import '../src/assets/css/moments.css'
+import '../src/assets/css/mobile-responsive.css'
 
 import Routers from './Routers';
 import IntroVideo from './components/others/IntroVideo';
