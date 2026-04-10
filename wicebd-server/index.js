@@ -20,23 +20,32 @@ const eventPassRoutes = require('./routes/eventPassRoutes');
 const promoCodeRoutes = require('./routes/promoCodeRoutes');
 
 // CORS — raw middleware, runs before everything
-const allowedOrigins = new Set(JSON.parse(process.env.FRONTEND_BASE_URL));
+
+const normalize = (url) => url?.replace(/\/$/, "");
+
+app.use(cors({
+  origin: (origin, callback) => {
+    const o = normalize(origin);
+
+    if (!origin || allowedOrigins.has(o)) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS blocked"));
+  },
+  credentials: true
+}));
 
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
+  const origin = normalize(req.headers.origin);
 
-  if (allowedOrigins.has(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
+  if (!origin || allowedOrigins.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
   }
 
   res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.setHeader("Vary", "Origin");
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
+  if (req.method === "OPTIONS") return res.sendStatus(204);
 
   next();
 });
