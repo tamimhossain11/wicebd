@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+// Routes
 const paymentRoutes = require('./routes/paymentRoute');
 const registrationRoutes = require('./routes/registerRoute');
 const olympiadRoutes = require('./routes/olympiadRoutes');
@@ -19,10 +20,22 @@ const clubPartnerRoutes = require('./routes/clubPartnerRoutes');
 const eventPassRoutes = require('./routes/eventPassRoutes');
 const promoCodeRoutes = require('./routes/promoCodeRoutes');
 
-// CORS — raw middleware, runs before everything
+
+// ----------------------------
+// CORS CONFIG
+// ----------------------------
 
 const normalize = (url) => url?.replace(/\/$/, "");
 
+// Get frontend URLs from .env
+const allowedOrigins = new Set([
+  ...process.env.FRONTEND_BASE_URL.split(',').map(normalize),
+  normalize(process.env.FRONTEND_DEV_URL)
+]);
+
+console.log("Allowed Origins:", allowedOrigins);
+
+// CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
     const o = normalize(origin);
@@ -30,11 +43,14 @@ app.use(cors({
     if (!origin || allowedOrigins.has(o)) {
       return callback(null, true);
     }
+
+    console.log("❌ Blocked CORS:", origin);
     return callback(new Error("CORS blocked"));
   },
   credentials: true
 }));
 
+// Extra headers
 app.use((req, res, next) => {
   const origin = normalize(req.headers.origin);
 
@@ -44,31 +60,38 @@ app.use((req, res, next) => {
 
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Vary", "Origin");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
 
   if (req.method === "OPTIONS") return res.sendStatus(204);
 
   next();
 });
 
-// Parse JSON
+// ----------------------------
+// Middleware
+// ----------------------------
+
 app.use(express.json());
 
-// Add console log middleware to track hits
 app.use('/api/payment', (req, res, next) => {
   console.log('🛣️ Base /api/payment route accessed');
   next();
 });
 
+// Routes
 app.use('/api/registration', registrationRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/olympiad', olympiadRoutes);
-
-//admin routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/qr', qr);
-
-// User auth routes
 app.use('/api/user-auth', userAuthRoutes);
 app.use('/api/user-profile', userProfileRoutes);
 app.use('/api/analytics', analyticsRoutes);
@@ -79,7 +102,12 @@ app.use('/api/club-partner', clubPartnerRoutes);
 app.use('/api/event-pass', eventPassRoutes);
 app.use('/api/promo', promoCodeRoutes);
 
+// ----------------------------
+// Server
+// ----------------------------
+
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
