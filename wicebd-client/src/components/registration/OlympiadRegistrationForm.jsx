@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextField, Typography, Grid, CircularProgress, Checkbox } from '@mui/material';
+import { Box, TextField, Typography, Grid, CircularProgress, Checkbox, FormHelperText } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -19,21 +19,59 @@ const f = {
     '& .MuiInputLabel-root.Mui-focused': { color: '#c0002a' },
     '& .MuiInputBase-input': { color: '#fff' },
     '& .MuiInputBase-inputMultiline': { color: '#fff' },
-    '& .MuiFormHelperText-root.Mui-error': { color: '#ff7070', marginLeft: 0, marginTop: '4px' },
+    '& .MuiFormHelperText-root': { color: 'rgba(255,255,255,0.35)', marginLeft: 0, marginTop: '4px' },
+    '& .MuiFormHelperText-root.Mui-error': { color: '#ff7070' },
 };
 
-export default function OlympiadRegistrationForm() {
-    const [form, setForm] = useState({ fullName: '', email: '', phone: '', address: '', institution: '', crReference: '', ca_code: '', club_code: '' });
+export default function OlympiadRegistrationForm({ onPromoChange }) {
+    const [form, setForm] = useState({ fullName: '', email: '', phone: '', address: '', institution: '', ca_code: '', club_code: '', promo_code: '' });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [promoInput, setPromoInput] = useState('');
+    const [promoStatus, setPromoStatus] = useState(null);
+    const [promoLoading, setPromoLoading] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const onChange = e => {
         const { name, value } = e.target;
-        setForm(p => ({ ...p, [name]: value }));
+        setForm(p => ({
+            ...p, [name]: value,
+            ...(name === 'ca_code' && value ? { club_code: '' } : {}),
+            ...(name === 'club_code' && value ? { ca_code: '' } : {}),
+        }));
         setErrors(p => ({ ...p, [name]: '' }));
+    };
+
+    const applyPromo = async () => {
+        if (!promoInput.trim()) return;
+        setPromoLoading(true);
+        try {
+            const res = await axios.post(`${backendUrl}/api/promo/validate`, {
+                code: promoInput.trim().toUpperCase(),
+                competitionType: 'olympiad',
+            });
+            setPromoStatus(res.data);
+            if (res.data.valid) {
+                setForm(p => ({ ...p, promo_code: promoInput.trim().toUpperCase() }));
+                onPromoChange?.({ code: promoInput.trim().toUpperCase(), discount: res.data.discountPercentage });
+            } else {
+                setForm(p => ({ ...p, promo_code: '' }));
+                onPromoChange?.({ code: '', discount: 0 });
+            }
+        } catch {
+            setPromoStatus({ valid: false, message: 'Could not validate code. Try again.' });
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
+    const clearPromo = () => {
+        setPromoInput('');
+        setPromoStatus(null);
+        setForm(p => ({ ...p, promo_code: '' }));
+        onPromoChange?.({ code: '', discount: 0 });
     };
 
     const handleSubmit = async e => {
@@ -91,57 +129,121 @@ export default function OlympiadRegistrationForm() {
     return (
         <Box component="form" onSubmit={handleSubmit} noValidate>
             <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField fullWidth label="Full Name *" name="fullName" value={form.fullName} onChange={onChange}
-                        error={!!errors.fullName} helperText={errors.fullName} sx={f} />
+                        error={!!errors.fullName}
+                        helperText={errors.fullName || 'Enter your full name as on your ID/student card'}
+                        sx={f} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField fullWidth label="Email Address *" name="email" value={form.email} onChange={onChange}
-                        error={!!errors.email} helperText={errors.email} type="email" sx={f} />
+                        error={!!errors.email}
+                        helperText={errors.email || 'Exam details and confirmation will be sent here'}
+                        type="email" sx={f} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField fullWidth label="Phone Number *" name="phone" value={form.phone} onChange={onChange}
-                        error={!!errors.phone} helperText={errors.phone} placeholder="01XXXXXXXXX" sx={f} />
+                        error={!!errors.phone}
+                        helperText={errors.phone || 'Bangladeshi number, e.g. 01712345678'}
+                        placeholder="01XXXXXXXXX" sx={f} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField fullWidth label="Institution *" name="institution" value={form.institution} onChange={onChange}
-                        error={!!errors.institution} helperText={errors.institution} sx={f} />
+                        error={!!errors.institution}
+                        helperText={errors.institution || 'Your school, college or university name'}
+                        sx={f} />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                     <TextField fullWidth multiline rows={3} label="Address *" name="address" value={form.address} onChange={onChange}
-                        error={!!errors.address} helperText={errors.address} sx={f} />
+                        error={!!errors.address}
+                        helperText={errors.address || 'Your current residential address (city, district)'}
+                        sx={f} />
                 </Grid>
-                <Grid item xs={12}>
-                    <TextField fullWidth label="CR Reference (optional)" name="crReference" value={form.crReference} onChange={onChange} sx={f} />
-                </Grid>
-
-                {/* ── Campus Ambassador & Club Partner search ── */}
-                <Grid item xs={12}>
+                {/* ── Campus Ambassador & Club Partner (mutual exclusion) ── */}
+                <Grid size={{ xs: 12 }}>
                     <Box sx={{ height: '1px', background: 'rgba(255,255,255,0.07)', my: 1 }} />
-                    <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 2 }}>
+                    <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 0.5 }}>
                         <Box sx={{ width: 3, height: 14, borderRadius: 2, background: '#800020' }} />
                         <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>
                             Reference (Optional)
                         </Typography>
                     </Box>
+                    <Typography sx={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', mb: 2 }}>
+                        Select either a Campus Ambassador <em>or</em> a Club Partner — not both.
+                    </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <ReferenceSearch
                         type="ca"
                         value={form.ca_code}
-                        onChange={(code) => setForm(p => ({ ...p, ca_code: code }))}
+                        onChange={(code) => setForm(p => ({ ...p, ca_code: code, ...(code ? { club_code: '' } : {}) }))}
+                        disabled={!!form.club_code}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <ReferenceSearch
                         type="club"
                         value={form.club_code}
-                        onChange={(code) => setForm(p => ({ ...p, club_code: code }))}
+                        onChange={(code) => setForm(p => ({ ...p, club_code: code, ...(code ? { ca_code: '' } : {}) }))}
+                        disabled={!!form.ca_code}
                     />
                 </Grid>
 
+                {/* ── Promo Code ── */}
+                <Grid size={{ xs: 12 }}>
+                    <Box sx={{ height: '1px', background: 'rgba(255,255,255,0.07)', my: 1 }} />
+                    <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 2 }}>
+                        <Box sx={{ width: 3, height: 14, borderRadius: 2, background: '#800020' }} />
+                        <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>
+                            Promo Code (Optional)
+                        </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                        <TextField
+                            value={promoInput}
+                            onChange={e => { setPromoInput(e.target.value.toUpperCase()); setPromoStatus(null); }}
+                            placeholder="e.g. WICE2025"
+                            disabled={promoStatus?.valid}
+                            sx={{ ...f, flex: 1 }}
+                            size="small"
+                            helperText={
+                                promoStatus
+                                    ? promoStatus.valid
+                                        ? `✓ ${promoStatus.discountPercentage}% discount applied!`
+                                        : promoStatus.message
+                                    : 'Enter a promo code if you have one'
+                            }
+                            slotProps={{
+                                formHelperText: {
+                                    sx: {
+                                        color: promoStatus?.valid ? '#10b981' : promoStatus ? '#ff7070' : 'rgba(255,255,255,0.3)',
+                                        ml: 0, mt: '4px',
+                                    },
+                                },
+                            }}
+                        />
+                        {promoStatus?.valid ? (
+                            <button type="button" onClick={clearPromo} style={{
+                                padding: '9px 18px', borderRadius: '10px', border: '1px solid rgba(255,100,100,0.4)',
+                                background: 'rgba(255,80,80,0.1)', color: '#ff7070', fontSize: '13px',
+                                fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                            }}>Remove</button>
+                        ) : (
+                            <button type="button" onClick={applyPromo} disabled={promoLoading || !promoInput.trim()} style={{
+                                padding: '9px 18px', borderRadius: '10px', border: '1px solid rgba(128,0,32,0.4)',
+                                background: 'rgba(128,0,32,0.15)', color: '#c0002a', fontSize: '13px',
+                                fontWeight: 600, cursor: promoLoading || !promoInput.trim() ? 'not-allowed' : 'pointer',
+                                opacity: promoLoading || !promoInput.trim() ? 0.5 : 1,
+                                whiteSpace: 'nowrap', flexShrink: 0,
+                            }}>
+                                {promoLoading ? '…' : 'Apply'}
+                            </button>
+                        )}
+                    </Box>
+                </Grid>
+
                 {/* T&C acceptance */}
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                     <Box sx={{
                         display: 'flex', alignItems: 'flex-start', gap: 1.5,
                         p: 2.5, borderRadius: '12px',

@@ -24,7 +24,8 @@ const f = {
     '& .MuiInputLabel-root.Mui-focused': { color: '#c0002a' },
     '& .MuiInputBase-input': { color: '#fff' },
     '& .MuiSelect-icon': { color: 'rgba(255,255,255,0.4)' },
-    '& .MuiFormHelperText-root.Mui-error': { color: '#ff7070', marginLeft: 0, marginTop: '4px' },
+    '& .MuiFormHelperText-root': { color: 'rgba(255,255,255,0.35)', marginLeft: 0, marginTop: '4px' },
+    '& .MuiFormHelperText-root.Mui-error': { color: '#ff7070' },
 };
 
 const MP = {
@@ -88,35 +89,71 @@ const NavRow = ({ step, total, onBack, loading, lastLabel }) => (
     </Box>
 );
 
-export default function ProjectRegistrationForm() {
+export default function ProjectRegistrationForm({ onPromoChange }) {
     const [step, setStep] = useState(0);
     const [form, setForm] = useState({
-        competitionCategory: 'Project', projectSubcategory: '', categories: '', crRefrence: '',
+        competitionCategory: 'Project', projectSubcategory: '', categories: '',
         ca_code: '', club_code: '',
         leader: '', institution: '', leaderPhone: '', leaderWhatsApp: '', leaderEmail: '',
         tshirtSizeLeader: '', member2: '', institution2: '', tshirtSize2: '',
         member3: '', institution3: '', tshirtSize3: '',
         projectTitle: '', projectCategory: '', participatedBefore: '',
         previousCompetition: '', socialMedia: '', infoSource: '',
+        promo_code: '',
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [promoInput, setPromoInput] = useState('');
+    const [promoStatus, setPromoStatus] = useState(null); // null | { valid, discount, message }
+    const [promoLoading, setPromoLoading] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const set = (name, value) => setForm(p => ({
         ...p, [name]: value,
         ...(name === 'participatedBefore' && value === 'No' ? { previousCompetition: '' } : {}),
+        // mutual exclusion
+        ...(name === 'ca_code' && value ? { club_code: '' } : {}),
+        ...(name === 'club_code' && value ? { ca_code: '' } : {}),
     }));
 
     const onChange = e => { set(e.target.name, e.target.value); setErrors(p => ({ ...p, [e.target.name]: '' })); };
+
+    const applyPromo = async () => {
+        if (!promoInput.trim()) return;
+        setPromoLoading(true);
+        try {
+            const res = await axios.post(`${backendUrl}/api/promo/validate`, {
+                code: promoInput.trim().toUpperCase(),
+                competitionType: 'project',
+            });
+            setPromoStatus(res.data);
+            if (res.data.valid) {
+                setForm(p => ({ ...p, promo_code: promoInput.trim().toUpperCase() }));
+                onPromoChange?.({ code: promoInput.trim().toUpperCase(), discount: res.data.discountPercentage });
+            } else {
+                setForm(p => ({ ...p, promo_code: '' }));
+                onPromoChange?.({ code: '', discount: 0 });
+            }
+        } catch {
+            setPromoStatus({ valid: false, message: 'Could not validate code. Try again.' });
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
+    const clearPromo = () => {
+        setPromoInput('');
+        setPromoStatus(null);
+        setForm(p => ({ ...p, promo_code: '' }));
+        onPromoChange?.({ code: '', discount: 0 });
+    };
 
     const validateStep = () => {
         const errs = {};
         if (step === 0) {
             if (!form.projectSubcategory) errs.projectSubcategory = 'Required';
             if (!form.categories) errs.categories = 'Required';
-            if (!form.crRefrence.trim()) errs.crRefrence = 'Required';
         }
         if (step === 1) {
             if (!form.leader.trim()) errs.leader = 'Required';
@@ -196,54 +233,111 @@ export default function ProjectRegistrationForm() {
                     {/* ── Step 0: Competition ── */}
                     {step === 0 && (
                         <Grid container spacing={3}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <FormControl fullWidth sx={f} error={!!errors.projectSubcategory}>
                                     <InputLabel>Subcategory *</InputLabel>
                                     <Select name="projectSubcategory" value={form.projectSubcategory} onChange={onChange} label="Subcategory *" MenuProps={MP}>
                                         {SUBCATS.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
                                     </Select>
-                                    {errors.projectSubcategory && <FormHelperText>{errors.projectSubcategory}</FormHelperText>}
+                                    <FormHelperText sx={{ color: errors.projectSubcategory ? '#ff7070' : 'rgba(255,255,255,0.3)', ml: 0, mt: '4px' }}>
+                                        {errors.projectSubcategory || 'Choose the scientific field that best fits your project'}
+                                    </FormHelperText>
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <FormControl fullWidth sx={f} error={!!errors.categories}>
                                     <InputLabel>Education Level *</InputLabel>
                                     <Select name="categories" value={form.categories} onChange={onChange} label="Education Level *" MenuProps={MP}>
                                         {EDU_LEVELS.map(l => <MenuItem key={l.value} value={l.value}>{l.label}</MenuItem>)}
                                     </Select>
-                                    {errors.categories && <FormHelperText>{errors.categories}</FormHelperText>}
+                                    <FormHelperText sx={{ color: errors.categories ? '#ff7070' : 'rgba(255,255,255,0.3)', ml: 0, mt: '4px' }}>
+                                        {errors.categories || 'Select your current education level'}
+                                    </FormHelperText>
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField fullWidth label="CR Reference *" name="crRefrence" value={form.crRefrence} onChange={onChange}
-                                    error={!!errors.crRefrence} helperText={errors.crRefrence} sx={f} placeholder="Your CR's name" />
-                            </Grid>
-
-                            {/* ── Campus Ambassador & Club Partner search ── */}
-                            <Grid item xs={12}>
+                            {/* ── Campus Ambassador & Club Partner (mutual exclusion) ── */}
+                            <Grid size={{ xs: 12 }}>
                                 <Box sx={{ height: '1px', background: 'rgba(255,255,255,0.07)', my: 1 }} />
-                                <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 2 }}>
+                                <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 0.5 }}>
                                     <Box sx={{ width: 3, height: 14, borderRadius: 2, background: '#800020' }} />
                                     <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>
                                         Reference (Optional)
                                     </Typography>
                                 </Box>
+                                <Typography sx={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', mb: 2 }}>
+                                    Select either a Campus Ambassador <em>or</em> a Club Partner — not both.
+                                </Typography>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <ReferenceSearch
                                     type="ca"
                                     value={form.ca_code}
                                     onChange={(code) => set('ca_code', code)}
+                                    disabled={!!form.club_code}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <ReferenceSearch
                                     type="club"
                                     value={form.club_code}
                                     onChange={(code) => set('club_code', code)}
+                                    disabled={!!form.ca_code}
                                 />
+                            </Grid>
+
+                            {/* ── Promo Code ── */}
+                            <Grid size={{ xs: 12 }}>
+                                <Box sx={{ height: '1px', background: 'rgba(255,255,255,0.07)', my: 1 }} />
+                                <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', mb: 2 }}>
+                                    <Box sx={{ width: 3, height: 14, borderRadius: 2, background: '#800020' }} />
+                                    <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>
+                                        Promo Code (Optional)
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                                    <TextField
+                                        value={promoInput}
+                                        onChange={e => { setPromoInput(e.target.value.toUpperCase()); setPromoStatus(null); }}
+                                        placeholder="e.g. WICE2025"
+                                        disabled={promoStatus?.valid}
+                                        sx={{ ...f, flex: 1 }}
+                                        size="small"
+                                        helperText={
+                                            promoStatus
+                                                ? promoStatus.valid
+                                                    ? `✓ ${promoStatus.discountPercentage}% discount applied!`
+                                                    : promoStatus.message
+                                                : 'Enter a promo code if you have one'
+                                        }
+                                        slotProps={{
+                                            formHelperText: {
+                                                sx: {
+                                                    color: promoStatus?.valid ? '#10b981' : promoStatus ? '#ff7070' : 'rgba(255,255,255,0.3)',
+                                                    ml: 0, mt: '4px',
+                                                },
+                                            },
+                                        }}
+                                    />
+                                    {promoStatus?.valid ? (
+                                        <button type="button" onClick={clearPromo} style={{
+                                            padding: '9px 18px', borderRadius: '10px', border: '1px solid rgba(255,100,100,0.4)',
+                                            background: 'rgba(255,80,80,0.1)', color: '#ff7070', fontSize: '13px',
+                                            fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                                        }}>Remove</button>
+                                    ) : (
+                                        <button type="button" onClick={applyPromo} disabled={promoLoading || !promoInput.trim()} style={{
+                                            padding: '9px 18px', borderRadius: '10px', border: '1px solid rgba(128,0,32,0.4)',
+                                            background: 'rgba(128,0,32,0.15)', color: '#c0002a', fontSize: '13px',
+                                            fontWeight: 600, cursor: promoLoading || !promoInput.trim() ? 'not-allowed' : 'pointer',
+                                            opacity: promoLoading || !promoInput.trim() ? 0.5 : 1,
+                                            whiteSpace: 'nowrap', flexShrink: 0,
+                                        }}>
+                                            {promoLoading ? '…' : 'Apply'}
+                                        </button>
+                                    )}
+                                </Box>
                             </Grid>
                         </Grid>
                     )}
@@ -252,33 +346,45 @@ export default function ProjectRegistrationForm() {
                     {step === 1 && (
                         <Box>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField fullWidth label="Leader Name *" name="leader" value={form.leader} onChange={onChange}
-                                        error={!!errors.leader} helperText={errors.leader} sx={f} />
+                                        error={!!errors.leader}
+                                        helperText={errors.leader || 'Full name as on your ID/student card'}
+                                        sx={f} />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField fullWidth label="Institution *" name="institution" value={form.institution} onChange={onChange}
-                                        error={!!errors.institution} helperText={errors.institution} sx={f} />
+                                        error={!!errors.institution}
+                                        helperText={errors.institution || 'Your school, college or university name'}
+                                        sx={f} />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField fullWidth label="Phone Number *" name="leaderPhone" value={form.leaderPhone} onChange={onChange}
-                                        error={!!errors.leaderPhone} helperText={errors.leaderPhone} placeholder="01XXXXXXXXX" sx={f} />
+                                        error={!!errors.leaderPhone}
+                                        helperText={errors.leaderPhone || 'Bangladeshi number, e.g. 01712345678'}
+                                        placeholder="01XXXXXXXXX" sx={f} />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField fullWidth label="WhatsApp Number *" name="leaderWhatsApp" value={form.leaderWhatsApp} onChange={onChange}
-                                        error={!!errors.leaderWhatsApp} helperText={errors.leaderWhatsApp} placeholder="01XXXXXXXXX" sx={f} />
+                                        error={!!errors.leaderWhatsApp}
+                                        helperText={errors.leaderWhatsApp || 'Must be active on WhatsApp — event updates will be sent here'}
+                                        placeholder="01XXXXXXXXX" sx={f} />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField fullWidth label="Email Address *" name="leaderEmail" value={form.leaderEmail} onChange={onChange}
-                                        error={!!errors.leaderEmail} helperText={errors.leaderEmail} type="email" sx={f} />
+                                        error={!!errors.leaderEmail}
+                                        helperText={errors.leaderEmail || 'Registration confirmation will be sent to this email'}
+                                        type="email" sx={f} />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <FormControl fullWidth sx={f} error={!!errors.tshirtSizeLeader}>
                                         <InputLabel>T-Shirt Size *</InputLabel>
                                         <Select name="tshirtSizeLeader" value={form.tshirtSizeLeader} onChange={onChange} label="T-Shirt Size *" MenuProps={MP}>
                                             {['S','M','L','XL','XXL'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
                                         </Select>
-                                        {errors.tshirtSizeLeader && <FormHelperText>{errors.tshirtSizeLeader}</FormHelperText>}
+                                        <FormHelperText sx={{ color: errors.tshirtSizeLeader ? '#ff7070' : 'rgba(255,255,255,0.3)', ml: 0, mt: '4px' }}>
+                                            {errors.tshirtSizeLeader || 'Event T-shirt is included with registration'}
+                                        </FormHelperText>
                                     </FormControl>
                                 </Grid>
                             </Grid>
@@ -291,13 +397,13 @@ export default function ProjectRegistrationForm() {
                                 <Box key={n} sx={{ mb: 2.5, p: 3, borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.025)' }}>
                                     <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', mb: 2 }}>Member {n}</Typography>
                                     <Grid container spacing={2.5}>
-                                        <Grid item xs={12} sm={5}>
+                                        <Grid size={{ xs: 12, sm: 5 }}>
                                             <TextField fullWidth label="Name" name={`member${n}`} value={form[`member${n}`]} onChange={onChange} sx={f} size="small" />
                                         </Grid>
-                                        <Grid item xs={12} sm={5}>
+                                        <Grid size={{ xs: 12, sm: 5 }}>
                                             <TextField fullWidth label="Institution" name={`institution${n}`} value={form[`institution${n}`]} onChange={onChange} sx={f} size="small" />
                                         </Grid>
-                                        <Grid item xs={12} sm={2}>
+                                        <Grid size={{ xs: 12, sm: 2 }}>
                                             <FormControl fullWidth sx={f} size="small">
                                                 <InputLabel>Size</InputLabel>
                                                 <Select name={`tshirtSize${n}`} value={form[`tshirtSize${n}`]} onChange={onChange} label="Size" MenuProps={MP}>
@@ -314,47 +420,58 @@ export default function ProjectRegistrationForm() {
                     {/* ── Step 2: Project ── */}
                     {step === 2 && (
                         <Grid container spacing={3}>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <TextField fullWidth label="Project Title *" name="projectTitle" value={form.projectTitle} onChange={onChange}
-                                    error={!!errors.projectTitle} helperText={errors.projectTitle || `${form.projectTitle.length}/160`}
-                                    inputProps={{ maxLength: 160 }} sx={f} />
+                                    error={!!errors.projectTitle}
+                                    helperText={errors.projectTitle || `Give your project a clear, descriptive title · ${form.projectTitle.length}/160`}
+                                    slotProps={{ htmlInput: { maxLength: 160 } }} sx={f} />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <FormControl fullWidth sx={f} error={!!errors.projectCategory}>
                                     <InputLabel>Project Category *</InputLabel>
                                     <Select name="projectCategory" value={form.projectCategory} onChange={onChange} label="Project Category *" MenuProps={MP}>
                                         <MenuItem value="Innovation">Innovation</MenuItem>
                                         <MenuItem value="Research">Research</MenuItem>
                                     </Select>
-                                    {errors.projectCategory && <FormHelperText>{errors.projectCategory}</FormHelperText>}
+                                    <FormHelperText sx={{ color: errors.projectCategory ? '#ff7070' : 'rgba(255,255,255,0.3)', ml: 0, mt: '4px' }}>
+                                        {errors.projectCategory || 'Innovation = new invention · Research = study-based'}
+                                    </FormHelperText>
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <FormControl fullWidth sx={f} error={!!errors.participatedBefore}>
                                     <InputLabel>Participated before? *</InputLabel>
                                     <Select name="participatedBefore" value={form.participatedBefore} onChange={onChange} label="Participated before? *" MenuProps={MP}>
                                         <MenuItem value="Yes">Yes</MenuItem>
                                         <MenuItem value="No">No</MenuItem>
                                     </Select>
-                                    {errors.participatedBefore && <FormHelperText>{errors.participatedBefore}</FormHelperText>}
+                                    <FormHelperText sx={{ color: errors.participatedBefore ? '#ff7070' : 'rgba(255,255,255,0.3)', ml: 0, mt: '4px' }}>
+                                        {errors.participatedBefore || 'Have you joined any WICEBD or similar competition before?'}
+                                    </FormHelperText>
                                 </FormControl>
                             </Grid>
                             {form.participatedBefore === 'Yes' && (
-                                <Grid item xs={12}>
-                                    <TextField fullWidth label="Which competition?" name="previousCompetition" value={form.previousCompetition} onChange={onChange} sx={f} />
+                                <Grid size={{ xs: 12 }}>
+                                    <TextField fullWidth label="Which competition?" name="previousCompetition" value={form.previousCompetition} onChange={onChange}
+                                        helperText="Name and year of the competition you participated in"
+                                        sx={f} />
                                 </Grid>
                             )}
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField fullWidth label="Social Media (optional)" name="socialMedia" value={form.socialMedia} onChange={onChange}
-                                    error={!!errors.socialMedia} helperText={errors.socialMedia} placeholder="https://facebook.com/…" sx={f} />
+                                    error={!!errors.socialMedia}
+                                    helperText={errors.socialMedia || 'Your team\'s Facebook page or profile link (optional)'}
+                                    placeholder="https://facebook.com/…" sx={f} />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField fullWidth label="How did you hear about WICEBD? *" name="infoSource" value={form.infoSource} onChange={onChange}
-                                    error={!!errors.infoSource} helperText={errors.infoSource} placeholder="e.g. Facebook, Teacher…" sx={f} />
+                                    error={!!errors.infoSource}
+                                    helperText={errors.infoSource || 'e.g. Facebook, teacher, friend, poster, YouTube'}
+                                    placeholder="e.g. Facebook, Teacher…" sx={f} />
                             </Grid>
 
                             {/* T&C acceptance */}
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <Box sx={{
                                     display: 'flex', alignItems: 'flex-start', gap: 1.5,
                                     p: 2.5, borderRadius: '12px',

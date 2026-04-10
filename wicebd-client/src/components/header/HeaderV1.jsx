@@ -152,13 +152,12 @@ const HeaderV1 = ({ headerStyle, parentMenu }) => {
                 </div>
                 <div className={`${openMenu ? "mobile-menu-visible" : ""}`}>
                     <div className="mobile-menu">
-                        <div className="menu-backdrop" ></div>
-                        <div className="close-btn"><span className="icon flaticon-cancel-1"></span></div>
+                        <div className="menu-backdrop" onClick={handleCloseMenu}></div>
                         <nav className="menu-box">
-                            <div className="nav-logo"><Link to="/#"><img src="/images/logo-2.png" alt="image" /></Link></div>
+                            <div className="nav-logo"><Link to="/#"><img src="/images/logo-normal.PNG" alt="WICEBD" /></Link></div>
                             <MainMenu toggleMultiMenu={toggleMultiMenu} toggleMenu={toggleMenu} parentMenu={parentMenu} />
                         </nav>
-                        <div className="close-btn" onClick={handleCloseMenu} ><span className="icon flaticon-cancel-music"></span></div>
+                        <div className="close-btn" onClick={handleCloseMenu}><span className="icon flaticon-cancel-music"></span></div>
                     </div>
                 </div>
             </header>

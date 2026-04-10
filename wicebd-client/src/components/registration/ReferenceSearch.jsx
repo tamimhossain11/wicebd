@@ -24,7 +24,7 @@ const inputStyle = {
  *  onChange    (code, label) => void  — called on select / clear
  *  error       string | undefined
  */
-export default function ReferenceSearch({ type, value, onChange, error }) {
+export default function ReferenceSearch({ type, value, onChange, error, disabled = false }) {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const endpoint = type === 'ca'
         ? `${backendUrl}/api/campus-ambassador/search`
@@ -110,13 +110,16 @@ export default function ReferenceSearch({ type, value, onChange, error }) {
             <Box sx={{ position: 'relative' }}>
                 <input
                     value={query}
-                    onChange={handleInput}
-                    onFocus={() => results.length && setOpen(true)}
-                    placeholder={placeholder}
+                    onChange={disabled ? undefined : handleInput}
+                    onFocus={() => !disabled && results.length && setOpen(true)}
+                    placeholder={disabled ? 'Select the other reference first to enable this' : placeholder}
+                    disabled={disabled}
                     style={{
                         ...inputStyle,
                         borderColor: error ? '#ff7070' : (open ? '#800020' : 'rgba(255,255,255,0.14)'),
                         paddingRight: value ? '40px' : '16px',
+                        opacity: disabled ? 0.38 : 1,
+                        cursor: disabled ? 'not-allowed' : 'text',
                     }}
                 />
                 {/* Loading spinner */}

@@ -53,6 +53,7 @@ const NAV_ITEMS = [
   { label: 'Olympiad Exam',      icon: <Quiz />,                section: 'manage' },
   { label: 'Campus Ambassadors', icon: <EmojiPeople />,         section: 'network' },
   { label: 'Club Partners',      icon: <Group />,               section: 'network' },
+  { label: 'Promo Codes',        icon: <Inbox />,               section: 'manage' },
 ];
 
 /* ─── Custom tooltip for charts ─── */
@@ -178,6 +179,12 @@ export default function AdminDashboard() {
   const [caLoading, setCaLoading]     = useState(false);
   const [caView, setCaView]           = useState('list');
 
+  // Promo Codes
+  const [promoList, setPromoList]       = useState([]);
+  const [promoDialog, setPromoDialog]   = useState(false);
+  const [promoForm, setPromoForm]       = useState({ code: '', discount_percentage: '', competition_type: 'all' });
+  const [promoLoading, setPromoLoading] = useState(false);
+
   // Club Partners
   const [clubList, setClubList]         = useState([]);
   const [clubStats, setClubStats]       = useState([]);
@@ -211,6 +218,13 @@ export default function AdminDashboard() {
     } catch { /* non-critical */ }
   }, []);
 
+  const fetchPromo = useCallback(async () => {
+    try {
+      const res = await api.get('/api/promo');
+      setPromoList(Array.isArray(res.data) ? res.data : []);
+    } catch { /* non-critical */ }
+  }, []);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -236,8 +250,9 @@ export default function AdminDashboard() {
     } catch { /* ok */ }
     fetchCA();
     fetchClub();
+    fetchPromo();
     setLoading(false);
-  }, [logout, navigate, fetchCA, fetchClub]);
+  }, [logout, navigate, fetchCA, fetchClub, fetchPromo]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -981,10 +996,124 @@ export default function AdminDashboard() {
               )}
             </Box>
           )}
+          {/* ══════════════ PROMO CODES ══════════════ */}
+          {activeNav === 10 && (
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                <Box>
+                  <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800 }}>Promo Codes</Typography>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, mt: 0.5 }}>
+                    Create discount codes per competition type. Codes auto-apply on user entry.
+                  </Typography>
+                </Box>
+                <Button variant="contained" startIcon={<Add />} onClick={() => { setPromoForm({ code: '', discount_percentage: '', competition_type: 'all' }); setPromoDialog(true); }}
+                  sx={{ background: `linear-gradient(135deg,${RED},${ACCENT})`, textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
+                  New Promo Code
+                </Button>
+              </Box>
+
+              <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
+                        {['Code', 'Discount', 'Competition', 'Status', 'Created', 'Actions'].map(h => (
+                          <th key={h} style={{ padding: '13px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {promoList.length === 0 && (
+                        <tr><td colSpan={6} style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>No promo codes yet. Create one above.</td></tr>
+                      )}
+                      {promoList.map((row, i) => (
+                        <tr key={row.id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Chip label={row.code} size="small" sx={{ background: `${ACCENT}18`, color: ACCENT, fontWeight: 800, fontSize: 12, letterSpacing: '0.06em' }} />
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Typography sx={{ color: GREEN, fontWeight: 800, fontSize: 16 }}>{row.discount_percentage}%</Typography>
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Chip label={row.competition_type} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Switch checked={!!row.is_active} size="small"
+                              onChange={async () => { await api.patch(`/api/promo/${row.id}/toggle`); fetchPromo(); }}
+                              sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: GREEN }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { background: GREEN } }}
+                            />
+                          </td>
+                          <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                            {new Date(row.created_at).toLocaleDateString()}
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <IconButton size="small" onClick={async () => { if (window.confirm(`Delete code ${row.code}?`)) { await api.delete(`/api/promo/${row.id}`); fetchPromo(); } }}
+                              sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
+                              <Delete sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </Paper>
+            </Box>
+          )}
         </Box>
       </Box>
 
       {/* ══════════════ DIALOGS ══════════════ */}
+
+      {/* Promo Code */}
+      <Dialog open={promoDialog} onClose={() => setPromoDialog(false)} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
+        <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>New Promo Code</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
+          <TextField label="Code *" placeholder="e.g. WICE25" fullWidth value={promoForm.code}
+            onChange={e => setPromoForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} sx={inputSx}
+            helperText="Uppercase letters and numbers only" />
+          <TextField label="Discount %" type="number" fullWidth value={promoForm.discount_percentage}
+            onChange={e => setPromoForm(p => ({ ...p, discount_percentage: e.target.value }))} sx={inputSx}
+            slotProps={{ htmlInput: { min: 1, max: 100 } }} helperText="Enter a value from 1 to 100" />
+          <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
+            <InputLabel>Competition Type</InputLabel>
+            <Select value={promoForm.competition_type} label="Competition Type"
+              onChange={e => setPromoForm(p => ({ ...p, competition_type: e.target.value }))}
+              slotProps={{ paper: { sx: { background: SURFACE, color: '#fff' } } }}>
+              <MenuItem value="all">All Competitions</MenuItem>
+              <MenuItem value="project">Project Only</MenuItem>
+              <MenuItem value="wall-magazine">Wall Magazine Only</MenuItem>
+              <MenuItem value="olympiad">Olympiad Only</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button onClick={() => setPromoDialog(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+          <Button
+            disabled={promoLoading || !promoForm.code.trim() || !promoForm.discount_percentage}
+            onClick={async () => {
+              setPromoLoading(true);
+              try {
+                await api.post('/api/promo', {
+                  code: promoForm.code.trim(),
+                  discount_percentage: parseInt(promoForm.discount_percentage, 10),
+                  competition_type: promoForm.competition_type,
+                });
+                setPromoDialog(false);
+                fetchPromo();
+              } catch (err) {
+                alert(err.response?.data?.error || 'Failed to create promo code');
+              } finally {
+                setPromoLoading(false);
+              }
+            }}
+            variant="contained"
+            sx={{ background: `linear-gradient(135deg,${RED},${ACCENT})`, textTransform: 'none', borderRadius: 2, px: 3 }}>
+            {promoLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Create Code'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Advisor */}
       <Dialog open={advisorDialog} onClose={() => setAdvisorDialog(false)} maxWidth="sm" fullWidth

@@ -40,12 +40,18 @@ const FEE_INFO = {
 export default function RegistrationPage() {
     const location = useLocation();
     const [tab, setTab] = useState('project');
+    const [promo, setPromo] = useState({ code: '', discount: 0 });
 
     useEffect(() => {
         const p = new URLSearchParams(location.search);
         const t = p.get('tab');
         if (t === 'olympiad' || t === 'wall-magazine' || t === 'project') setTab(t);
     }, [location.search]);
+
+    // Reset promo when tab changes
+    useEffect(() => { setPromo({ code: '', discount: 0 }); }, [tab]);
+
+    const handlePromoChange = ({ code, discount }) => setPromo({ code, discount });
 
     return (
         <ThemeProvider theme={darkTheme}>
@@ -72,7 +78,7 @@ export default function RegistrationPage() {
                     <div className="auto-container">
 
                         {/* Tab switcher */}
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 48 }}>
+                        <div className="wice-reg-tabs">
                             {TABS.map(t => {
                                 const active = tab === t.id;
                                 return (
@@ -84,6 +90,7 @@ export default function RegistrationPage() {
                                         fontWeight: 700, fontSize: 14, cursor: 'pointer',
                                         boxShadow: active ? '0 6px 22px rgba(128,0,32,0.4)' : 'none',
                                         transition: 'all 0.28s ease',
+                                        whiteSpace: 'nowrap',
                                     }}>
                                         {t.label}
                                         <span style={{
@@ -99,6 +106,7 @@ export default function RegistrationPage() {
                         {/* Card */}
                         <AnimatePresence mode="wait">
                             <motion.div key={tab}
+                                className="wice-reg-card"
                                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
                                 transition={{ duration: 0.3 }}
                                 style={{
@@ -120,51 +128,64 @@ export default function RegistrationPage() {
                                 </Typography>
 
                                 {/* Fee + prize info bar */}
-                                {FEE_INFO[tab] && (
-                                    <div style={{
-                                        display: 'flex', gap: 12, flexWrap: 'wrap',
-                                        marginBottom: 28,
-                                    }}>
-                                        {/* Fee */}
-                                        <div style={{
-                                            flex: 1, minWidth: 140,
-                                            background: 'rgba(128,0,32,0.12)',
-                                            border: '1px solid rgba(128,0,32,0.28)',
-                                            borderRadius: 12, padding: '14px 18px',
-                                        }}>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
-                                                {FEE_INFO[tab].label}
-                                            </div>
-                                            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>
-                                                ৳{FEE_INFO[tab].fee.toLocaleString()}
-                                            </div>
-                                            {FEE_INFO[tab].note && (
-                                                <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600, marginTop: 3 }}>
-                                                    {FEE_INFO[tab].note}
+                                {FEE_INFO[tab] && (() => {
+                                    const baseFee = FEE_INFO[tab].fee;
+                                    const discountedFee = promo.discount > 0
+                                        ? Math.round(baseFee * (1 - promo.discount / 100))
+                                        : null;
+                                    return (
+                                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+                                            {/* Fee */}
+                                            <div style={{
+                                                flex: 1, minWidth: 140,
+                                                background: 'rgba(128,0,32,0.12)',
+                                                border: '1px solid rgba(128,0,32,0.28)',
+                                                borderRadius: 12, padding: '14px 18px',
+                                            }}>
+                                                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                                    {FEE_INFO[tab].label}
                                                 </div>
-                                            )}
-                                        </div>
-
-                                        {/* Prize pool */}
-                                        <div style={{
-                                            flex: 1, minWidth: 140,
-                                            background: 'rgba(255,255,255,0.04)',
-                                            border: '1px solid rgba(255,255,255,0.09)',
-                                            borderRadius: 12, padding: '14px 18px',
-                                        }}>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
-                                                Prize Pool
+                                                {discountedFee !== null ? (
+                                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                                                        <span style={{ fontSize: 24, fontWeight: 800, color: '#10b981' }}>৳{discountedFee.toLocaleString()}</span>
+                                                        <span style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>৳{baseFee.toLocaleString()}</span>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>৳{baseFee.toLocaleString()}</div>
+                                                )}
+                                                {discountedFee !== null && (
+                                                    <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600, marginTop: 3 }}>
+                                                        {promo.discount}% promo discount applied · code: {promo.code}
+                                                    </div>
+                                                )}
+                                                {!discountedFee && FEE_INFO[tab].note && (
+                                                    <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600, marginTop: 3 }}>
+                                                        {FEE_INFO[tab].note}
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div style={{ fontSize: 24, fontWeight: 800, color: '#800020' }}>
-                                                {FEE_INFO[tab].prize}
+
+                                            {/* Prize pool */}
+                                            <div style={{
+                                                flex: 1, minWidth: 140,
+                                                background: 'rgba(255,255,255,0.04)',
+                                                border: '1px solid rgba(255,255,255,0.09)',
+                                                borderRadius: 12, padding: '14px 18px',
+                                            }}>
+                                                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                                    Prize Pool
+                                                </div>
+                                                <div style={{ fontSize: 24, fontWeight: 800, color: '#800020' }}>
+                                                    {FEE_INFO[tab].prize}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    );
+                                })()}
 
-                                {tab === 'project' && <ProjectRegistrationForm />}
-                                {tab === 'wall-magazine' && <WallMagazineRegistrationForm />}
-                                {tab === 'olympiad' && <OlympiadRegistrationForm />}
+                                {tab === 'project' && <ProjectRegistrationForm onPromoChange={handlePromoChange} />}
+                                {tab === 'wall-magazine' && <WallMagazineRegistrationForm onPromoChange={handlePromoChange} />}
+                                {tab === 'olympiad' && <OlympiadRegistrationForm onPromoChange={handlePromoChange} />}
                             </motion.div>
                         </AnimatePresence>
                     </div>

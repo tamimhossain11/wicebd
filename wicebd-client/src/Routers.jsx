@@ -14,7 +14,6 @@ import BuyTicket from './pages/innerPages/BuyTicket';
 import BlogSidebar from './pages/innerPages/BlogSidebar';
 import BlogGrid from './pages/innerPages/BlogGrid';
 import BlogSingle from './pages/innerPages/BlogSingle';
-import Login from './pages/innerPages/Login';
 import Contact from './pages/innerPages/Contact';
 import ErrorPage from './pages/innerPages/ErrorPage';
 import PaymentCallback from './pages/callback/PaymentCallback';
@@ -77,7 +76,7 @@ const Routers = () => {
                 <Route path='/blog-sidebar' element={<BlogSidebar />}></Route>
                 <Route path='/blog-grid' element={<BlogGrid />}></Route>
                 <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
-                <Route path='/login' element={<Login />}></Route>
+                <Route path='/login' element={<Navigate to="/sign-in" replace />} />
                 {/* User Auth & Dashboard */}
                 <Route path='/sign-in' element={<SignIn />} />
                 <Route path='/sign-up' element={<SignUp />} />
