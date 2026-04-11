@@ -49,11 +49,13 @@ const PARTNERS = [
         logo: '/images/partners/Dob logo.png',
         cat: 'Event Organizer',
     },
+    {/*
     {
         name: 'Northern University Bangladesh',
         logo: '/images/partners/nub.webp',
         cat: 'Host Institution',
     },
+    */},
     {
         name: 'Dhaka Imperial College',
         logo: '/images/partners/Dhaka_Imperial_College.jpg',
