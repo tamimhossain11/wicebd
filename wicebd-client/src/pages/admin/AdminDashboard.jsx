@@ -23,8 +23,10 @@ import {
   EmojiPeople, Group, UploadFile, Dashboard,
   ArrowUpward, ArrowDownward,
   Inbox, Campaign, Notifications,
+  QrCodeScanner, ManageAccounts,
 } from '@mui/icons-material';
 import OlympiadExamTab from '../../components/admin/OlympiadExamTab';
+import QRScannerPanel from '../../components/admin/QRScannerPanel';
 import api from '../../api/index';
 import { useAuth } from '../../context/AuthContext';
 
@@ -42,6 +44,9 @@ const SIDEBAR_W = 256;
 
 
 
+// indices: 0=Dashboard,1=ProjectRegs,2=OlympiadRegs,3=WallMagRegs,4=Users,
+//          5=Announcements,6=Advisors,7=OlympiadExam,8=CampusAmbassadors,
+//          9=ClubPartners,10=PromoCodes,11=QRScanner,12=AdminUsers
 const NAV_ITEMS = [
   { label: 'Dashboard',          icon: <Dashboard />,          section: 'main' },
   { label: 'Project Regs',       icon: <Assignment />,          section: 'data' },
@@ -54,6 +59,8 @@ const NAV_ITEMS = [
   { label: 'Campus Ambassadors', icon: <EmojiPeople />,         section: 'network' },
   { label: 'Club Partners',      icon: <Group />,               section: 'network' },
   { label: 'Promo Codes',        icon: <Inbox />,               section: 'manage' },
+  { label: 'QR Scanner',         icon: <QrCodeScanner />,       section: 'event',  superOnly: false },
+  { label: 'Admin Users',        icon: <ManageAccounts />,      section: 'event',  superOnly: true },
 ];
 
 /* ─── Custom tooltip for charts ─── */
@@ -213,6 +220,20 @@ export default function AdminDashboard() {
   const [promoForm, setPromoForm]       = useState({ code: '', discount_percentage: '', competition_type: 'all' });
   const [promoLoading, setPromoLoading] = useState(false);
 
+  // Admin role from token
+  const adminRole = (() => { try { const d = JSON.parse(atob(localStorage.getItem('adminToken')?.split('.')[1] || '')); return d?.adminRole || 'super_admin'; } catch { return 'super_admin'; } })();
+
+  // (QR Scanner state lives inside QRScannerPanel component)
+
+  // Admin Users
+  const [adminUsers, setAdminUsers]     = useState([]);
+  const [adminUserDialog, setAdminUserDialog] = useState(false);
+  const [adminUserForm, setAdminUserForm] = useState({ username: '', email: '', password: '', role: 'data_extractor' });
+  const [adminUserLoading, setAdminUserLoading] = useState(false);
+
+  // Advisor image uploading
+  const [advisorImgUploading, setAdvisorImgUploading] = useState(false);
+
   // Club Partners
   const [clubList, setClubList]         = useState([]);
   const [clubStats, setClubStats]       = useState([]);
@@ -253,6 +274,20 @@ export default function AdminDashboard() {
     } catch { /* non-critical */ }
   }, []);
 
+  const fetchAdminUsers = useCallback(async () => {
+    try {
+      const res = await api.get('/api/admin-manage/admins');
+      setAdminUsers(res.data?.admins || []);
+    } catch { /* non-critical — only super_admin can reach this */ }
+  }, []);
+
+  const fetchAdvisors = useCallback(async () => {
+    try {
+      const res = await api.get('/api/advisors/admin');
+      setAdvisors(res.data?.advisors || []);
+    } catch { /* non-critical */ }
+  }, []);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -279,8 +314,10 @@ export default function AdminDashboard() {
     fetchCA();
     fetchClub();
     fetchPromo();
+    fetchAdvisors();
+    fetchAdminUsers();
     setLoading(false);
-  }, [logout, navigate, fetchCA, fetchClub, fetchPromo]);
+  }, [logout, navigate, fetchCA, fetchClub, fetchPromo, fetchAdvisors, fetchAdminUsers]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -405,7 +442,20 @@ export default function AdminDashboard() {
     { field: 'name', headerName: 'Name', width: 170 },
     { field: 'email', headerName: 'Email', width: 230 },
     { field: 'provider', headerName: 'Provider', width: 110, renderCell: p => <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> },
-    { field: 'is_verified', headerName: 'Verified', width: 100, renderCell: p => <Chip label={p.value ? 'Yes' : 'No'} size="small" color={p.value ? 'success' : 'default'} /> },
+    { field: 'is_verified', headerName: 'Verified', width: 90, renderCell: p => <Chip label={p.value ? 'Yes' : 'No'} size="small" color={p.value ? 'success' : 'default'} /> },
+    {
+      field: 'is_active', headerName: 'Access', width: 110,
+      renderCell: p => (
+        <Switch size="small" checked={p.value !== 0}
+          onChange={async () => {
+            await api.patch(`/api/admin-manage/users/${p.row.id}/toggle`);
+            const usersRes = await api.get('/api/admin/users');
+            setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
+          }}
+          sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: GREEN }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { background: GREEN } }}
+        />
+      ),
+    },
     { field: 'created_at', headerName: 'Joined', width: 130, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
   ];
 
@@ -449,10 +499,11 @@ export default function AdminDashboard() {
   /* ── Sidebar ── */
   const SidebarContent = () => {
     const sections = [
-      { key: 'main', label: 'Overview' },
-      { key: 'data', label: 'Registrations' },
-      { key: 'manage', label: 'Management' },
+      { key: 'main',    label: 'Overview' },
+      { key: 'data',    label: 'Registrations' },
+      { key: 'manage',  label: 'Management' },
       { key: 'network', label: 'Network' },
+      { key: 'event',   label: 'Event Day' },
     ];
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -472,7 +523,9 @@ export default function AdminDashboard() {
         {/* Nav */}
         <Box sx={{ flex: 1, overflowY: 'auto', py: 2, px: 1.5, '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.08)', borderRadius: 2 } }}>
           {sections.map(sec => {
-            const items = NAV_ITEMS.map((item, i) => ({ ...item, index: i })).filter(item => item.section === sec.key);
+            const items = NAV_ITEMS.map((item, i) => ({ ...item, index: i }))
+              .filter(item => item.section === sec.key)
+              .filter(item => !item.superOnly || adminRole === 'super_admin');
             if (!items.length) return null;
             return (
               <Box key={sec.key} sx={{ mb: 1 }}>
@@ -829,7 +882,7 @@ export default function AdminDashboard() {
                 icon={<RecordVoiceOver sx={{ fontSize: 18 }} />}
                 title="Advisors & Speakers"
                 action={
-                  <Button startIcon={<Add />} onClick={() => { setAdvisorForm({ name: '', title: '', institution: '', category: 'Academic', image: '' }); setEditingAdvisor(null); setAdvisorDialog(true); }}
+                  <Button startIcon={<Add />} onClick={() => { setAdvisorForm({ name: '', title: '', institution: '', category: 'Academic', image_url: '' }); setEditingAdvisor(null); setAdvisorDialog(true); }}
                     variant="contained" size="small"
                     sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, boxShadow: `0 4px 14px ${RED}40` }}>
                     Add Advisor
@@ -843,11 +896,11 @@ export default function AdminDashboard() {
                 </Paper>
               ) : (
                 <Grid container spacing={2}>
-                  {advisors.map((adv, i) => (
-                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-                      <Paper sx={{ p: 2.5, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {advisors.map((adv) => (
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={adv.id}>
+                      <Paper sx={{ p: 2.5, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, display: 'flex', flexDirection: 'column', gap: 1.5, transition: 'border-color 0.2s', '&:hover': { borderColor: `${ACCENT}40` } }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar src={adv.image || undefined} sx={{ width: 50, height: 50, background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, fontWeight: 800, fontSize: 20 }}>
+                          <Avatar src={adv.image_url || undefined} sx={{ width: 54, height: 54, background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, fontWeight: 800, fontSize: 20 }}>
                             {adv.name?.charAt(0).toUpperCase()}
                           </Avatar>
                           <Box sx={{ flex: 1, overflow: 'hidden' }}>
@@ -855,14 +908,14 @@ export default function AdminDashboard() {
                             <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{adv.title}</Typography>
                           </Box>
                         </Box>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{adv.institution}</Typography>
+                        {adv.institution && <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{adv.institution}</Typography>}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <Chip label={adv.category} size="small" sx={{ background: `${ACCENT}18`, color: ACCENT, fontSize: 11 }} />
                           <Box sx={{ display: 'flex', gap: 0.5 }}>
-                            <IconButton size="small" onClick={() => { setAdvisorForm({ ...adv }); setEditingAdvisor(i); setAdvisorDialog(true); }} sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: ACCENT } }}>
+                            <IconButton size="small" onClick={() => { setAdvisorForm({ name: adv.name, title: adv.title, institution: adv.institution || '', category: adv.category, image_url: adv.image_url || '' }); setEditingAdvisor(adv.id); setAdvisorDialog(true); }} sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: ACCENT } }}>
                               <EditIcon sx={{ fontSize: 15 }} />
                             </IconButton>
-                            <IconButton size="small" onClick={() => setAdvisors(prev => prev.filter((_, idx) => idx !== i))} sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
+                            <IconButton size="small" onClick={async () => { if (!window.confirm(`Delete ${adv.name}?`)) return; try { await api.delete(`/api/advisors/${adv.id}`); fetchAdvisors(); } catch { setError('Delete failed'); } }} sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
                               <Delete sx={{ fontSize: 15 }} />
                             </IconButton>
                           </Box>
@@ -877,6 +930,107 @@ export default function AdminDashboard() {
 
           {/* ══════════════ OLYMPIAD EXAM ══════════════ */}
           {activeNav === 7 && <OlympiadExamTab />}
+
+          {/* ══════════════ QR SCANNER ══════════════ */}
+          {activeNav === 11 && <QRScannerPanel />}
+
+          {/* ══════════════ ADMIN USERS ══════════════ */}
+          {activeNav === 12 && adminRole === 'super_admin' && (
+            <Box>
+              <SectionHeader
+                icon={<ManageAccounts sx={{ fontSize: 18 }} />}
+                title="Admin User Management"
+                action={
+                  <Button startIcon={<Add />} onClick={() => { setAdminUserForm({ username: '', email: '', password: '', role: 'data_extractor' }); setAdminUserDialog(true); }}
+                    variant="contained" size="small"
+                    sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, boxShadow: `0 4px 14px ${RED}40` }}>
+                    Add Admin
+                  </Button>
+                }
+              />
+              <Grid container spacing={2}>
+                {adminUsers.map(a => (
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={a.id}>
+                    <Paper sx={{ p: 2.5, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ width: 44, height: 44, background: a.role === 'super_admin' ? `linear-gradient(135deg,${RED},${ACCENT})` : a.role === 'data_extractor' ? `linear-gradient(135deg,${CYAN},${ACCENT})` : `linear-gradient(135deg,${GREEN},${ACCENT})`, fontWeight: 800, fontSize: 18 }}>
+                          {a.username?.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14 }}>{a.username}</Typography>
+                          {a.email && <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>{a.email}</Typography>}
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Chip label={a.role.replace(/_/g, ' ')} size="small" sx={{
+                          background: a.role === 'super_admin' ? `${RED}20` : a.role === 'data_extractor' ? `${CYAN}20` : `${GREEN}20`,
+                          color: a.role === 'super_admin' ? RED : a.role === 'data_extractor' ? CYAN : GREEN,
+                          fontSize: 11, fontWeight: 700, textTransform: 'capitalize',
+                        }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{a.is_active ? 'Active' : 'Disabled'}</Typography>
+                          <Switch size="small" checked={!!a.is_active}
+                            onChange={async () => { await api.patch(`/api/admin-manage/admins/${a.id}/toggle`); fetchAdminUsers(); }}
+                            sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: GREEN }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { background: GREEN } }}
+                          />
+                          {a.role !== 'super_admin' && (
+                            <IconButton size="small" onClick={async () => { if (!window.confirm(`Delete admin "${a.username}"?`)) return; await api.delete(`/api/admin-manage/admins/${a.id}`); fetchAdminUsers(); }}
+                              sx={{ color: 'rgba(255,255,255,0.25)', '&:hover': { color: RED } }}>
+                              <Delete sx={{ fontSize: 15 }} />
+                            </IconButton>
+                          )}
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+
+              {/* Add Admin Dialog */}
+              <Dialog open={adminUserDialog} onClose={() => setAdminUserDialog(false)} maxWidth="xs" fullWidth
+                slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
+                <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><ManageAccounts sx={{ color: RED }} />New Admin Account</Box>
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
+                  <TextField label="Username *" fullWidth value={adminUserForm.username} onChange={e => setAdminUserForm(p => ({ ...p, username: e.target.value.toLowerCase().replace(/\s/g,'') }))} sx={inputSx} />
+                  <TextField label="Email (optional)" fullWidth value={adminUserForm.email} onChange={e => setAdminUserForm(p => ({ ...p, email: e.target.value }))} sx={inputSx} />
+                  <TextField label="Password *" type="password" fullWidth value={adminUserForm.password} onChange={e => setAdminUserForm(p => ({ ...p, password: e.target.value }))} sx={inputSx} />
+                  <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
+                    <InputLabel>Role</InputLabel>
+                    <Select value={adminUserForm.role} label="Role" onChange={e => setAdminUserForm(p => ({ ...p, role: e.target.value }))}
+                      slotProps={{ paper: { sx: { background: SURFACE, color: '#fff' } } }}>
+                      <MenuItem value="data_extractor">
+                        <Box><Typography sx={{ fontSize: 13, fontWeight: 600 }}>Data Extractor</Typography><Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Registrations section only</Typography></Box>
+                      </MenuItem>
+                      <MenuItem value="ca_cl_manager">
+                        <Box><Typography sx={{ fontSize: 13, fontWeight: 600 }}>CA / CL Manager</Typography><Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Network section only</Typography></Box>
+                      </MenuItem>
+                      <MenuItem value="super_admin">
+                        <Box><Typography sx={{ fontSize: 13, fontWeight: 600, color: RED }}>Super Admin</Typography><Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Full access</Typography></Box>
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+                  <Button onClick={() => setAdminUserDialog(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+                  <Button disabled={adminUserLoading || !adminUserForm.username || !adminUserForm.password}
+                    onClick={async () => {
+                      setAdminUserLoading(true);
+                      try {
+                        await api.post('/api/admin-manage/admins', adminUserForm);
+                        setAdminUserDialog(false);
+                        fetchAdminUsers();
+                      } catch (err) { setError(err.response?.data?.message || 'Failed to create admin'); }
+                      finally { setAdminUserLoading(false); }
+                    }}
+                    variant="contained" sx={{ background: `linear-gradient(135deg,${RED},${ACCENT})`, textTransform: 'none', borderRadius: 2, px: 3 }}>
+                    {adminUserLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Create Admin'}
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </Box>
+          )}
 
           {/* ══════════════ CAMPUS AMBASSADORS ══════════════ */}
           {activeNav === 8 && (
@@ -1186,15 +1340,15 @@ export default function AdminDashboard() {
       </Dialog>
 
       {/* Advisor */}
-      <Dialog open={advisorDialog} onClose={() => setAdvisorDialog(false)} maxWidth="sm" fullWidth
+      <Dialog open={advisorDialog} onClose={() => { setAdvisorDialog(false); setEditingAdvisor(null); }} maxWidth="sm" fullWidth
         slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
         <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><RecordVoiceOver sx={{ color: RED }} />{editingAdvisor !== null ? 'Edit Advisor' : 'Add Advisor'}</Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><RecordVoiceOver sx={{ color: RED }} />{editingAdvisor !== null ? 'Edit Advisor / Speaker' : 'Add Advisor / Speaker'}</Box>
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
-          {[['Full Name', 'name'], ['Title / Designation', 'title'], ['Institution', 'institution'], ['Photo URL (optional)', 'image']].map(([label, key]) => (
-            <TextField key={key} label={label} fullWidth value={advisorForm[key]} onChange={e => setAdvisorForm({ ...advisorForm, [key]: e.target.value })} sx={inputSx} />
-          ))}
+          <TextField label="Full Name *" fullWidth value={advisorForm.name} onChange={e => setAdvisorForm({ ...advisorForm, name: e.target.value })} sx={inputSx} />
+          <TextField label="Title / Designation *" fullWidth value={advisorForm.title} onChange={e => setAdvisorForm({ ...advisorForm, title: e.target.value })} sx={inputSx} />
+          <TextField label="Institution / Organisation" fullWidth value={advisorForm.institution} onChange={e => setAdvisorForm({ ...advisorForm, institution: e.target.value })} sx={inputSx} />
           <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
             <InputLabel>Category</InputLabel>
             <Select value={advisorForm.category} label="Category" onChange={e => setAdvisorForm({ ...advisorForm, category: e.target.value })}
@@ -1202,14 +1356,54 @@ export default function AdminDashboard() {
               {['Academic', 'Industry', 'Government', 'International', 'Technical'].map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
             </Select>
           </FormControl>
+          {/* Photo upload */}
+          <Box>
+            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, mb: 1 }}>Photo (uploaded to GCS)</Typography>
+            {!advisorForm.image_url ? (
+              <Box component="label" htmlFor="adv-img-input" sx={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: 1, p: 3, borderRadius: 2, border: `2px dashed ${BORDER}`,
+                cursor: advisorImgUploading ? 'wait' : 'pointer', background: 'rgba(255,255,255,0.02)',
+                '&:hover': { borderColor: ACCENT, background: `${ACCENT}08` }, transition: 'all 0.2s',
+              }}>
+                {advisorImgUploading ? <CircularProgress size={26} sx={{ color: ACCENT }} /> : <UploadFile sx={{ fontSize: 32, color: 'rgba(255,255,255,0.25)' }} />}
+                <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>{advisorImgUploading ? 'Uploading…' : 'Click to upload photo'}</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>JPG, PNG, WebP — max 8 MB</Typography>
+                <input id="adv-img-input" type="file" accept="image/*" hidden disabled={advisorImgUploading} onChange={async e => {
+                  const file = e.target.files?.[0]; if (!file) return;
+                  setAdvisorImgUploading(true);
+                  try {
+                    const fd = new FormData(); fd.append('image', file);
+                    const res = await api.post('/api/upload/image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                    if (res.data?.url) setAdvisorForm(prev => ({ ...prev, image_url: res.data.url }));
+                  } catch { setError('Photo upload failed'); }
+                  finally { setAdvisorImgUploading(false); }
+                }} />
+              </Box>
+            ) : (
+              <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: `1px solid ${BORDER}`, maxHeight: 180 }}>
+                <img src={advisorForm.image_url} alt="preview" style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block' }} />
+                <Box onClick={() => setAdvisorForm(prev => ({ ...prev, image_url: '' }))}
+                  sx={{ position: 'absolute', top: 8, right: 8, px: 1.5, py: 0.5, borderRadius: 1, background: `${RED}cc`, color: '#fff', fontSize: 12, cursor: 'pointer', '&:hover': { background: RED } }}>
+                  Remove
+                </Box>
+              </Box>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button onClick={() => setAdvisorDialog(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
-          <Button disabled={!advisorForm.name || !advisorForm.title}
-            onClick={() => {
-              if (editingAdvisor !== null) setAdvisors(prev => prev.map((a, i) => i === editingAdvisor ? { ...advisorForm } : a));
-              else setAdvisors(prev => [...prev, { ...advisorForm }]);
-              setAdvisorDialog(false);
+          <Button onClick={() => { setAdvisorDialog(false); setEditingAdvisor(null); }} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+          <Button disabled={!advisorForm.name || !advisorForm.title || advisorImgUploading}
+            onClick={async () => {
+              try {
+                if (editingAdvisor !== null) {
+                  await api.put(`/api/advisors/${editingAdvisor}`, advisorForm);
+                } else {
+                  await api.post('/api/advisors', advisorForm);
+                }
+                setAdvisorDialog(false); setEditingAdvisor(null);
+                fetchAdvisors();
+              } catch { setError('Failed to save advisor'); }
             }}
             variant="contained" sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, px: 3 }}>
             {editingAdvisor !== null ? 'Save Changes' : 'Add Advisor'}
@@ -1278,7 +1472,11 @@ export default function AdminDashboard() {
             <InputLabel>Target Audience</InputLabel>
             <Select value={annForm.target_audience} label="Target Audience" onChange={e => setAnnForm({ ...annForm, target_audience: e.target.value })}
               slotProps={{ paper: { sx: { background: SURFACE, color: '#fff' } } }}>
-              {['all', 'project', 'olympiad', 'robo_soccer', 'event_registered'].map(v => <MenuItem key={v} value={v}>{v.replace('_', ' ').toUpperCase()}</MenuItem>)}
+              <MenuItem value="all">All Users</MenuItem>
+              <MenuItem value="project">Project Participants</MenuItem>
+              <MenuItem value="olympiad">Olympiad Participants</MenuItem>
+              <MenuItem value="wall_magazine">Wall Magazine Participants</MenuItem>
+              <MenuItem value="event_registered">All Event Registered</MenuItem>
             </Select>
           </FormControl>
           <FormControlLabel

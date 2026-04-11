@@ -16,7 +16,7 @@ const AUDIENCE_LABEL = {
     all: 'General',
     project: 'Project',
     olympiad: 'Olympiad',
-    robo_soccer: 'Robo Soccer',
+    wall_magazine: 'Wall Magazine',
     event_registered: 'Registered',
 };
 
@@ -342,10 +342,10 @@ const Announcements = () => {
     const rest = filtered.slice(1);
 
     const FILTERS = [
-        { value: 'all', label: 'All News' },
-        { value: 'project', label: 'Project' },
-        { value: 'olympiad', label: 'Olympiad' },
-        { value: 'robo_soccer', label: 'Robo Soccer' },
+        { value: 'all',          label: 'All News' },
+        { value: 'project',      label: 'Project' },
+        { value: 'olympiad',     label: 'Olympiad' },
+        { value: 'wall_magazine', label: 'Wall Magazine' },
     ];
 
     return (

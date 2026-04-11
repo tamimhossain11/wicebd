@@ -100,8 +100,8 @@ const sendAnnouncementEmails = async (announcementId, title, body, audience) => 
     } else if (audience === 'olympiad') {
       const [rows] = await db.query('SELECT DISTINCT email FROM olympiad_registrations WHERE email IS NOT NULL');
       emails = rows.map(r => r.email);
-    } else if (audience === 'robo_soccer') {
-      const [rows] = await db.query('SELECT DISTINCT leader_email as email FROM robo_soccer_registrations WHERE leader_email IS NOT NULL');
+    } else if (audience === 'wall_magazine') {
+      const [rows] = await db.query("SELECT DISTINCT leaderEmail as email FROM registrations WHERE competitionCategory = 'Megazine' AND leaderEmail IS NOT NULL");
       emails = rows.map(r => r.email);
     }
 

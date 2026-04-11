@@ -19,8 +19,8 @@ router.post('/login', async (req, res) => {
   try {
     // 1. Find admin (case-sensitive query)
     const [admin] = await db.query(
-      'SELECT id, username, password FROM admins WHERE username = ?', 
-      [username.trim().toLowerCase()] // Normalize username
+      'SELECT id, username, password, role, is_active FROM admins WHERE username = ?',
+      [username.trim().toLowerCase()]
     );
 
     if (!admin || admin.length === 0) {
@@ -44,12 +44,18 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 3. Create JWT token
+    // 3. Check account is active
+    if (!adminData.is_active) {
+      return res.status(403).json({ success: false, message: 'Account is disabled' });
+    }
+
+    // 4. Create JWT token (include adminRole so middleware can enforce RBAC)
     const token = jwt.sign(
       {
-        id: adminData.id,
-        username: adminData.username,
-        role: 'admin'
+        id:        adminData.id,
+        username:  adminData.username,
+        role:      'admin',
+        adminRole: adminData.role,       // super_admin | data_extractor | ca_cl_manager
       },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
@@ -59,8 +65,9 @@ router.post('/login', async (req, res) => {
       success: true,
       token,
       admin: {
-        id: adminData.id,
-        username: adminData.username
+        id:        adminData.id,
+        username:  adminData.username,
+        adminRole: adminData.role,
       }
     });
 

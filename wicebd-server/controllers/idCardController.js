@@ -153,20 +153,72 @@ const verifyCard = async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT ic.card_uid, ic.registration_type, ic.registration_id, ic.generated_at,
-             u.name, u.email
+             u.id AS user_id, u.name AS user_name, u.email AS user_email
       FROM id_cards ic
-      JOIN users u ON ic.user_id = u.id
+      LEFT JOIN users u ON ic.user_id = u.id
       WHERE ic.card_uid = ?
     `, [cardUid]);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'ID card not found' });
+    if (!rows.length) return res.status(404).json({ success: false, message: 'ID card not found' });
+
+    const card = rows[0];
+    let detail = {};
+
+    // Fetch registration-specific detail
+    if (card.registration_type === 'olympiad') {
+      const [[reg]] = await db.query(
+        'SELECT full_name, institution, class_grade, phone, email, registration_id FROM olympiad_registrations WHERE registration_id = ?',
+        [card.registration_id]
+      );
+      detail = reg || {};
+    } else {
+      const [[reg]] = await db.query(
+        'SELECT leader, institution, leaderEmail, leaderPhone, projectTitle, competitionCategory, paymentID FROM registrations WHERE paymentID = ?',
+        [card.registration_id]
+      );
+      detail = reg || {};
     }
-    res.json({ success: true, data: rows[0] });
+
+    // Attendance status
+    const [attRows] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
+
+    res.json({ success: true, data: { ...card, detail, attendance: attRows[0] || null } });
   } catch (err) {
     console.error('verifyCard error:', err);
     res.status(500).json({ success: false, message: 'Verification failed' });
   }
 };
 
-module.exports = { getMyCards, generateCard, verifyCard };
+// DELETE /api/id-card/delete — user deletes their own card to regenerate
+const deleteCard = async (req, res) => {
+  const userId = req.user.id;
+  const { registration_type, registration_id } = req.body;
+  if (!registration_type || !registration_id) {
+    return res.status(400).json({ success: false, message: 'registration_type and registration_id required' });
+  }
+  try {
+    const [existing] = await db.query(
+      'SELECT * FROM id_cards WHERE user_id = ? AND registration_type = ? AND registration_id = ?',
+      [userId, registration_type, registration_id]
+    );
+    if (!existing.length) return res.status(404).json({ success: false, message: 'Card not found' });
+
+    // Delete QR image from GCS if stored there
+    const card = existing[0];
+    if (card.image_url) {
+      const { deleteFile } = require('../utils/gcsStorage');
+      await deleteFile(card.image_url).catch(() => {});
+    }
+
+    await db.query(
+      'DELETE FROM id_cards WHERE user_id = ? AND registration_type = ? AND registration_id = ?',
+      [userId, registration_type, registration_id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('deleteCard error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete card' });
+  }
+};
+
+module.exports = { getMyCards, generateCard, verifyCard, deleteCard };

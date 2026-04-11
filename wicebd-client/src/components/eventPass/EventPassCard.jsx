@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Button, CircularProgress, Paper, Chip, Grid,
 } from '@mui/material';
-import { QrCode2, Download, CheckCircle, Badge, Lock } from '@mui/icons-material';
+import { QrCode2, Download, CheckCircle, Lock, Refresh } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/index';
 
@@ -180,8 +180,9 @@ const IDCardVisual = ({ reg, card }) => {
 
 /* ── Registration slot (one per reg) ── */
 const RegSlot = ({ reg, onGenerated, profileComplete }) => {
-  const [loading, setLoading] = useState(false);
-  const [card, setCard]       = useState(reg.card);
+  const [loading, setLoading]   = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [card, setCard]         = useState(reg.card);
   const meta = TYPE_META[reg.type] || TYPE_META.project;
 
   const generate = async () => {
@@ -191,15 +192,22 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
         registration_type: reg.type,
         registration_id:   reg.reg_id,
       });
-      if (data.success) {
-        setCard(data.card);
-        onGenerated?.();
-      }
-    } catch {
-      // silently fail — user can retry
-    } finally {
-      setLoading(false);
-    }
+      if (data.success) { setCard(data.card); onGenerated?.(); }
+    } catch { /* user can retry */ }
+    finally { setLoading(false); }
+  };
+
+  const deleteCard = async () => {
+    if (!window.confirm('Delete this ID card so you can generate a fresh one?')) return;
+    setDeleting(true);
+    try {
+      await api.delete('/api/id-card/delete', {
+        data: { registration_type: reg.type, registration_id: reg.reg_id },
+      });
+      setCard(null);
+      onGenerated?.();
+    } catch { /* silently fail */ }
+    finally { setDeleting(false); }
   };
 
   return (
@@ -212,59 +220,66 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
         <Box>
           <Chip
-            label={meta.label}
-            size="small"
+            label={meta.label} size="small"
             sx={{ background: `${meta.color}20`, color: meta.color, border: `1px solid ${meta.color}33`, fontSize: 11, fontWeight: 700, mb: 0.8 }}
           />
           <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{reg.name}</Typography>
-          {reg.title && (
-            <Typography sx={{ color: C.muted, fontSize: 12.5, mt: 0.3 }}>{reg.title}</Typography>
-          )}
-          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.5, fontFamily: 'monospace' }}>
-            {reg.reg_id}
-          </Typography>
+          {reg.title && <Typography sx={{ color: C.muted, fontSize: 12.5, mt: 0.3 }}>{reg.title}</Typography>}
+          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.5, fontFamily: 'monospace' }}>{reg.reg_id}</Typography>
         </Box>
-        {card ? (
-          <Chip
-            icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
-            label="Card Generated"
-            size="small"
-            sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
-          />
-        ) : profileComplete ? (
-          <Button
-            onClick={generate}
-            disabled={loading}
-            size="small"
-            startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <QrCode2 sx={{ fontSize: 16 }} />}
-            sx={{
-              background: `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)`,
-              color: '#fff', textTransform: 'none', fontWeight: 700, fontSize: 12.5,
-              borderRadius: 2, px: 2, py: 0.9,
-              boxShadow: `0 4px 14px ${meta.color}44`,
-              '&:hover': { opacity: 0.9 },
-              '&:disabled': { background: `${meta.color}44`, color: 'rgba(255,255,255,0.4)' },
-            }}
-          >
-            {loading ? 'Generating…' : 'Generate ID Card'}
-          </Button>
-        ) : (
-          <Chip
-            label="Complete profile first"
-            size="small"
-            sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }}
-          />
-        )}
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+          {card ? (
+            <>
+              <Chip
+                icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
+                label="Card Generated" size="small"
+                sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
+              />
+              <Button
+                onClick={deleteCard} disabled={deleting} size="small"
+                startIcon={deleting ? <CircularProgress size={12} sx={{ color: '#fff' }} /> : <Refresh sx={{ fontSize: 14 }} />}
+                sx={{
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                  color: 'rgba(255,255,255,0.5)', textTransform: 'none', fontSize: 11.5,
+                  borderRadius: 2, px: 1.5, py: 0.5,
+                  '&:hover': { background: 'rgba(233,69,96,0.15)', borderColor: '#e9456060', color: '#e94560' },
+                }}
+              >
+                {deleting ? 'Deleting…' : 'Regenerate'}
+              </Button>
+            </>
+          ) : profileComplete ? (
+            <Button
+              onClick={generate} disabled={loading} size="small"
+              startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <QrCode2 sx={{ fontSize: 16 }} />}
+              sx={{
+                background: `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)`,
+                color: '#fff', textTransform: 'none', fontWeight: 700, fontSize: 12.5,
+                borderRadius: 2, px: 2, py: 0.9,
+                boxShadow: `0 4px 14px ${meta.color}44`,
+                '&:hover': { opacity: 0.9 },
+                '&:disabled': { background: `${meta.color}44`, color: 'rgba(255,255,255,0.4)' },
+              }}
+            >
+              {loading ? 'Generating…' : 'Generate ID Card'}
+            </Button>
+          ) : (
+            <Chip
+              label="Complete profile first" size="small"
+              sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }}
+            />
+          )}
+        </Box>
       </Box>
 
-      {/* Show card if generated */}
       {card && <IDCardVisual reg={reg} card={card} />}
     </Paper>
   );
 };
 
 /* ── Main section ── */
-const IDCardSection = ({ user, profileComplete }) => {
+const IDCardSection = ({ profileComplete }) => {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
 

@@ -369,7 +369,13 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
       <!-- Next steps -->
       ${sectionTitle('What Happens Next')}
       <div style="background:rgba(128,0,32,0.08);border:1px solid rgba(128,0,32,0.2);border-radius:12px;padding:20px 24px;">
-        ${['Save this email as proof of your registration.', 'Join our official participants\' group — invite link coming soon.', 'Monitor wicebd.com for competition schedule and updates.'].map((t, i) => `
+        ${[
+          'Save this email as proof of your registration.',
+          isWallMag
+            ? 'Join the Wall Magazine WhatsApp group: <a href="https://chat.whatsapp.com/IrqQRmrFpXdEx4vit4ghxT" style="color:#c0002a;font-weight:600;">Click to join</a>'
+            : 'Join the Project Participants WhatsApp group: <a href="https://chat.whatsapp.com/HWtqFGgo3tUBtY68EYWpxT" style="color:#c0002a;font-weight:600;">Click to join</a>',
+          'Monitor wicebd.com for competition schedule and updates.',
+        ].map((t, i) => `
           <div style="display:flex;gap:14px;align-items:flex-start;padding:8px 0;${i < 2 ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : ''}">
             <span style="width:24px;height:24px;border-radius:50%;background:rgba(128,0,32,0.3);border:1px solid rgba(128,0,32,0.5);color:#c0002a;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i + 1}</span>
             <span style="color:rgba(255,255,255,0.6);font-size:13px;line-height:1.6;padding-top:3px;">${t}</span>
@@ -437,7 +443,11 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
       <!-- Next steps -->
       ${sectionTitle('What Happens Next')}
       <div style="background:rgba(128,0,32,0.08);border:1px solid rgba(128,0,32,0.2);border-radius:12px;padding:20px 24px;">
-        ${['Save your Registration ID — you will need it on competition day.', 'Check your email for the competition schedule and venue details.', 'Follow wicebd.com and our social media for updates and announcements.'].map((t, i) => `
+        ${[
+          'Save your Registration ID — you will need it on competition day.',
+          'Join the Science Olympiad WhatsApp group: <a href="https://chat.whatsapp.com/BVKlyCk2IEXCZzhQ2xHkj4" style="color:#c0002a;font-weight:600;">Click to join</a>',
+          'Follow wicebd.com and our social media for updates and announcements.',
+        ].map((t, i) => `
           <div style="display:flex;gap:14px;align-items:flex-start;padding:8px 0;${i < 2 ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : ''}">
             <span style="width:24px;height:24px;border-radius:50%;background:rgba(128,0,32,0.3);border:1px solid rgba(128,0,32,0.5);color:#c0002a;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i + 1}</span>
             <span style="color:rgba(255,255,255,0.6);font-size:13px;line-height:1.6;padding-top:3px;">${t}</span>
