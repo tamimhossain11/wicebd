@@ -43,7 +43,7 @@ const initiatePayment = async (req, res) => {
 
     // 2. Determine amount based on competition category + extra members (300 BDT each beyond member3)
     const cat = registration.competitionCategory.toLowerCase();
-    const baseAmount = cat === 'megazine' ? 10 : cat === 'olympiad' ? 5 : 20;
+    const baseAmount = cat === 'megazine' ? 399 : cat === 'olympiad' ? 50 : 999;
     const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
     const extraCharge = cat === 'megazine' ? 120 : 300;
     const amount = baseAmount + (extraMembers * extraCharge);
@@ -418,7 +418,7 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
       <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
         ${infoRow('Invoice Number', paymentDetails.invoiceNumber)}
         ${infoRow('Transaction ID', paymentDetails.trxID)}
-        ${infoRow('Amount Paid', '৳5 BDT')}
+        ${infoRow('Amount Paid', '৳50 BDT')}
         ${infoRow('Payment Method', 'bKash via PayStation')}
         ${infoRow('Status', '&#10003; Completed', true)}
       </table>
