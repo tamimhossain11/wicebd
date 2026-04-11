@@ -28,7 +28,7 @@
 /* Main glass content box */
 .wice-banner-content-wrap {
   position: absolute;
-  bottom: 106px;
+  bottom: 116px;
   left: 0;
   right: 0;
   z-index: 10;
@@ -40,12 +40,29 @@
 .wice-banner-content-inner {
   border-radius: 16px;
   width: 100%;
-  max-width: 100%;
-  padding: 14px 40px;
-  display: flex;
+  max-width: 100% !important;
+  padding: 22px 40px;
+  display: flex !important;
   align-items: center;
   gap: 48px;
   box-sizing: border-box;
+}
+
+/* Right column — subtitle + guidebook */
+.wice-banner-right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.wice-banner-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.75;
+  font-weight: 400;
 }
 
 .wice-banner-divider {
@@ -120,25 +137,44 @@
   .wice-learn-more-btn { display: none !important; }
   .wice-banner-content-inner {
     gap: 24px;
-    padding: 14px 24px;
+    padding: 18px 24px;
+  }
+  .wice-banner-subtitle {
+    font-size: 13px;
   }
 }
 
 /* Mobile */
 @media (max-width: 767px) {
+  /* Fill entire hero height, use flex centering, push content above the timer */
   .wice-banner-content-wrap {
-    bottom: 90px !important;
-    padding: 0 12px;
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 70px 12px 100px !important; /* top: clear header; bottom: clear timer */
+    pointer-events: none;
+  }
+  .wice-banner-content-wrap > * {
+    pointer-events: auto;
   }
   .wice-banner-content-inner {
     flex-direction: column !important;
-    gap: 10px !important;
-    padding: 16px 18px !important;
+    gap: 12px !important;
+    padding: 20px 18px !important;
     align-items: flex-start !important;
   }
   .wice-banner-divider { display: none !important; }
+  .wice-banner-right-col {
+    width: 100% !important;
+    gap: 12px !important;
+  }
   .wice-banner-title { font-size: 20px !important; line-height: 1.3 !important; margin: 6px 0 0 !important; }
-  .wice-banner-subtitle { font-size: 12px !important; margin: 0 !important; }
+  .wice-banner-subtitle { font-size: 12.5px !important; line-height: 1.65 !important; }
   .wice-scroll-hint { display: none !important; }
 
   /* Countdown */
@@ -635,33 +671,56 @@
    ============================================================ */
 
 .wice-guidebook-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  background: rgba(128, 0, 32, 0.18);
-  border: 1px solid rgba(128, 0, 32, 0.45);
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 13px;
+  gap: 10px;
+  padding: 13px 26px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(128,0,32,0.22) 0%, rgba(192,0,42,0.14) 100%);
+  border: 1px solid rgba(192, 0, 42, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13.5px;
   font-weight: 700;
   text-decoration: none;
-  letter-spacing: 0.03em;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
   white-space: nowrap;
   align-self: flex-start;
+  box-shadow: 0 4px 20px rgba(128,0,32,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+/* Shimmer sweep on hover */
+.wice-guidebook-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
+}
+
+.wice-guidebook-btn:hover::before {
+  transform: translateX(100%);
 }
 
 .wice-guidebook-btn:hover {
-  background: rgba(128, 0, 32, 0.32);
-  border-color: rgba(192, 0, 42, 0.7);
+  background: linear-gradient(135deg, rgba(192,0,42,0.38) 0%, rgba(128,0,32,0.28) 100%);
+  border-color: rgba(233, 69, 96, 0.75);
   color: #fff;
+  box-shadow: 0 6px 28px rgba(192,0,42,0.4), 0 0 0 1px rgba(233,69,96,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 767px) {
   .wice-guidebook-btn {
     font-size: 12px !important;
-    padding: 9px 16px !important;
+    padding: 10px 18px !important;
+    letter-spacing: 0.04em !important;
+    align-self: stretch !important;
+    justify-content: center !important;
   }
 }
 
