@@ -127,7 +127,7 @@
 /* Mobile */
 @media (max-width: 767px) {
   .wice-banner-content-wrap {
-    bottom: 80px !important;
+    bottom: 90px !important;
     padding: 0 12px;
   }
   .wice-banner-content-inner {
@@ -627,5 +627,70 @@
 @media (max-width: 767px) {
   .wice-reg-card {
     padding: 28px 22px 36px !important;
+  }
+}
+
+/* ============================================================
+   DOWNLOAD GUIDEBOOK BUTTON (Banner hero card)
+   ============================================================ */
+
+.wice-guidebook-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: rgba(128, 0, 32, 0.18);
+  border: 1px solid rgba(128, 0, 32, 0.45);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+.wice-guidebook-btn:hover {
+  background: rgba(128, 0, 32, 0.32);
+  border-color: rgba(192, 0, 42, 0.7);
+  color: #fff;
+}
+
+@media (max-width: 767px) {
+  .wice-guidebook-btn {
+    font-size: 12px !important;
+    padding: 9px 16px !important;
+  }
+}
+
+/* ============================================================
+   INNER PAGE HERO (SelectedTeams, InternationalTeam, AboutUs)
+   — clears the fixed header
+   ============================================================ */
+
+.wice-inner-hero {
+  padding-top: 0;
+}
+
+.wice-inner-hero-container {
+  padding-top: 140px;
+  padding-bottom: 80px;
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+  .wice-inner-hero-container {
+    padding-top: 110px !important;
+    padding-bottom: 60px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .wice-inner-hero-container {
+    padding-top: 90px !important;
+    padding-bottom: 50px !important;
   }
 }

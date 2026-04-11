@@ -55,7 +55,7 @@ const NAV = [
   { id: 'registrations',  label: 'My Registrations',  icon: <CheckCircle     sx={{ fontSize: 19 }} /> },
   { id: 'event-pass',     label: 'ID Cards',          icon: <Badge           sx={{ fontSize: 19 }} /> },
   { id: 'announcements',  label: 'Announcements',     icon: <Notifications   sx={{ fontSize: 19 }} /> },
-  { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} /> },
+  { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} />, disabled: true },
   { id: 'profile',        label: 'Profile',           icon: <Person          sx={{ fontSize: 19 }} /> },
 ];
 
@@ -128,6 +128,26 @@ const Sidebar = ({ active, setActive, user, onLogout, open, setOpen }) => (
         </Typography>
         {NAV.map(item => {
           const isActive = active === item.id;
+          if (item.disabled) {
+            return (
+              <Box key={item.id}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1.5,
+                  px: 1.5, py: 1.2, borderRadius: 2, mb: 0.5,
+                  cursor: 'default', opacity: 0.45,
+                  color: C.muted,
+                  borderLeft: '3px solid transparent',
+                }}>
+                {item.icon}
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 500 }}>{item.label}</Typography>
+                  <Typography sx={{ fontSize: 9, color: '#800020', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1.2, mt: 0.2 }}>
+                    Coming Soon
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          }
           if (item.href) {
             return (
               <Box key={item.id} component={Link} to={item.href} onClick={() => setActive(item.id)}
@@ -348,6 +368,13 @@ export default function UserDashboard() {
   }, []);
 
   const handleLogout = () => { logout(); toast.info('Signed out.'); navigate('/sign-in'); };
+
+  // Allow child components (e.g. IDCardSection) to navigate to a tab
+  useEffect(() => {
+    const handler = (e) => setActive(e.detail);
+    document.addEventListener('dashboard:navigate', handler);
+    return () => document.removeEventListener('dashboard:navigate', handler);
+  }, []);
 
   const setField = (k) => (e) => setProfileForm(prev => ({ ...prev, [k]: e.target.value }));
 
@@ -704,7 +731,7 @@ export default function UserDashboard() {
 
           {/* ══ ID CARDS ══ */}
           {active === 'event-pass' && (
-            <IDCardSection user={user} />
+            <IDCardSection user={user} profileComplete={profileComplete} />
           )}
 
           {/* ══ ANNOUNCEMENTS ══ */}
@@ -744,19 +771,14 @@ export default function UserDashboard() {
             <Box>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>Event Schedule</Typography>
-                <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>WICE Bangladesh 2025 — 8th Edition</Typography>
+                <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>WICE Bangladesh — 8th Edition</Typography>
               </Box>
               <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 3, background: C.card, border: `1px solid ${C.border}` }}>
                 <CalendarMonth sx={{ fontSize: 64, color: `${C.primary}55`, mb: 2 }} />
-                <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.5)', mb: 0.8 }}>Full schedule coming soon</Typography>
-                <Typography sx={{ color: C.muted, fontSize: 13, mb: 3 }}>Event date: May 9, 2026</Typography>
-                <Button component={Link} to="/schedule" sx={{
-                  textTransform: 'none', color: '#fff', fontWeight: 700,
-                  background: C.primary, borderRadius: 2, px: 3,
-                  '&:hover': { background: C.accent },
-                }}>
-                  View Full Schedule →
-                </Button>
+                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 800, mb: 1 }}>Schedule will be announced soon</Typography>
+                <Typography sx={{ color: C.muted, fontSize: 13 }}>
+                  The detailed event schedule is currently being finalized. Check back here for updates.
+                </Typography>
               </Paper>
             </Box>
           )}

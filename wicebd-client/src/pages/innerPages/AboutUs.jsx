@@ -119,7 +119,7 @@ const AboutUs = () => (
         {/* ══════════════════════════════════
             1. HERO
         ══════════════════════════════════ */}
-        <section style={{ position: 'relative', minHeight: '92vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+        <section className="wice-inner-hero" style={{ position: 'relative', minHeight: '92vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
             {/* BG image */}
             <div style={{
                 position: 'absolute', inset: 0,
@@ -132,7 +132,7 @@ const AboutUs = () => (
             <Orb style={{ width: 500, height: 500, top: -100, left: -80 }} />
             <Orb style={{ width: 320, height: 320, bottom: -60, right: '12%' }} />
 
-            <div className="auto-container" style={{ position: 'relative', zIndex: 2, paddingTop: 120 }}>
+            <div className="auto-container wice-inner-hero-container" style={{ position: 'relative', zIndex: 2 }}>
                 <motion.div variants={fadeUp} initial="hidden" animate="show" style={{ maxWidth: 740 }}>
                     <Kicker text="Dreams of Bangladesh Presents" />
                     <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(38px,6vw,72px)', lineHeight: 1.1, margin: '0 0 24px' }}>

@@ -25,7 +25,7 @@ const InternationalTeam = () => (
         <span className="header-span" />
         <HeaderV1 headerStyle="header-style-two" parentMenu="teams" />
 
-        <section style={{
+        <section className="wice-inner-hero" style={{
             position: 'relative', minHeight: '100vh', overflow: 'hidden',
             background: 'linear-gradient(160deg,#0d0006 0%,#1a000a 55%,#2a0010 100%)',
             display: 'flex', alignItems: 'center',
@@ -40,7 +40,7 @@ const InternationalTeam = () => (
                 backgroundSize: '60px 60px',
             }} />
 
-            <div className="auto-container" style={{ position: 'relative', zIndex: 2, width: '100%', padding: '140px 0 80px' }}>
+            <div className="auto-container wice-inner-hero-container" style={{ position: 'relative', zIndex: 2, width: '100%' }}>
                 <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
                     {/* Flag icon */}
                     <motion.div

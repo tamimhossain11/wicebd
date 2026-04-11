@@ -15,6 +15,20 @@ const C = {
   card:    'rgba(255,255,255,0.04)',
 };
 
+/* ── Small label/value row used inside the card ── */
+const CardRow = ({ label, value, mono = false }) => (
+  <Box>
+    <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
+      {label}
+    </Typography>
+    {typeof value === 'string' ? (
+      <Typography sx={{ color: '#fff', fontSize: 12, fontWeight: 600, fontFamily: mono ? 'monospace' : 'inherit', letterSpacing: mono ? '0.06em' : 'normal', wordBreak: 'break-all' }}>
+        {value}
+      </Typography>
+    ) : value}
+  </Box>
+);
+
 const TYPE_META = {
   project:         { label: 'Project Competition', color: '#800020', prefix: 'PRJ' },
   'wall-magazine': { label: 'Wall Magazine',        color: '#10b981', prefix: 'MAG' },
@@ -165,7 +179,7 @@ const IDCardVisual = ({ reg, card }) => {
 };
 
 /* ── Registration slot (one per reg) ── */
-const RegSlot = ({ reg, onGenerated }) => {
+const RegSlot = ({ reg, onGenerated, profileComplete }) => {
   const [loading, setLoading] = useState(false);
   const [card, setCard]       = useState(reg.card);
   const meta = TYPE_META[reg.type] || TYPE_META.project;
@@ -217,7 +231,7 @@ const RegSlot = ({ reg, onGenerated }) => {
             size="small"
             sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
           />
-        ) : (
+        ) : profileComplete ? (
           <Button
             onClick={generate}
             disabled={loading}
@@ -234,6 +248,12 @@ const RegSlot = ({ reg, onGenerated }) => {
           >
             {loading ? 'Generating…' : 'Generate ID Card'}
           </Button>
+        ) : (
+          <Chip
+            label="Complete profile first"
+            size="small"
+            sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }}
+          />
         )}
       </Box>
 
@@ -244,7 +264,7 @@ const RegSlot = ({ reg, onGenerated }) => {
 };
 
 /* ── Main section ── */
-const IDCardSection = ({ user }) => {
+const IDCardSection = ({ user, profileComplete }) => {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -276,6 +296,45 @@ const IDCardSection = ({ user }) => {
         </Typography>
       </Box>
 
+      {/* Profile incomplete gate */}
+      {!profileComplete && (
+        <Paper sx={{
+          p: 3, mb: 3, borderRadius: 3,
+          background: 'rgba(245,158,11,0.08)',
+          border: '1px solid rgba(245,158,11,0.3)',
+          display: 'flex', alignItems: 'center', gap: 2.5, flexWrap: 'wrap',
+        }}>
+          <Box sx={{
+            width: 42, height: 42, borderRadius: 2, flexShrink: 0,
+            background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Typography sx={{ fontSize: 20 }}>⚠️</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 200 }}>
+            <Typography sx={{ color: '#f59e0b', fontWeight: 700, fontSize: 14, mb: 0.3 }}>
+              Profile Incomplete — Required Before Generating ID Card
+            </Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 1.6 }}>
+              You must complete your profile (personal &amp; family information) before you can generate a participant ID card. This ensures your card displays accurate details.
+            </Typography>
+          </Box>
+          <Button
+            component="a" href="#profile"
+            onClick={(e) => { e.preventDefault(); document.dispatchEvent(new CustomEvent('dashboard:navigate', { detail: 'profile' })); }}
+            size="small"
+            sx={{
+              background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)',
+              color: '#f59e0b', textTransform: 'none', fontWeight: 700,
+              fontSize: 12.5, borderRadius: 2, px: 2.5, py: 1,
+              '&:hover': { background: 'rgba(245,158,11,0.25)' },
+            }}
+          >
+            Complete Profile →
+          </Button>
+        </Paper>
+      )}
+
       {!hasRegs ? (
         /* No registrations */
         <Paper sx={{ p: 6, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, textAlign: 'center' }}>
@@ -304,7 +363,7 @@ const IDCardSection = ({ user }) => {
         <Grid container spacing={3}>
           {regs.map(reg => (
             <Grid size={{ xs: 12, lg: 6 }} key={`${reg.type}:${reg.reg_id}`}>
-              <RegSlot reg={reg} onGenerated={load} />
+              <RegSlot reg={reg} onGenerated={load} profileComplete={profileComplete} />
             </Grid>
           ))}
         </Grid>
