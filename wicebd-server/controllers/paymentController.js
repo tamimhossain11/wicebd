@@ -240,7 +240,7 @@ const emailBase = (bodyHtml) => `
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>WICEBD 2025</title>
+<title>8th WICE Bangladesh</title>
 </head>
 <body style="margin:0;padding:0;background:#0d0006;font-family:'Segoe UI',Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0006;padding:32px 0;">
@@ -250,9 +250,9 @@ const emailBase = (bodyHtml) => `
       <!-- HEADER -->
       <tr>
         <td style="background:linear-gradient(135deg,#1a0008 0%,#2a000f 100%);border-radius:20px 20px 0 0;padding:36px 40px 28px;text-align:center;border-bottom:3px solid #800020;">
-          <img src="https://www.wicebd.com/images/logo.png" alt="WICEBD" width="120" style="max-width:120px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />
+          <img src="https://www.wicebd.com/images/logo-normal.PNG" alt="8th WICE Bangladesh" style="height:52px;object-fit:contain;display:block;margin:0 auto 12px;" />
           <div style="font-size:11px;letter-spacing:0.22em;font-weight:700;color:#800020;text-transform:uppercase;margin-bottom:6px;">World Invention Competition &amp; Exhibition</div>
-          <h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0;letter-spacing:-0.3px;">Bangladesh 2025</h1>
+          <h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0;letter-spacing:-0.3px;">8th WICE Bangladesh</h1>
         </td>
       </tr>
 
@@ -266,6 +266,7 @@ const emailBase = (bodyHtml) => `
       <!-- FOOTER -->
       <tr>
         <td style="background:#0a0004;border-radius:0 0 20px 20px;padding:24px 40px;text-align:center;border-top:1px solid rgba(128,0,32,0.25);">
+          <img src="https://www.wicebd.com/images/logo-normal.PNG" alt="8th WICE Bangladesh" style="height:36px;object-fit:contain;display:block;margin:0 auto 14px;opacity:0.8;" />
           <p style="color:rgba(255,255,255,0.35);font-size:12px;margin:0 0 8px;">
             &copy; ${new Date().getFullYear()} WICE Bangladesh &bull; All rights reserved
           </p>
@@ -331,7 +332,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
       <p style="color:rgba(255,255,255,0.55);font-size:14px;margin:0 0 4px;">Dear</p>
       <h2 style="color:#fff;font-size:20px;font-weight:800;margin:0 0 6px;">${registration.leader}</h2>
       <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0 0 24px;line-height:1.7;">
-        Your <strong style="color:#fff;">${categoryLabel}</strong> registration for <strong style="color:#fff;">WICEBD 2025</strong> is confirmed and your payment has been processed successfully.
+        Your <strong style="color:#fff;">${categoryLabel}</strong> registration for <strong style="color:#fff;">8th WICE Bangladesh</strong> is confirmed and your payment has been processed successfully.
       </p>
 
       <!-- Status badges -->
@@ -380,11 +381,11 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
       </p>`;
 
     await emailTransporter.sendMail({
-      from: `"WICEBD 2025" <contact@wicebd.com>`,
+      from: `"8th WICE Bangladesh" <contact@wicebd.com>`,
       to: registration.leaderEmail,
-      subject: `Registration Confirmed — WICEBD 2025 ${categoryLabel} · ${registration.projectTitle}`,
+      subject: `Registration Confirmed — 8th WICE Bangladesh ${categoryLabel} · ${registration.projectTitle}`,
       html: emailBase(body),
-      text: `WICEBD 2025 ${categoryLabel} Registration Confirmed\n\nDear ${registration.leader},\n\nYour registration is confirmed.\n\nInvoice: ${paymentDetails.invoiceNumber}\nTransaction ID: ${paymentDetails.trxID}\nAmount: ৳${totalAmount} BDT\nStatus: Completed\n\nProject: ${registration.projectTitle}\nInstitution: ${registration.institution}\n\nFor questions: contact@wicebd.com\nwww.wicebd.com`,
+      text: `8th WICE Bangladesh ${categoryLabel} Registration Confirmed\n\nDear ${registration.leader},\n\nYour registration is confirmed.\n\nInvoice: ${paymentDetails.invoiceNumber}\nTransaction ID: ${paymentDetails.trxID}\nAmount: ৳${totalAmount} BDT\nStatus: Completed\n\nProject: ${registration.projectTitle}\nInstitution: ${registration.institution}\n\nFor questions: contact@wicebd.com\nwww.wicebd.com`,
     });
     console.log(`✅ ${categoryLabel} confirmation email sent to ${registration.leaderEmail}`);
   } catch (error) {
@@ -400,7 +401,7 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
       <p style="color:rgba(255,255,255,0.55);font-size:14px;margin:0 0 4px;">Dear</p>
       <h2 style="color:#fff;font-size:20px;font-weight:800;margin:0 0 6px;">${registration.leader}</h2>
       <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0 0 24px;line-height:1.7;">
-        Your registration for the <strong style="color:#fff;">WICEBD 2025 Science Olympiad</strong> is confirmed. Welcome aboard!
+        Your registration for the <strong style="color:#fff;">8th WICE Bangladesh — Science Olympiad</strong> is confirmed. Welcome aboard!
       </p>
 
       <!-- Status badges -->
@@ -448,11 +449,11 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
       </p>`;
 
     await emailTransporter.sendMail({
-      from: `"WICEBD 2025 Olympiad" <contact@wicebd.com>`,
+      from: `"8th WICE Bangladesh" <contact@wicebd.com>`,
       to: registration.leaderEmail,
-      subject: `Olympiad Registration Confirmed — WICEBD 2025 · ${paymentDetails.registrationId}`,
+      subject: `Olympiad Registration Confirmed — 8th WICE Bangladesh · ${paymentDetails.registrationId}`,
       html: emailBase(body),
-      text: `WICEBD 2025 Science Olympiad — Registration Confirmed\n\nDear ${registration.leader},\n\nYour Olympiad registration is confirmed.\n\nRegistration ID: ${paymentDetails.registrationId}\nInvoice: ${paymentDetails.invoiceNumber}\nTransaction ID: ${paymentDetails.trxID}\nAmount: ৳5 BDT\nStatus: Completed\n\nInstitution: ${registration.institution}\n\nFor questions: contact@wicebd.com\nwww.wicebd.com`,
+      text: `8th WICE Bangladesh — Science Olympiad Registration Confirmed\n\nDear ${registration.leader},\n\nYour Olympiad registration is confirmed.\n\nRegistration ID: ${paymentDetails.registrationId}\nInvoice: ${paymentDetails.invoiceNumber}\nTransaction ID: ${paymentDetails.trxID}\nAmount: ৳50 BDT\nStatus: Completed\n\nInstitution: ${registration.institution}\n\nFor questions: contact@wicebd.com\nwww.wicebd.com`,
     });
     console.log(`✅ Olympiad confirmation email sent to ${registration.leaderEmail}`);
   } catch (error) {
