@@ -443,7 +443,7 @@ export default function UserDashboard() {
                 {NAV.find(n => n.id === active)?.label || 'Dashboard'}
               </Typography>
               <Typography sx={{ color: C.muted, fontSize: 11 }}>
-                WICE Bangladesh 2025 — 8th Edition
+                WICE Bangladesh 2026 — 8th Edition
               </Typography>
             </Box>
           </Box>
