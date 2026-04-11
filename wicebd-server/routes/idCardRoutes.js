@@ -1,18 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const authenticateUser = require('../middleware/userAuth');
+const authenticateUser  = require('../middleware/userAuth');
+const authenticateAdmin = require('../middleware/auth');
+const requireRole       = require('../middleware/requireRole');
 const { getMyCards, generateCard, verifyCard, deleteCard } = require('../controllers/idCardController');
 
 // User: list all registrations + card status
 router.get('/my-cards', authenticateUser, getMyCards);
 
-// User: generate a card for a specific registration
+// User: generate a card for a specific registration (one-time only — existing card is returned as-is)
 router.post('/generate', authenticateUser, generateCard);
 
-// User: delete own card so it can be regenerated
-router.delete('/delete', authenticateUser, deleteCard);
+// Admin-only: delete a card (super_admin use only — not exposed to users)
+router.delete('/delete', authenticateAdmin, requireRole('super_admin'), deleteCard);
 
-// Public: verify a card by UID (QR scan)
-router.get('/verify/:cardUid', verifyCard);
+// QR scan: restricted to super_admin — all others receive 403
+router.get('/verify/:cardUid', authenticateAdmin, requireRole('super_admin'), verifyCard);
 
 module.exports = router;

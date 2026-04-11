@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Button, CircularProgress, Paper, Chip, Grid,
 } from '@mui/material';
-import { QrCode2, Download, CheckCircle, Lock, Refresh } from '@mui/icons-material';
+import { QrCode2, Download, CheckCircle, Lock } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/index';
 
@@ -132,7 +132,7 @@ const IDCardVisual = ({ reg, card }) => {
               <QRCodeSVG value={verifyUrl || 'https://wicebd.com'} size={90} level="M" bgColor="#ffffff" fgColor="#1a0008" />
             </Box>
             <Typography sx={{ color: 'rgba(255,255,255,0.22)', fontSize: 8.5, textAlign: 'center', letterSpacing: '0.04em' }}>
-              Scan to verify
+              Admin scan only
             </Typography>
           </Box>
         </Box>
@@ -180,9 +180,8 @@ const IDCardVisual = ({ reg, card }) => {
 
 /* ── Registration slot (one per reg) ── */
 const RegSlot = ({ reg, onGenerated, profileComplete }) => {
-  const [loading, setLoading]   = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [card, setCard]         = useState(reg.card);
+  const [loading, setLoading] = useState(false);
+  const [card, setCard]       = useState(reg.card);
   const meta = TYPE_META[reg.type] || TYPE_META.project;
 
   const generate = async () => {
@@ -195,19 +194,6 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
       if (data.success) { setCard(data.card); onGenerated?.(); }
     } catch { /* user can retry */ }
     finally { setLoading(false); }
-  };
-
-  const deleteCard = async () => {
-    if (!window.confirm('Delete this ID card so you can generate a fresh one?')) return;
-    setDeleting(true);
-    try {
-      await api.delete('/api/id-card/delete', {
-        data: { registration_type: reg.type, registration_id: reg.reg_id },
-      });
-      setCard(null);
-      onGenerated?.();
-    } catch { /* silently fail */ }
-    finally { setDeleting(false); }
   };
 
   return (
@@ -230,25 +216,11 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
           {card ? (
-            <>
-              <Chip
-                icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
-                label="Card Generated" size="small"
-                sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
-              />
-              <Button
-                onClick={deleteCard} disabled={deleting} size="small"
-                startIcon={deleting ? <CircularProgress size={12} sx={{ color: '#fff' }} /> : <Refresh sx={{ fontSize: 14 }} />}
-                sx={{
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                  color: 'rgba(255,255,255,0.5)', textTransform: 'none', fontSize: 11.5,
-                  borderRadius: 2, px: 1.5, py: 0.5,
-                  '&:hover': { background: 'rgba(233,69,96,0.15)', borderColor: '#e9456060', color: '#e94560' },
-                }}
-              >
-                {deleting ? 'Deleting…' : 'Regenerate'}
-              </Button>
-            </>
+            <Chip
+              icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
+              label="Card Generated" size="small"
+              sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
+            />
           ) : profileComplete ? (
             <Button
               onClick={generate} disabled={loading} size="small"
