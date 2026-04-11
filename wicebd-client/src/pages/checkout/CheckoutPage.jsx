@@ -9,7 +9,7 @@ import FooterV2 from '../../components/footer/FooterV2';
 import api from '../../api/index';
 
 const EXTRA_CHARGE = { project: 300, megazine: 120, olympiad: 0 };
-const BASE_FEE = { project: 620, megazine: 200, olympiad: 50 };
+const BASE_FEE = { project: 999, megazine: 399, olympiad: 50 };
 
 const Row = ({ label, value, bold, highlight }) => (
     <div style={{

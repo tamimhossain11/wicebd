@@ -43,7 +43,7 @@ const initiatePayment = async (req, res) => {
 
     // 2. Determine amount based on competition category + extra members (300 BDT each beyond member3)
     const cat = registration.competitionCategory.toLowerCase();
-    const baseAmount = cat === 'megazine' ? 200 : cat === 'olympiad' ? 50 : 620;
+    const baseAmount = cat === 'megazine' ? 399 : cat === 'olympiad' ? 50 : 999;
     const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
     const extraCharge = cat === 'megazine' ? 120 : 300;
     const amount = baseAmount + (extraMembers * extraCharge);
