@@ -60,10 +60,10 @@ const CATEGORIES = [
     },
     {
         id: '04',
-        title: 'Creative Computing',
-        subtitle: 'Design · Code · Launch',
+        title: 'STEM Olympuad',
+        subtitle: 'Choose · Submit · Sharp Mind',
         description:
-            'Software applications, mobile apps, websites, and digital solutions that address community challenges or push creative boundaries.',
+            'Test your knowledge in science and technology through challenging problems and puzzles.',
         eligibility: 'Open to all',
         prize: 'Prize Pool: ৳10,000',
         fee: '৳50',
