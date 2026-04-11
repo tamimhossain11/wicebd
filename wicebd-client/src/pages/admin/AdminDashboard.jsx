@@ -23,7 +23,7 @@ import {
   EmojiPeople, Group, UploadFile, Dashboard,
   ArrowUpward, ArrowDownward,
   Inbox, Campaign, Notifications,
-  QrCodeScanner, ManageAccounts,
+  QrCodeScanner, ManageAccounts, LockReset,
 } from '@mui/icons-material';
 import OlympiadExamTab from '../../components/admin/OlympiadExamTab';
 import QRScannerPanel from '../../components/admin/QRScannerPanel';
@@ -231,6 +231,11 @@ export default function AdminDashboard() {
   const [adminUserForm, setAdminUserForm] = useState({ username: '', email: '', password: '', role: 'data_extractor' });
   const [adminUserLoading, setAdminUserLoading] = useState(false);
 
+  // Reset password dialog
+  const [resetPwdDialog, setResetPwdDialog] = useState({ open: false, type: '', id: null, name: '' });
+  const [resetPwdValue, setResetPwdValue]   = useState('');
+  const [resetPwdLoading, setResetPwdLoading] = useState(false);
+
   // Advisor image uploading
   const [advisorImgUploading, setAdvisorImgUploading] = useState(false);
 
@@ -371,6 +376,27 @@ export default function AdminDashboard() {
     catch { setError('Failed to delete announcement'); }
   };
 
+  const openResetPwd = (type, id, name) => {
+    setResetPwdValue('');
+    setResetPwdDialog({ open: true, type, id, name });
+  };
+
+  const handleResetPassword = async () => {
+    if (resetPwdValue.length < 6) return;
+    setResetPwdLoading(true);
+    try {
+      const endpoint = resetPwdDialog.type === 'admin'
+        ? `/api/admin-manage/admins/${resetPwdDialog.id}/reset-password`
+        : `/api/admin-manage/users/${resetPwdDialog.id}/reset-password`;
+      await api.patch(endpoint, { password: resetPwdValue });
+      setResetPwdDialog({ open: false, type: '', id: null, name: '' });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Password reset failed');
+    } finally {
+      setResetPwdLoading(false);
+    }
+  };
+
   /* ── DataGrid columns ── */
   const statusChip = (v) => {
     const color = v === 'registered' || v === 'confirmed' ? GREEN : v === 'pending' ? AMBER : RED;
@@ -457,6 +483,17 @@ export default function AdminDashboard() {
       ),
     },
     { field: 'created_at', headerName: 'Joined', width: 130, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
+    {
+      field: 'actions', headerName: '', width: 60, sortable: false,
+      renderCell: p => (
+        <Tooltip title="Reset Password">
+          <IconButton size="small" onClick={() => openResetPwd('user', p.row.id, p.row.name)}
+            sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: CYAN } }}>
+            <LockReset sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+      ),
+    },
   ];
 
   /* ── Derived data ── */
@@ -973,6 +1010,12 @@ export default function AdminDashboard() {
                             onChange={async () => { await api.patch(`/api/admin-manage/admins/${a.id}/toggle`); fetchAdminUsers(); }}
                             sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: GREEN }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { background: GREEN } }}
                           />
+                          <Tooltip title="Reset Password">
+                            <IconButton size="small" onClick={() => openResetPwd('admin', a.id, a.username)}
+                              sx={{ color: 'rgba(255,255,255,0.25)', '&:hover': { color: CYAN } }}>
+                              <LockReset sx={{ fontSize: 15 }} />
+                            </IconButton>
+                          </Tooltip>
                           {a.role !== 'super_admin' && (
                             <IconButton size="small" onClick={async () => { if (!window.confirm(`Delete admin "${a.username}"?`)) return; await api.delete(`/api/admin-manage/admins/${a.id}`); fetchAdminUsers(); }}
                               sx={{ color: 'rgba(255,255,255,0.25)', '&:hover': { color: RED } }}>
@@ -1031,6 +1074,35 @@ export default function AdminDashboard() {
               </Dialog>
             </Box>
           )}
+
+      {/* ══ Reset Password Dialog (shared for admin + portal users) ══ */}
+      <Dialog open={resetPwdDialog.open} onClose={() => setResetPwdDialog({ open: false, type: '', id: null, name: '' })} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
+        <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LockReset sx={{ color: CYAN }} />
+            Reset Password — {resetPwdDialog.name}
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, mb: 2 }}>
+            Enter a new password for this {resetPwdDialog.type === 'admin' ? 'admin account' : 'user account'}. Minimum 6 characters.
+          </Typography>
+          <TextField
+            label="New Password" type="password" fullWidth
+            value={resetPwdValue} onChange={e => setResetPwdValue(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleResetPassword(); }}
+            sx={inputSx}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => setResetPwdDialog({ open: false, type: '', id: null, name: '' })} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+          <Button onClick={handleResetPassword} disabled={resetPwdLoading || resetPwdValue.length < 6} variant="contained"
+            sx={{ background: `linear-gradient(135deg,${CYAN},#0284c7)`, textTransform: 'none', borderRadius: 2, px: 3 }}>
+            {resetPwdLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Reset Password'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
           {/* ══════════════ CAMPUS AMBASSADORS ══════════════ */}
           {activeNav === 8 && (

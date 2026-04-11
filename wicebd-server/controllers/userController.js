@@ -342,6 +342,10 @@ const unifiedLogin = async (req, res) => {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
 
+      if (user.is_active === 0) {
+        return res.status(403).json({ success: false, message: 'Your account has been suspended. Please contact support.' });
+      }
+
       const token = signUserToken(user);
       return res.json({
         success: true,
@@ -353,7 +357,7 @@ const unifiedLogin = async (req, res) => {
 
     // 2. Try admin login by username (email field used as username for admins)
     const [adminRows] = await db.query(
-      'SELECT id, username, password FROM admins WHERE username = ?',
+      'SELECT id, username, password, role, is_active FROM admins WHERE username = ?',
       [email.trim().toLowerCase()]
     );
 
@@ -364,8 +368,12 @@ const unifiedLogin = async (req, res) => {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
 
+      if (!admin.is_active) {
+        return res.status(403).json({ success: false, message: 'Account is disabled' });
+      }
+
       const token = jwt.sign(
-        { id: admin.id, username: admin.username, role: 'admin' },
+        { id: admin.id, username: admin.username, role: 'admin', adminRole: admin.role },
         process.env.JWT_SECRET,
         { expiresIn: '8h' }
       );

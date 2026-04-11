@@ -42,6 +42,19 @@ router.post('/admins', authenticateAdmin, requireRole('super_admin'), async (req
   }
 });
 
+/* Reset admin password */
+router.patch('/admins/:id/reset-password', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await db.query('UPDATE admins SET password = ? WHERE id = ?', [hash, req.params.id]);
+    res.json({ success: true, message: 'Password updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
+});
+
 /* Toggle admin is_active */
 router.patch('/admins/:id/toggle', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
   const { id } = req.params;
@@ -68,6 +81,19 @@ router.delete('/admins/:id', authenticateAdmin, requireRole('super_admin'), asyn
 });
 
 /* ══ PLATFORM USER RESTRICTION ════════════════════════════════════════ */
+
+/* Reset portal user password */
+router.patch('/users/:id/reset-password', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await db.query("UPDATE users SET password = ?, provider = 'local' WHERE id = ?", [hash, req.params.id]);
+    res.json({ success: true, message: 'Password updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
+});
 
 /* Toggle platform user active/inactive */
 router.patch('/users/:id/toggle', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
