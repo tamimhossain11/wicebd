@@ -97,6 +97,8 @@ export default function ProjectRegistrationForm({ onPromoChange }) {
         leader: '', institution: '', leaderPhone: '', leaderWhatsApp: '', leaderEmail: '',
         tshirtSizeLeader: '', member2: '', institution2: '', tshirtSize2: '',
         member3: '', institution3: '', tshirtSize3: '',
+        member4: '', institution4: '', tshirtSize4: '',
+        member5: '', institution5: '', tshirtSize5: '',
         projectTitle: '', projectCategory: '', participatedBefore: '',
         previousCompetition: '', socialMedia: '', infoSource: '',
         promo_code: '',
@@ -391,9 +393,11 @@ export default function ProjectRegistrationForm({ onPromoChange }) {
                             <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', mt: 4, mb: 2 }}>
                                 Additional Members — Optional
                             </Typography>
-                            {[2, 3].map(n => (
+                            {[2, 3, 4, 5].map(n => (
                                 <Box key={n} sx={{ mb: 2.5, p: 3, borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.025)' }}>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', mb: 2 }}>Member {n}</Typography>
+                                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', mb: 2 }}>
+                                        Member {n} {n >= 4 ? <span style={{ color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>(optional)</span> : ''}
+                                    </Typography>
                                     <Grid container spacing={2.5}>
                                         <Grid size={{ xs: 12, sm: 5 }}>
                                             <TextField fullWidth label="Name" name={`member${n}`} value={form[`member${n}`]} onChange={onChange} sx={f} size="small" />

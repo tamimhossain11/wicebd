@@ -176,20 +176,25 @@ const confirmPayment = async (req, res) => {
           competitionCategory,
           projectSubcategory, categories, crReference,
           leader, institution, leaderPhone, leaderWhatsApp,
-          leaderEmail, tshirtSizeLeader, member2, institution2,
-          tshirtSize2, member3, institution3, tshirtSize3,
+          leaderEmail, tshirtSizeLeader,
+          member2, institution2, tshirtSize2,
+          member3, institution3, tshirtSize3,
+          member4, institution4, tshirtSize4,
+          member5, institution5, tshirtSize5,
           projectTitle, projectCategory, participatedBefore,
           previousCompetition, socialMedia, infoSource, paymentID, bkashTrxId
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           registration.user_id || null,
           registration.competitionCategory, registration.projectSubcategory,
           registration.categories, registration.crRefrence, registration.leader,
           registration.institution, registration.leaderPhone, registration.leaderWhatsApp,
-          registration.leaderEmail, registration.tshirtSizeLeader, registration.member2,
-          registration.institution2, registration.tshirtSize2, registration.member3,
-          registration.institution3, registration.tshirtSize3, registration.projectTitle,
-          registration.projectCategory, registration.participatedBefore,
+          registration.leaderEmail, registration.tshirtSizeLeader,
+          registration.member2 || null, registration.institution2 || null, registration.tshirtSize2 || null,
+          registration.member3 || null, registration.institution3 || null, registration.tshirtSize3 || null,
+          registration.member4 || null, registration.institution4 || null, registration.tshirtSize4 || null,
+          registration.member5 || null, registration.institution5 || null, registration.tshirtSize5 || null,
+          registration.projectTitle, registration.projectCategory, registration.participatedBefore,
           registration.previousCompetition, registration.socialMedia,
           registration.infoSource, invoice_number, verifiedTrxId
         ]
@@ -268,6 +273,8 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
               <li>${registration.leader} (Leader)</li>
               ${registration.member2 ? `<li>${registration.member2}</li>` : ''}
               ${registration.member3 ? `<li>${registration.member3}</li>` : ''}
+              ${registration.member4 ? `<li>${registration.member4}</li>` : ''}
+              ${registration.member5 ? `<li>${registration.member5}</li>` : ''}
             </ul>
 
             <div style="background: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #0066cc;">
@@ -301,7 +308,9 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
         `- Team Members:\n` +
         `  • ${registration.leader} (Leader)\n` +
         `${registration.member2 ? `  • ${registration.member2}\n` : ''}` +
-        `${registration.member3 ? `  • ${registration.member3}\n` : ''}\n` +
+        `${registration.member3 ? `  • ${registration.member3}\n` : ''}` +
+        `${registration.member4 ? `  • ${registration.member4}\n` : ''}` +
+        `${registration.member5 ? `  • ${registration.member5}\n` : ''}\n` +
         `Next Steps:\n` +
         `1. Save this confirmation email\n` +
         `2. Join our official participants group\n` +

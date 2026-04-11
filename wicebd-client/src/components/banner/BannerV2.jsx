@@ -274,7 +274,7 @@ const BannerV2 = () => {
                                 from Bangladesh to the global stage.
                             </p>
                             <a
-                                href="https://drive.google.com/your-guidebook-url"
+                                href="https://drive.google.com/file/d/1Oibx7OOi-DBq_zZmiv9dwdlBWNdYcE-O/view?fbclid=IwdGRjcARG4mBleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEe9dSznBn5CpPGuhRVp2RrbK5cC38MhFzyPQlM7EIQEZVujyqUoduQnXGKIWc_aem_5m8313mqOvKxMZ1bCKEpoQ"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="wice-guidebook-btn"
