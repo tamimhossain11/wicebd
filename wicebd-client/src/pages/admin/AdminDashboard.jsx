@@ -122,25 +122,52 @@ const inputSx = {
 };
 
 const dataGridSx = {
-  border: 'none', color: 'rgba(255,255,255,0.8)',
+  border: 'none',
   background: CARD,
-  '& .MuiDataGrid-main': { background: CARD },
+  color: 'rgba(255,255,255,0.8)',
+
+  /* entire grid bg */
+  '& .MuiDataGrid-main':            { background: CARD },
   '& .MuiDataGrid-virtualScroller': { background: CARD },
-  '& .MuiDataGrid-columnHeaders': { background: `${RED}18`, color: '#fff', fontWeight: 700, fontSize: 13 },
-  '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 700 },
-  '& .MuiDataGrid-cell': { borderColor: BORDER, fontSize: 13, color: 'rgba(255,255,255,0.8)' },
-  '& .MuiDataGrid-row': { background: CARD },
-  '& .MuiDataGrid-row:hover': { background: 'rgba(255,255,255,0.04)' },
-  '& .MuiDataGrid-footerContainer': { borderColor: BORDER, color: '#fff', background: CARD },
-  '& .MuiTablePagination-root': { color: 'rgba(255,255,255,0.6)' },
-  '& .MuiTablePagination-selectLabel': { color: 'rgba(255,255,255,0.5)' },
+
+  /* column header row — v8 splits into several sub-elements, override all */
+  '& .MuiDataGrid-columnHeaders':                  { background: '#1a0a12 !important', borderBottom: '1px solid rgba(128,0,32,0.5) !important' },
+  '& .MuiDataGrid-columnHeadersInner':             { background: '#1a0a12 !important' },
+  '& .MuiDataGrid-filler':                         { background: '#1a0a12 !important' },
+  '& .MuiDataGrid-scrollbarFiller':                { background: '#1a0a12 !important' },
+  '& .MuiDataGrid-columnHeader':                   { background: '#1a0a12 !important', color: '#fff !important' },
+  '& .MuiDataGrid-columnHeaderTitle':              { color: '#fff !important', fontWeight: 700, fontSize: 13 },
+  '& .MuiDataGrid-sortIcon':                       { color: 'rgba(255,255,255,0.6) !important' },
+  '& .MuiDataGrid-menuIconButton':                 { color: 'rgba(255,255,255,0.5) !important' },
+  '& .MuiDataGrid-iconButtonContainer .MuiIconButton-root': { color: 'rgba(255,255,255,0.5) !important' },
+  '& .MuiDataGrid-columnSeparator':                { color: 'rgba(255,255,255,0.08) !important' },
+
+  /* rows & cells */
+  '& .MuiDataGrid-row':               { background: CARD },
+  '& .MuiDataGrid-row:hover':         { background: 'rgba(255,255,255,0.04)' },
+  '& .MuiDataGrid-cell':              { borderColor: BORDER, fontSize: 13, color: 'rgba(255,255,255,0.8)' },
+  '& .MuiDataGrid-cell:focus':        { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
+
+  /* footer / pagination */
+  '& .MuiDataGrid-footerContainer':      { borderColor: BORDER, background: CARD },
+  '& .MuiTablePagination-root':          { color: 'rgba(255,255,255,0.6)' },
+  '& .MuiTablePagination-selectLabel':   { color: 'rgba(255,255,255,0.5)' },
   '& .MuiTablePagination-displayedRows': { color: 'rgba(255,255,255,0.5)' },
-  '& .MuiInputBase-root': { color: '#fff' },
-  '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' },
-  '& .MuiDataGrid-toolbarContainer': { p: 1.5, borderBottom: `1px solid ${BORDER}`, gap: 1, background: CARD },
-  '& .MuiButton-root': { color: 'rgba(255,255,255,0.6)', fontSize: 12 },
-  '& .MuiDataGrid-selectedRowCount': { color: 'rgba(255,255,255,0.4)' },
+  '& .MuiTablePagination-actions .MuiIconButton-root': { color: 'rgba(255,255,255,0.5)' },
+  '& .MuiDataGrid-selectedRowCount':     { color: 'rgba(255,255,255,0.4)' },
+
+  /* toolbar */
+  '& .MuiDataGrid-toolbarContainer': { padding: '10px 14px', borderBottom: `1px solid ${BORDER}`, background: CARD, gap: 1 },
+  '& .MuiDataGrid-toolbarContainer .MuiButton-root': { color: 'rgba(255,255,255,0.6)', fontSize: 12 },
+  '& .MuiDataGrid-toolbarContainer .MuiInputBase-root': { color: '#fff' },
+
+  /* misc */
   '& .MuiDataGrid-overlay': { background: CARD, color: 'rgba(255,255,255,0.3)' },
+  '& .MuiSvgIcon-root':     { color: 'rgba(255,255,255,0.5)' },
+  '& .MuiInputBase-root':   { color: '#fff' },
+  '& .MuiCheckbox-root':    { color: 'rgba(255,255,255,0.3)' },
+  '& .MuiCheckbox-root.Mui-checked': { color: RED },
 };
 
 /* ═══════════════════════════════════════════ MAIN COMPONENT ═══════════════════════════════════════════ */
@@ -287,47 +314,69 @@ export default function AdminDashboard() {
   };
 
   /* ── DataGrid columns ── */
+  const statusChip = (v) => {
+    const color = v === 'registered' || v === 'confirmed' ? GREEN : v === 'pending' ? AMBER : RED;
+    return <Chip label={v || 'registered'} size="small" sx={{ background: `${color}20`, color, fontSize: 11, fontWeight: 700 }} />;
+  };
+  const gatewayChip = () => <Chip label="PayStation" size="small" sx={{ background: `${CYAN}15`, color: CYAN, fontSize: 11, fontWeight: 700 }} />;
+
   const projectCols = [
-    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'id', headerName: 'ID', width: 55 },
     { field: 'leader', headerName: 'Leader', width: 150 },
     { field: 'leaderEmail', headerName: 'Email', width: 200 },
     { field: 'leaderPhone', headerName: 'Phone', width: 130 },
     { field: 'institution', headerName: 'Institution', width: 180 },
-    { field: 'competitionCategory', headerName: 'Category', width: 130, renderCell: p => <Chip label={p.value} size="small" sx={{ background: `${RED}20`, color: RED, fontSize: 11 }} /> },
-    { field: 'projectSubcategory', headerName: 'Subcategory', width: 160 },
+    { field: 'competitionCategory', headerName: 'Category', width: 110, renderCell: p => <Chip label={p.value} size="small" sx={{ background: `${RED}20`, color: RED, fontSize: 11, fontWeight: 700 }} /> },
+    { field: 'projectSubcategory', headerName: 'Subcategory', width: 180, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}15`, color: ACCENT, fontSize: 11, fontWeight: 700 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'categories', headerName: 'Edu Level', width: 130, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${AMBER}15`, color: AMBER, fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
     { field: 'projectTitle', headerName: 'Project Title', width: 220 },
-    { field: 'ca_code', headerName: 'CA Code', width: 130, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> : '—' },
-    { field: 'club_code', headerName: 'Club Code', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11 }} /> : '—' },
-    { field: 'paymentID', headerName: 'Payment ID', width: 160 },
-    { field: 'createdAt', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
+    { field: 'member2', headerName: 'Member 2', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'member3', headerName: 'Member 3', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'member4', headerName: 'Member 4 (+)', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${GREEN}15`, color: GREEN, fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'member5', headerName: 'Member 5 (+)', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${GREEN}15`, color: GREEN, fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'ca_code', headerName: 'CA Code', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> : '—' },
+    { field: 'club_code', headerName: 'Club Code', width: 120, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11 }} /> : '—' },
+    { field: 'paymentID', headerName: 'Invoice No.', width: 170 },
+    { field: 'bkashTrxId', headerName: 'Trx ID', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: '_gateway', headerName: 'Gateway', width: 120, renderCell: () => gatewayChip(), sortable: false },
+    { field: '_status', headerName: 'Payment', width: 120, renderCell: () => statusChip('registered'), sortable: false },
+    { field: 'created_at', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
   ];
 
   const olympiadCols = [
-    { field: 'id', headerName: 'ID', width: 60 },
-    { field: 'registration_id', headerName: 'Reg ID', width: 130 },
+    { field: 'id', headerName: 'ID', width: 55 },
+    { field: 'registration_id', headerName: 'Reg ID', width: 140, renderCell: p => <span style={{ color: CYAN, fontWeight: 700, fontSize: 12 }}>{p.value || '—'}</span> },
     { field: 'full_name', headerName: 'Name', width: 160 },
     { field: 'email', headerName: 'Email', width: 200 },
     { field: 'phone', headerName: 'Phone', width: 130 },
     { field: 'institution', headerName: 'Institution', width: 180 },
     { field: 'address', headerName: 'Address', width: 200 },
-    { field: 'ca_code', headerName: 'CA Code', width: 130, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> : '—' },
-    { field: 'club_code', headerName: 'Club Code', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11 }} /> : '—' },
-    { field: 'status', headerName: 'Status', width: 110, renderCell: p => <Chip label={p.value} size="small" color={p.value === 'registered' ? 'success' : 'default'} /> },
+    { field: 'ca_code', headerName: 'CA Code', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> : '—' },
+    { field: 'club_code', headerName: 'Club Code', width: 120, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11 }} /> : '—' },
+    { field: '_gateway', headerName: 'Gateway', width: 120, renderCell: () => gatewayChip(), sortable: false },
+    { field: 'status', headerName: 'Payment', width: 120, renderCell: p => statusChip(p.value) },
     { field: 'created_at', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
   ];
 
   const wallMagazineCols = [
-    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'id', headerName: 'ID', width: 55 },
     { field: 'leader', headerName: 'Leader', width: 150 },
     { field: 'leaderEmail', headerName: 'Email', width: 200 },
     { field: 'leaderPhone', headerName: 'Phone', width: 130 },
     { field: 'institution', headerName: 'Institution', width: 180 },
-    { field: 'categories', headerName: 'Edu Level', width: 150, renderCell: p => <Chip label={p.value || '—'} size="small" sx={{ background: `${AMBER}20`, color: AMBER, fontSize: 11 }} /> },
+    { field: 'categories', headerName: 'Edu Level', width: 140, renderCell: p => <Chip label={p.value || '—'} size="small" sx={{ background: `${AMBER}20`, color: AMBER, fontSize: 11 }} /> },
     { field: 'projectTitle', headerName: 'Magazine Title', width: 240 },
-    { field: 'ca_code', headerName: 'CA Code', width: 130, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> : '—' },
-    { field: 'club_code', headerName: 'Club Code', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11 }} /> : '—' },
-    { field: 'paymentID', headerName: 'Payment ID', width: 160 },
-    { field: 'createdAt', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
+    { field: 'member2', headerName: 'Member 2', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'member3', headerName: 'Member 3', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'member4', headerName: 'Member 4 (+)', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${GREEN}15`, color: GREEN, fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'member5', headerName: 'Member 5 (+)', width: 140, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${GREEN}15`, color: GREEN, fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'ca_code', headerName: 'CA Code', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11 }} /> : '—' },
+    { field: 'club_code', headerName: 'Club Code', width: 120, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11 }} /> : '—' },
+    { field: 'paymentID', headerName: 'Invoice No.', width: 170 },
+    { field: 'bkashTrxId', headerName: 'Trx ID', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: '_gateway', headerName: 'Gateway', width: 120, renderCell: () => gatewayChip(), sortable: false },
+    { field: '_status', headerName: 'Payment', width: 120, renderCell: () => statusChip('registered'), sortable: false },
+    { field: 'created_at', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
   ];
 
   const userCols = [

@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, EmailOutlined, LockOutlined } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
-import { unifiedLogin, googleLogin, facebookLogin } from '../../api/userAuth';
+import { unifiedLogin, googleLogin } from '../../api/userAuth';
 import FooterV2 from '../../components/footer/FooterV2';
 import HeaderV1 from '../../components/header/HeaderV1';
 
@@ -81,29 +81,6 @@ const SignIn = () => {
     } finally { setLoading(false); }
   };
 
-  const handleFacebookLogin = () => {
-    if (typeof window.FB === 'undefined' || !window._fbReady) {
-      toast.error('Facebook SDK not ready yet. Please wait a moment and try again.');
-      return;
-    }
-    // FB.login does NOT accept async callbacks — use .then()/.catch() instead
-    window.FB.login((response) => {
-      if (response.authResponse) {
-        const { accessToken, userID } = response.authResponse;
-        setLoading(true);
-        facebookLogin(accessToken, userID)
-          .then(({ data }) => {
-            if (data.success) {
-              loginAsUser(data.token, data.user);
-              toast.success(`Welcome, ${data.user.name}!`);
-              navigate('/dashboard', { replace: true });
-            }
-          })
-          .catch(err => toast.error(err.response?.data?.message || 'Facebook sign-in failed'))
-          .finally(() => setLoading(false));
-      }
-    }, { scope: 'public_profile,email' });
-  };
 
   return (
     <>
@@ -209,30 +186,7 @@ const SignIn = () => {
                 </Button>
               )}
 
-              {/* Facebook */}
-              <Button
-                fullWidth
-                onClick={handleFacebookLogin}
-                disabled={loading}
-                startIcon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                }
-                sx={{
-                  background: '#1877F2',
-                  color: '#fff',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  fontSize: 14,
-                  py: 1.25,
-                  '&:hover': { background: '#1465d8' },
-                  '&:disabled': { opacity: 0.6 },
-                }}
-              >
-                Continue with Facebook
-              </Button>
+              {/* Facebook login hidden */}
             </Box>
 
             <Divider sx={{ borderColor: 'rgba(255,255,255,0.10)', mb: 3 }}>
