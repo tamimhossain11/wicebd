@@ -37,15 +37,17 @@ const startRegistration = async (req, res) => {
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
+const n = v => (v === undefined ? null : v || null);
+
 const values = [
-  paymentID, user_id, competitionCategory, projectSubcategory, categories, crReference,
-  leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
-  member2 || null, institution2 || null, tshirtSize2 || null,
-  member3 || null, institution3 || null, tshirtSize3 || null,
-  member4 || null, institution4 || null, tshirtSize4 || null,
-  member5 || null, institution5 || null, tshirtSize5 || null,
-  projectTitle, projectCategory, participatedBefore, previousCompetition,
-  socialMedia, infoSource, ca_code || null, club_code || null
+  paymentID, user_id, n(competitionCategory), n(projectSubcategory), n(categories), crReference,
+  n(leader), n(institution), n(leaderPhone), n(leaderWhatsApp), n(leaderEmail), n(tshirtSizeLeader),
+  n(member2), n(institution2), n(tshirtSize2),
+  n(member3), n(institution3), n(tshirtSize3),
+  n(member4), n(institution4), n(tshirtSize4),
+  n(member5), n(institution5), n(tshirtSize5),
+  n(projectTitle), n(projectCategory), n(participatedBefore), n(previousCompetition),
+  n(socialMedia), n(infoSource), n(ca_code), n(club_code)
 ];
 
 

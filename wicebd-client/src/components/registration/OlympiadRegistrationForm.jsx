@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, TextField, Typography, Grid, CircularProgress, Checkbox, FormHelperText } from '@mui/material';
+import { Box, TextField, Typography, Grid, CircularProgress, Checkbox } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import api from '../../api/index';
 import ReferenceSearch from './ReferenceSearch';
 
 const f = {
@@ -24,7 +25,7 @@ const f = {
 
 export default function OlympiadRegistrationForm({ onPromoChange }) {
     const navigate = useNavigate();
-    const [form, setForm] = useState({ fullName: '', email: '', phone: '', address: '', institution: '', ca_code: '', club_code: '', promo_code: '' });
+    const [form, setForm] = useState({ competitionCategory: 'Olympiad', fullName: '', email: '', phone: '', address: '', institution: '', ca_code: '', club_code: '', promo_code: '' });
     const [errors, setErrors] = useState({});
     const [loading] = useState(false);
     const [done, setDone] = useState(false);

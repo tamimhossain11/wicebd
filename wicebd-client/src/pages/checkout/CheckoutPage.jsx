@@ -39,27 +39,36 @@ export default function CheckoutPage() {
     if (!formData) return null;
 
     const cat = formData.competitionCategory?.toLowerCase() || 'project';
-    const baseFee = BASE_FEE[cat] ?? 620;
+    const isOlympiad = cat === 'olympiad';
+
+    // Normalise field names — olympiad uses fullName/email/phone, others use leader/leaderEmail/leaderPhone
+    const participantName  = isOlympiad ? formData.fullName   : formData.leader;
+    const participantEmail = isOlympiad ? formData.email      : formData.leaderEmail;
+    const participantPhone = isOlympiad ? formData.phone      : formData.leaderPhone;
+    const participantAddr  = isOlympiad ? formData.address    : null;
+
+    const baseFee = BASE_FEE[cat] ?? 999;
     const extraCharge = EXTRA_CHARGE[cat] ?? 0;
     const extraCount = (formData.member4 ? 1 : 0) + (formData.member5 ? 1 : 0);
     const extraTotal = extraCount * extraCharge;
 
-    // Promo discount (stored as percentage)
     const promoDiscount = formData._promoDiscount || 0;
     const promoCode = formData._promoCode || '';
     const promoSaving = promoDiscount > 0 ? Math.round(baseFee * promoDiscount / 100) : 0;
 
     const total = baseFee + extraTotal - promoSaving;
 
-    const categoryLabel = cat === 'megazine' ? 'Wall Magazine' : cat === 'olympiad' ? 'Science Olympiad' : 'Project';
+    const categoryLabel = cat === 'megazine' ? 'Wall Magazine' : isOlympiad ? 'Science Olympiad' : 'Project';
 
-    const members = [
-        formData.leader && { name: formData.leader, institution: formData.institution, role: 'Leader' },
-        formData.member2 && { name: formData.member2, institution: formData.institution2 },
-        formData.member3 && { name: formData.member3, institution: formData.institution3 },
-        formData.member4 && { name: formData.member4, institution: formData.institution4, extra: true },
-        formData.member5 && { name: formData.member5, institution: formData.institution5, extra: true },
-    ].filter(Boolean);
+    const members = isOlympiad
+        ? [{ name: participantName, institution: formData.institution, role: 'Participant' }]
+        : [
+            formData.leader   && { name: formData.leader,   institution: formData.institution,  role: 'Leader' },
+            formData.member2  && { name: formData.member2,  institution: formData.institution2 },
+            formData.member3  && { name: formData.member3,  institution: formData.institution3 },
+            formData.member4  && { name: formData.member4,  institution: formData.institution4, extra: true },
+            formData.member5  && { name: formData.member5,  institution: formData.institution5, extra: true },
+          ].filter(Boolean);
 
     const handleConfirm = async () => {
         setLoading(true);
@@ -153,12 +162,13 @@ export default function CheckoutPage() {
 
                             {/* Extra fields */}
                             <div style={{ marginTop: 16 }}>
-                                {cat !== 'olympiad' && formData.projectTitle && (
+                                {!isOlympiad && formData.projectTitle && (
                                     <Row label={cat === 'megazine' ? 'Magazine Title' : 'Project Title'} value={formData.projectTitle} />
                                 )}
-                                {formData.leaderEmail && <Row label="Email" value={formData.leaderEmail} />}
-                                {formData.leaderPhone && <Row label="Phone" value={formData.leaderPhone} />}
-                                {formData.categories && <Row label="Category" value={formData.categories} />}
+                                {isOlympiad && participantAddr && <Row label="Address" value={participantAddr} />}
+                                {participantEmail && <Row label="Email" value={participantEmail} />}
+                                {participantPhone && <Row label="Phone" value={participantPhone} />}
+                                {formData.categories && <Row label="Education Level" value={formData.categories} />}
                                 {cat === 'project' && formData.projectSubcategory && <Row label="Subcategory" value={formData.projectSubcategory} />}
                             </div>
                         </div>

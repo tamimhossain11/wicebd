@@ -102,11 +102,12 @@ const confirmPayment = async (req, res) => {
   try {
     // 1. Verify with PayStation transaction-status API
     const statusResult = await getTransactionStatus(invoice_number);
+    console.log('🔍 PayStation status result:', JSON.stringify(statusResult));
 
-    if (
-      statusResult.status_code !== '200' ||
-      statusResult.data?.trx_status?.toLowerCase() !== 'success'
-    ) {
+    const statusCode = String(statusResult?.status_code ?? '');
+    const trxStatus = (statusResult?.data?.trx_status || '').toLowerCase();
+
+    if (statusCode !== '200' || (trxStatus !== 'success' && trxStatus !== 'successful')) {
       console.error('❌ PayStation verification failed:', statusResult);
       return res.status(400).json({ success: false, message: 'Payment verification failed' });
     }
