@@ -1331,18 +1331,40 @@ export default function AdminDashboard() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
           <Box sx={{ p: 2, borderRadius: 2, background: 'rgba(255,255,255,0.04)', border: `1px solid ${BORDER}` }}>
             <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, mb: 0.5 }}>CSV format (header required):</Typography>
-            <Typography sx={{ color: CYAN, fontSize: 12, fontFamily: 'monospace' }}>name, institution_name, institution_address</Typography>
+            <Typography sx={{ color: CYAN, fontSize: 12, fontFamily: 'monospace' }}>name,institution_name,institution_address</Typography>
+            <Button size="small" onClick={() => {
+              const sample = 'name,institution_name,institution_address\nJohn Doe,BUET,"Dhaka, Bangladesh"\nJane Smith,DU,"Rajshahi, Bangladesh"';
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(new Blob([sample], { type: 'text/csv' }));
+              a.download = 'ca_sample.csv'; a.click();
+            }} sx={{ mt: 1, color: CYAN, textTransform: 'none', fontSize: 12, p: 0 }}>
+              Download sample CSV
+            </Button>
           </Box>
           <input type="file" accept=".csv" style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}
             onChange={async e => {
               const file = e.target.files[0]; if (!file) return;
-              const text = await file.text();
-              const lines = text.trim().split('\n');
-              const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+              // Strip UTF-8 BOM that Excel adds, then normalise line endings
+              const raw = (await file.text()).replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+              const lines = raw.trim().split('\n');
+              // Parse a CSV line respecting quoted fields (handles commas inside quotes)
+              const parseLine = line => {
+                const result = []; let cur = ''; let inQuote = false;
+                for (let i = 0; i < line.length; i++) {
+                  const ch = line[i];
+                  if (ch === '"') { inQuote = !inQuote; }
+                  else if (ch === ',' && !inQuote) { result.push(cur.trim()); cur = ''; }
+                  else { cur += ch; }
+                }
+                result.push(cur.trim());
+                return result;
+              };
+              const headers = parseLine(lines[0]);
               const entries = lines.slice(1).map(line => {
-                const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                const vals = parseLine(line);
                 return Object.fromEntries(headers.map((h, i) => [h, vals[i] || '']));
               }).filter(e => e.name);
+              if (entries.length === 0) { setCaBulkResult({ error: 'No valid rows found. Check that your CSV has the correct headers: name, institution_name, institution_address' }); return; }
               setCaLoading(true);
               try { const r = await api.post('/api/campus-ambassador/bulk', { entries }); setCaBulkResult(r.data); fetchCA(); }
               catch (err) { setCaBulkResult({ error: err.response?.data?.error || 'Upload failed' }); }
