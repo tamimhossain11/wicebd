@@ -4,10 +4,21 @@ const db = require('../db');
 const startRegistration = async (req, res) => {
   const data = req.body;
   const paymentID = uuidv4();
-  const user_id = req.user?.id || null;
+  const raw_user_id = req.user?.id || null;
+
+  // Verify the user_id actually exists in the users table to avoid FK violation
+  let user_id = null;
+  if (raw_user_id) {
+    try {
+      const [userRow] = await db.query('SELECT id FROM users WHERE id = ?', [raw_user_id]);
+      if (userRow.length > 0) user_id = raw_user_id;
+    } catch (_) {
+      // fall through with null
+    }
+  }
 
   const {
-    competitionCategory, projectSubcategory, categories, crReference,
+    competitionCategory, projectSubcategory, categories, crReference = null,
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     projectTitle, projectCategory, participatedBefore, previousCompetition,

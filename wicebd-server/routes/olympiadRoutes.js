@@ -3,7 +3,10 @@ const router = express.Router();
 const olympiadController = require('../controllers/olympiadController');
 const optionalUserAuth = require('../middleware/optionalUserAuth');
 
-// POST /api/olympiad/register
+// POST /api/olympiad/start — save to temp, returns paymentID for PayStation flow
+router.post('/start', optionalUserAuth, olympiadController.startOlympiadRegistration);
+
+// POST /api/olympiad/register (kept for legacy/admin use)
 router.post('/register', optionalUserAuth, olympiadController.registerParticipant);
 
 

@@ -188,11 +188,11 @@ export default function ProjectRegistrationForm({ onPromoChange }) {
             const saveRes = await api.post('/api/registration/start', form);
             const { paymentID } = saveRes.data;
             if (!paymentID) { toast.error('Failed to initiate registration'); return; }
-            const payRes = await api.post('/api/payment/initiate', { paymentID, formData: form });
-            const { bkashURL, paymentID: bkashID } = payRes.data;
-            if (bkashURL && bkashID) {
-                sessionStorage.setItem('bkashPaymentID', bkashID);
-                window.location.href = bkashURL;
+            const payRes = await api.post('/api/payment/initiate', { paymentID });
+            const { payment_url, invoice_number } = payRes.data;
+            if (payment_url && invoice_number) {
+                sessionStorage.setItem('paystationInvoice', invoice_number);
+                window.location.href = payment_url;
             } else {
                 toast.error('Payment URL not received');
             }

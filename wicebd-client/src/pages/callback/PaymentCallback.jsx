@@ -8,11 +8,13 @@ const PaymentCallback = () => {
   const [isLoading, setIsLoading] = useState(true);
   const hasConfirmed = useRef(false);
   const timeoutRef = useRef(null);
-  const backendUrl = import.meta.env.VITE_BACKEND_URL
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const status = queryParams.get('status');
-    const queryPaymentID = queryParams.get('paymentID');
+    const status = queryParams.get('status');           // Successful / Failed / Canceled
+    const invoiceNumber = queryParams.get('invoice_number');
+    const trxId = queryParams.get('trx_id');
 
     const cleanup = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -23,7 +25,7 @@ const PaymentCallback = () => {
       timeoutRef.current = setTimeout(() => navigate(path), delay);
     };
 
-    const handlePaymentConfirmation = async (paymentID) => {
+    const handlePaymentConfirmation = async (invoice, trx) => {
       if (hasConfirmed.current) return;
       hasConfirmed.current = true;
       setIsLoading(true);
@@ -33,7 +35,7 @@ const PaymentCallback = () => {
         const res = await fetch(`${backendUrl}/api/payment/confirm`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentID }),
+          body: JSON.stringify({ invoice_number: invoice, trx_id: trx, status: 'Successful' }),
         });
 
         if (!res.ok) {
@@ -44,8 +46,8 @@ const PaymentCallback = () => {
         setIsLoading(false);
 
         if (data?.success || data?.message === 'Payment already processed') {
-          localStorage.setItem(`confirmed_${paymentID}`, 'true');
-          sessionStorage.removeItem('bkashPaymentID');
+          localStorage.setItem(`confirmed_${invoice}`, 'true');
+          sessionStorage.removeItem('paystationInvoice');
           setMessage('Payment verified successfully! Redirecting...');
           safeNavigate('/thank-you');
         } else {
@@ -59,38 +61,38 @@ const PaymentCallback = () => {
       }
     };
 
-    // Store payment ID if present in URL
-    if (queryPaymentID) {
-      sessionStorage.setItem('bkashPaymentID', queryPaymentID);
+    // Persist invoice number from URL into sessionStorage as fallback
+    if (invoiceNumber) {
+      sessionStorage.setItem('paystationInvoice', invoiceNumber);
     }
 
-    const paymentID = queryPaymentID || sessionStorage.getItem('bkashPaymentID');
+    const invoice = invoiceNumber || sessionStorage.getItem('paystationInvoice');
 
-    if (!paymentID) {
+    if (!invoice) {
       setMessage('Missing payment information. Redirecting...');
       setIsLoading(false);
       safeNavigate('/payment-error');
       return cleanup;
     }
 
-    const alreadyConfirmed = localStorage.getItem(`confirmed_${paymentID}`);
+    const alreadyConfirmed = localStorage.getItem(`confirmed_${invoice}`);
 
     switch (status) {
-      case 'success':
+      case 'Successful':
         if (alreadyConfirmed) {
           setMessage('Payment already verified. Redirecting...');
           setIsLoading(false);
           safeNavigate('/thank-you');
         } else {
-          handlePaymentConfirmation(paymentID);
+          handlePaymentConfirmation(invoice, trxId);
         }
         break;
-      case 'failure':
+      case 'Failed':
         setMessage('Payment failed. Redirecting...');
         setIsLoading(false);
         safeNavigate('/payment-error');
         break;
-      case 'cancel':
+      case 'Canceled':
         setMessage('Payment cancelled. Redirecting...');
         setIsLoading(false);
         safeNavigate('/payment-cancelled');

@@ -86,12 +86,16 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
 
         setLoading(true);
         try {
-            const res = await api.post('/api/olympiad/register', form);
-            if (res.data.success) {
-                setDone(true);
-                toast.success('Registered successfully!');
+            const saveRes = await api.post('/api/olympiad/start', form);
+            const { paymentID } = saveRes.data;
+            if (!paymentID) { toast.error('Failed to initiate registration'); return; }
+            const payRes = await api.post('/api/payment/initiate', { paymentID });
+            const { payment_url, invoice_number } = payRes.data;
+            if (payment_url && invoice_number) {
+                sessionStorage.setItem('paystationInvoice', invoice_number);
+                window.location.href = payment_url;
             } else {
-                toast.error(res.data.message || 'Registration failed');
+                toast.error('Payment URL not received');
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to submit. Please try again.');
@@ -291,7 +295,7 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
                         display: 'inline-flex', alignItems: 'center', gap: 8,
                     }}
                 >
-                    {loading ? <><CircularProgress size={16} sx={{ color: '#fff' }} /> Submitting…</> : 'Submit Registration →'}
+                    {loading ? <><CircularProgress size={16} sx={{ color: '#fff' }} /> Submitting…</> : 'Submit & Pay →'}
                 </motion.button>
             </Box>
         </Box>

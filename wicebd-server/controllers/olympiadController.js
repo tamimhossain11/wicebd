@@ -2,6 +2,75 @@ const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
 
+// Save olympiad data to temp_registrations so it can go through PayStation payment flow
+const startOlympiadRegistration = async (req, res) => {
+  const user_id = req.user?.id || null;
+  const {
+    fullName,
+    email,
+    phone,
+    address,
+    institution,
+    crReference = '',
+    ca_code = null,
+    club_code = null,
+  } = req.body;
+
+  if (!fullName || !email || !phone || !address || !institution) {
+    return res.status(400).json({ success: false, message: 'All required fields must be provided' });
+  }
+
+  // Check duplicate email before saving to temp
+  try {
+    const [existing] = await db.query(
+      'SELECT id FROM olympiad_registrations WHERE email = ?',
+      [email]
+    );
+    if (existing.length > 0) {
+      return res.status(409).json({ success: false, message: 'This email is already registered' });
+    }
+  } catch (err) {
+    console.error('Duplicate check error:', err);
+  }
+
+  const paymentID = uuidv4();
+
+  // Verify user_id exists in users table
+  let verified_user_id = null;
+  if (user_id) {
+    try {
+      const [userRow] = await db.query('SELECT id FROM users WHERE id = ?', [user_id]);
+      if (userRow.length > 0) verified_user_id = user_id;
+    } catch (err) {
+      console.error('User verification error:', err);
+    }
+  }
+
+  try {
+    await db.execute(
+      `INSERT INTO temp_registrations (
+        paymentID, user_id, competitionCategory, projectSubcategory, categories, crReference,
+        leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
+        member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
+        projectTitle, projectCategory, participatedBefore, previousCompetition,
+        socialMedia, infoSource, ca_code, club_code
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        paymentID, verified_user_id, 'Olympiad', null, null, crReference,
+        fullName, institution, phone, phone, email, null,
+        null, null, null, null, null, null,
+        address, null, null, null,
+        null, null, ca_code || null, club_code || null,
+      ]
+    );
+    console.log('✅ Olympiad temp registration saved. paymentID:', paymentID);
+    res.json({ paymentID });
+  } catch (err) {
+    console.error('❌ Olympiad temp insert failed:', err);
+    res.status(500).json({ success: false, message: 'Failed to save registration' });
+  }
+};
+
 // Configure email transporter (shared with other forms)
 const emailTransporter = nodemailer.createTransport({
   host: 'smtp.hostinger.com', // Updated to Hostinger's SMTP server
@@ -45,6 +114,13 @@ const registerParticipant = async (req, res) => {
   const registrationId = `OLY-${uuidv4().substr(0, 8).toUpperCase()}`;
 
   try {
+    // Verify user_id actually exists in users table (fall back to null if not)
+    let verified_user_id = null;
+    if (user_id) {
+      const [userRow] = await db.query('SELECT id FROM users WHERE id = ?', [user_id]);
+      if (userRow.length > 0) verified_user_id = user_id;
+    }
+
     // Check if email already registered
     const [existing] = await db.query(
       'SELECT id FROM olympiad_registrations WHERE email = ?',
@@ -75,7 +151,7 @@ const registerParticipant = async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         registrationId,
-        user_id,
+        verified_user_id,
         fullName,
         email,
         phone,
@@ -227,8 +303,8 @@ const exportOlympiadToCSV = async (req, res) => {
 };
 // Add these to your exports
 module.exports = {
-  // ... your existing exports
-   registerParticipant,
+  startOlympiadRegistration,
+  registerParticipant,
   getOlympiadParticipants,
   exportOlympiadToCSV
 };
