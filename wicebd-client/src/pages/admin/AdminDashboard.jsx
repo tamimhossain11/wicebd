@@ -190,6 +190,7 @@ export default function AdminDashboard() {
   const [annDialog, setAnnDialog]     = useState(false);
   const [annForm, setAnnForm]         = useState({ title: '', body: '', image_url: '', target_audience: 'all', send_email: false });
   const [annLoading, setAnnLoading]   = useState(false);
+  const [annImgUploading, setAnnImgUploading] = useState(false);
 
   const [advisors, setAdvisors]             = useState([]);
   const [advisorDialog, setAdvisorDialog]   = useState(false);
@@ -305,6 +306,26 @@ export default function AdminDashboard() {
       fetchAll();
     } catch { setError('Failed to create announcement'); }
     finally { setAnnLoading(false); }
+  };
+
+  const handleAnnImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAnnImgUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await api.post('/api/upload/image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (res.data?.url) setAnnForm(prev => ({ ...prev, image_url: res.data.url }));
+    } catch { setError('Image upload failed'); }
+    finally { setAnnImgUploading(false); }
+  };
+
+  const handleAnnImageRemove = async () => {
+    if (annForm.image_url) {
+      try { await api.delete('/api/upload/image', { data: { url: annForm.image_url } }); } catch { /* non-critical */ }
+    }
+    setAnnForm(prev => ({ ...prev, image_url: '' }));
   };
 
   const handleDeleteAnn = async (id) => {
@@ -1197,7 +1218,7 @@ export default function AdminDashboard() {
       </Dialog>
 
       {/* Announcement */}
-      <Dialog open={annDialog} onClose={() => setAnnDialog(false)} maxWidth="sm" fullWidth
+      <Dialog open={annDialog} onClose={() => { setAnnDialog(false); setAnnForm({ title: '', body: '', image_url: '', target_audience: 'all', send_email: false }); setAnnImgUploading(false); }} maxWidth="sm" fullWidth
         slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
         <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><Send sx={{ color: RED }} />New Announcement</Box>
@@ -1205,12 +1226,54 @@ export default function AdminDashboard() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
           <TextField label="Title *" fullWidth value={annForm.title} onChange={e => setAnnForm({ ...annForm, title: e.target.value })} sx={inputSx} />
           <TextField label="Message *" fullWidth multiline rows={5} value={annForm.body} onChange={e => setAnnForm({ ...annForm, body: e.target.value })} sx={inputSx} />
-          <TextField label="Poster / Image URL (optional)" fullWidth value={annForm.image_url} onChange={e => setAnnForm({ ...annForm, image_url: e.target.value })} placeholder="https://…" sx={inputSx} />
-          {annForm.image_url && (
-            <Box sx={{ borderRadius: 2, overflow: 'hidden', border: `1px solid ${BORDER}`, maxHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
-              <img src={annForm.image_url} alt="preview" style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
-            </Box>
-          )}
+          {/* Image upload */}
+          <Box>
+            {!annForm.image_url ? (
+              <Box
+                component="label"
+                htmlFor="ann-img-input"
+                sx={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: 1, p: 3, borderRadius: 2, border: `2px dashed ${BORDER}`,
+                  cursor: annImgUploading ? 'wait' : 'pointer',
+                  background: 'rgba(255,255,255,0.02)',
+                  '&:hover': { borderColor: RED, background: 'rgba(233,69,96,0.06)' },
+                  transition: 'all 0.2s',
+                }}
+              >
+                {annImgUploading
+                  ? <CircularProgress size={28} sx={{ color: RED }} />
+                  : <UploadFile sx={{ fontSize: 36, color: 'rgba(255,255,255,0.25)' }} />}
+                <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
+                  {annImgUploading ? 'Uploading to GCS…' : 'Click to upload poster / image'}
+                </Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>JPG, PNG, GIF, WebP — max 8 MB</Typography>
+                <input id="ann-img-input" type="file" accept="image/*" hidden onChange={handleAnnImageUpload} disabled={annImgUploading} />
+              </Box>
+            ) : (
+              <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: `1px solid ${BORDER}` }}>
+                <img src={annForm.image_url} alt="preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
+                <Box sx={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 1 }}>
+                  <Box
+                    component="label" htmlFor="ann-img-replace"
+                    sx={{ px: 1.5, py: 0.5, borderRadius: 1, background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: 12, cursor: 'pointer', border: `1px solid ${BORDER}`, '&:hover': { background: 'rgba(0,0,0,0.9)' } }}
+                  >
+                    {annImgUploading ? '…' : 'Replace'}
+                    <input id="ann-img-replace" type="file" accept="image/*" hidden onChange={handleAnnImageUpload} disabled={annImgUploading} />
+                  </Box>
+                  <Box
+                    onClick={handleAnnImageRemove}
+                    sx={{ px: 1.5, py: 0.5, borderRadius: 1, background: 'rgba(233,69,96,0.8)', color: '#fff', fontSize: 12, cursor: 'pointer', '&:hover': { background: RED } }}
+                  >
+                    Remove
+                  </Box>
+                </Box>
+                <Typography sx={{ position: 'absolute', bottom: 6, left: 8, fontSize: 10, color: 'rgba(255,255,255,0.4)', background: 'rgba(0,0,0,0.5)', px: 1, borderRadius: 1 }}>
+                  Stored on GCS ✓
+                </Typography>
+              </Box>
+            )}
+          </Box>
           <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
             <InputLabel>Target Audience</InputLabel>
             <Select value={annForm.target_audience} label="Target Audience" onChange={e => setAnnForm({ ...annForm, target_audience: e.target.value })}
@@ -1224,8 +1287,8 @@ export default function AdminDashboard() {
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button onClick={() => setAnnDialog(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
-          <Button onClick={handleCreateAnnouncement} disabled={annLoading || !annForm.title || !annForm.body} variant="contained"
+          <Button onClick={() => { setAnnDialog(false); setAnnForm({ title: '', body: '', image_url: '', target_audience: 'all', send_email: false }); }} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+          <Button onClick={handleCreateAnnouncement} disabled={annLoading || annImgUploading || !annForm.title || !annForm.body} variant="contained"
             sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, px: 3 }}>
             {annLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Publish'}
           </Button>

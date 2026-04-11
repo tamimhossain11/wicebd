@@ -1,6 +1,7 @@
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const QRCode = require('qrcode');
+const { uploadBuffer } = require('../utils/gcsStorage');
 
 const BACKEND_URL = process.env.BACKEND_URL || process.env.FRONTEND_BASE_URL?.split(',')[0]?.trim() || 'https://wicebd.com';
 const VERIFY_BASE  = `${process.env.BACKEND_API_URL || 'https://api.wicebd.com'}/api/id-card/verify`;
@@ -81,7 +82,8 @@ const generateCard = async (req, res) => {
     );
     if (existing.length > 0) {
       const card = existing[0];
-      const qrImage = await QRCode.toDataURL(`${VERIFY_BASE}/${card.card_uid}`);
+      // Use stored GCS URL if available, else regenerate data URL as fallback
+      const qrImage = card.image_url || await QRCode.toDataURL(`${VERIFY_BASE}/${card.card_uid}`);
       return res.json({ success: true, card: { ...card, qrImage } });
     }
 
@@ -104,25 +106,38 @@ const generateCard = async (req, res) => {
     }
 
     const prefix  = registration_type === 'olympiad' ? 'OLY' : registration_type === 'wall-magazine' ? 'MAG' : 'PRJ';
-    const cardUid = `WICE-${prefix}-${uuidv4().substr(0, 8).toUpperCase()}`;
+    const cardUid = `WICE-${prefix}-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const verifyUrl = `${VERIFY_BASE}/${cardUid}`;
+
+    // Generate QR as PNG buffer and upload to GCS
+    let imageUrl = null;
+    try {
+      const qrBuffer = await QRCode.toBuffer(verifyUrl, {
+        type: 'png', errorCorrectionLevel: 'H', margin: 2, width: 400,
+      });
+      imageUrl = await uploadBuffer(qrBuffer, `id-cards/${cardUid}.png`, 'image/png');
+    } catch (gcsErr) {
+      console.error('GCS upload failed for ID card, falling back to data URL:', gcsErr.message);
+    }
 
     await db.query(
-      'INSERT INTO id_cards (user_id, registration_type, registration_id, card_uid, qr_data) VALUES (?, ?, ?, ?, ?)',
-      [userId, registration_type, registration_id, cardUid, `${VERIFY_BASE}/${cardUid}`]
+      'INSERT INTO id_cards (user_id, registration_type, registration_id, card_uid, qr_data, image_url) VALUES (?, ?, ?, ?, ?, ?)',
+      [userId, registration_type, registration_id, cardUid, verifyUrl, imageUrl]
     );
 
-    const qrImage = await QRCode.toDataURL(`${VERIFY_BASE}/${cardUid}`);
+    // Return GCS URL if available, else generate data URL on the fly
+    const qrImage = imageUrl || await QRCode.toDataURL(verifyUrl);
 
     res.json({
       success: true,
       card: {
         card_uid: cardUid,
-        qr_data: `${VERIFY_BASE}/${cardUid}`,
+        qr_data: verifyUrl,
+        image_url: imageUrl,
         qrImage,
         registration_type,
         registration_id,
         generated_at: new Date(),
-        // for display
         name, title, email,
       },
     });

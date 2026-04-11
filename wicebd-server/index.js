@@ -20,6 +20,7 @@ const clubPartnerRoutes = require('./routes/clubPartnerRoutes');
 const eventPassRoutes = require('./routes/eventPassRoutes');
 const idCardRoutes = require('./routes/idCardRoutes');
 const promoCodeRoutes = require('./routes/promoCodeRoutes');
+const uploadRoutes    = require('./routes/uploadRoutes');
 
 
 // ----------------------------
@@ -103,6 +104,7 @@ app.use('/api/club-partner', clubPartnerRoutes);
 app.use('/api/event-pass', eventPassRoutes);
 app.use('/api/id-card', idCardRoutes);
 app.use('/api/promo', promoCodeRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ----------------------------
 // Server
