@@ -21,6 +21,7 @@ const emailTransporter = nodemailer.createTransport({
 });
 
 const registerParticipant = async (req, res) => {
+  const user_id = req.user?.id || null;
   const {
     fullName,
     email,
@@ -61,6 +62,7 @@ const registerParticipant = async (req, res) => {
     await db.query(
       `INSERT INTO olympiad_registrations (
         registration_id,
+        user_id,
         full_name,
         email,
         phone,
@@ -70,9 +72,10 @@ const registerParticipant = async (req, res) => {
         ca_code,
         club_code,
         status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         registrationId,
+        user_id,
         fullName,
         email,
         phone,

@@ -67,10 +67,13 @@ const getProfile = async (req, res) => {
 const getMyRegistrations = async (req, res) => {
   const user_id = req.user.id;
   try {
-    const [project] = await db.query(
+    const [allRegs] = await db.query(
       `SELECT id, paymentID, competitionCategory, projectTitle, leader, leaderEmail, bkashTrxId, amount, created_at
        FROM registrations WHERE user_id = ? ORDER BY created_at DESC`, [user_id]
     );
+    const project     = allRegs.filter(r => r.competitionCategory !== 'Megazine');
+    const wallMagazine = allRegs.filter(r => r.competitionCategory === 'Megazine');
+
     const [olympiad] = await db.query(
       `SELECT id, registration_id, full_name, email, institution, status, created_at
        FROM olympiad_registrations WHERE user_id = ? ORDER BY created_at DESC`, [user_id]
@@ -80,7 +83,7 @@ const getMyRegistrations = async (req, res) => {
        FROM robo_soccer_registrations WHERE user_id = ? ORDER BY created_at DESC`, [user_id]
     );
 
-    res.json({ success: true, project, olympiad, roboSoccer });
+    res.json({ success: true, project, wallMagazine, olympiad, roboSoccer });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch registrations' });
   }

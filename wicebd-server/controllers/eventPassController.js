@@ -16,6 +16,22 @@ const getMyPass = async (req, res) => {
       return res.json({ success: true, pass: existing[0] });
     }
 
+    // Verify the user has a paid registration (project, wall-magazine, or olympiad)
+    const [[{ regCount }]] = await db.query(
+      'SELECT COUNT(*) AS regCount FROM registrations WHERE user_id = ?', [userId]
+    );
+    const [[{ olympiadCount }]] = await db.query(
+      'SELECT COUNT(*) AS olympiadCount FROM olympiad_registrations WHERE user_id = ?', [userId]
+    );
+
+    if (regCount === 0 && olympiadCount === 0) {
+      return res.status(403).json({
+        success: false,
+        not_registered: true,
+        message: 'You must be registered in a WICE competition (Project, Wall Magazine, or Science Olympiad) to get an event pass.',
+      });
+    }
+
     // Issue new pass
     const passId = `WICE-${uuidv4().substr(0, 8).toUpperCase()}`;
     await db.query(

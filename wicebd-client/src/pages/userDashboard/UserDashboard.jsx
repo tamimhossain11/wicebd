@@ -16,8 +16,8 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/index';
-import EventPassCard from '../../components/eventPass/EventPassCard';
-import { CardMembership } from '@mui/icons-material';
+import IDCardSection from '../../components/eventPass/EventPassCard';
+import { CardMembership, Badge } from '@mui/icons-material';
 
 /* ── Brand colours ── */
 const C = {
@@ -53,7 +53,7 @@ const NAV = [
   { id: 'overview',       label: 'Dashboard',        icon: <Dashboard       sx={{ fontSize: 19 }} /> },
   { id: 'competitions',   label: 'Competitions',      icon: <Assignment      sx={{ fontSize: 19 }} /> },
   { id: 'registrations',  label: 'My Registrations',  icon: <CheckCircle     sx={{ fontSize: 19 }} /> },
-  { id: 'event-pass',     label: 'Event Pass',        icon: <CardMembership  sx={{ fontSize: 19 }} /> },
+  { id: 'event-pass',     label: 'ID Cards',          icon: <Badge           sx={{ fontSize: 19 }} /> },
   { id: 'announcements',  label: 'Announcements',     icon: <Notifications   sx={{ fontSize: 19 }} /> },
   { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} /> },
   { id: 'profile',        label: 'Profile',           icon: <Person          sx={{ fontSize: 19 }} /> },
@@ -307,7 +307,7 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const [active, setActive] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [registrations, setRegistrations] = useState({ project: [], olympiad: [], roboSoccer: [] });
+  const [registrations, setRegistrations] = useState({ project: [], wallMagazine: [], olympiad: [], roboSoccer: [] });
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileForm, setProfileForm] = useState({
@@ -335,7 +335,12 @@ export default function UserDashboard() {
             gender: u.gender || '', institution: u.institution || '', class_grade: u.class_grade || '',
           });
         }
-        setRegistrations(r.data);
+        setRegistrations({
+          project:      r.data.project      || [],
+          wallMagazine: r.data.wallMagazine  || [],
+          olympiad:     r.data.olympiad      || [],
+          roboSoccer:   r.data.roboSoccer    || [],
+        });
         setAnnouncements(a.data.announcements || []);
       })
       .catch(() => {})
@@ -361,10 +366,12 @@ export default function UserDashboard() {
   const filledFields = Object.values(profileForm).filter(Boolean).length;
   const profilePct = Math.round((filledFields / Object.keys(profileForm).length) * 100);
 
-  const hasProject  = registrations.project?.length > 0;
-  const hasOlympiad = registrations.olympiad?.length > 0;
-  const totalRegs   = (registrations.project?.length || 0) + (registrations.olympiad?.length || 0);
-  const completedSteps = [true, profileComplete, hasProject || hasOlympiad].filter(Boolean).length;
+  const hasProject      = registrations.project?.length > 0;
+  const hasWallMagazine = registrations.wallMagazine?.length > 0;
+  const hasOlympiad     = registrations.olympiad?.length > 0;
+  const hasAnyReg       = hasProject || hasWallMagazine || hasOlympiad;
+  const totalRegs       = (registrations.project?.length || 0) + (registrations.wallMagazine?.length || 0) + (registrations.olympiad?.length || 0);
+  const completedSteps  = [true, profileComplete, hasAnyReg].filter(Boolean).length;
   const progressPct = Math.round((completedSteps / 3) * 100);
 
   if (loading) return (
@@ -511,7 +518,7 @@ export default function UserDashboard() {
                     <Typography fontWeight={700} sx={{ color: '#fff', mb: 2.5, fontSize: 15 }}>Your Journey</Typography>
                     <StepItem done label="Create Account" desc="Account successfully created" />
                     <StepItem done={!!profileComplete} label="Complete Profile" desc="Add personal & family information" />
-                    <StepItem done={hasProject || hasOlympiad} label="Register for Event" desc="Choose and register for a competition" />
+                    <StepItem done={hasAnyReg} label="Register for Event" desc="Choose and register for a competition" />
                   </Paper>
                 </Grid>
                 <Grid size={{ xs: 12, md: 7 }}>
@@ -582,8 +589,9 @@ export default function UserDashboard() {
                     icon={<Assignment sx={{ color: '#fff', fontSize: 22 }} />} color="#10b981"
                     title="Wall Magazine"
                     description="Showcase creativity through wall magazine entries. Team-based competition judged on design, content, and originality."
-                    registered={false}
-                    to="/registration?tab=wall-magazine" toLabel="Register for Wall Magazine"
+                    registered={hasWallMagazine}
+                    regId={registrations.wallMagazine[0]?.paymentID}
+                    to="/registration?tab=wall-magazine" toLabel={hasWallMagazine ? 'View Registration' : 'Register for Wall Magazine'}
                     fee={399}
                     prizePool="30,000"
                   />
@@ -621,8 +629,44 @@ export default function UserDashboard() {
                 <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>All your competition registrations.</Typography>
               </Box>
               {[
-                { label: 'Project Registrations',  data: registrations.project,  color: C.primary, fields: ['competitionCategory', 'projectTitle', 'leader', 'amount'], icon: <Assignment /> },
-                { label: 'Olympiad Registrations', data: registrations.olympiad, color: '#0f3460', fields: ['registration_id', 'full_name', 'institution', 'status'], icon: <EmojiEvents /> },
+                {
+                  label: 'Project Registrations',
+                  data: registrations.project,
+                  color: C.primary,
+                  icon: <Assignment />,
+                  fields: [
+                    { key: 'paymentID',          display: 'Payment ID' },
+                    { key: 'projectTitle',        display: 'Project Title' },
+                    { key: 'leader',              display: 'Team Leader' },
+                    { key: 'competitionCategory', display: 'Category' },
+                    { key: 'amount',              display: 'Amount', format: v => `৳ ${v}` },
+                  ],
+                },
+                {
+                  label: 'Wall Magazine Registrations',
+                  data: registrations.wallMagazine,
+                  color: '#10b981',
+                  icon: <Assignment />,
+                  fields: [
+                    { key: 'paymentID',   display: 'Payment ID' },
+                    { key: 'projectTitle', display: 'Magazine Title' },
+                    { key: 'leader',      display: 'Team Leader' },
+                    { key: 'leaderEmail', display: 'Email' },
+                    { key: 'amount',      display: 'Amount', format: v => `৳ ${v}` },
+                  ],
+                },
+                {
+                  label: 'Science Olympiad Registrations',
+                  data: registrations.olympiad,
+                  color: '#0f3460',
+                  icon: <EmojiEvents />,
+                  fields: [
+                    { key: 'registration_id', display: 'Registration ID' },
+                    { key: 'full_name',        display: 'Name' },
+                    { key: 'institution',      display: 'Institution' },
+                    { key: 'status',           display: 'Status' },
+                  ],
+                },
               ].map(({ label, data, color, fields, icon }) => (
                 <Box key={label} sx={{ mb: 3.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
@@ -636,15 +680,19 @@ export default function UserDashboard() {
                       </Paper>
                     : data.map(row => (
                         <Paper key={row.id} sx={{ p: 2.5, mb: 1.5, borderRadius: 2, background: C.card, border: `1px solid ${color}22`, display: 'flex', flexWrap: 'wrap', gap: 2.5 }}>
-                          {fields.map(f => row[f] && (
-                            <Box key={f}>
-                              <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,0.3)', textTransform: 'capitalize', mb: 0.3 }}>{f.replace(/_/g, ' ')}</Typography>
-                              <Typography sx={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>{f === 'amount' ? `৳ ${row[f]}` : row[f]}</Typography>
+                          {fields.map(({ key, display, format }) => row[key] ? (
+                            <Box key={key}>
+                              <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.3 }}>{display}</Typography>
+                              <Typography sx={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
+                                {format ? format(row[key]) : row[key]}
+                              </Typography>
                             </Box>
-                          ))}
+                          ) : null)}
                           <Box>
-                            <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,0.3)', mb: 0.3 }}>Date</Typography>
-                            <Typography sx={{ fontSize: 13.5, color: '#fff' }}>{new Date(row.created_at || row.createdAt).toLocaleDateString()}</Typography>
+                            <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.3 }}>Date</Typography>
+                            <Typography sx={{ fontSize: 13.5, color: '#fff' }}>
+                              {new Date(row.created_at || row.createdAt).toLocaleDateString('en-BD', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </Typography>
                           </Box>
                         </Paper>
                       ))
@@ -654,9 +702,9 @@ export default function UserDashboard() {
             </Box>
           )}
 
-          {/* ══ EVENT PASS ══ */}
+          {/* ══ ID CARDS ══ */}
           {active === 'event-pass' && (
-            <EventPassCard user={user} />
+            <IDCardSection user={user} />
           )}
 
           {/* ══ ANNOUNCEMENTS ══ */}

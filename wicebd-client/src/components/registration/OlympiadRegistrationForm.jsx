@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Box, TextField, Typography, Grid, CircularProgress, Checkbox, FormHelperText } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { toast } from 'react-toastify';
+import api from '../../api/index';
 import ReferenceSearch from './ReferenceSearch';
 
 const f = {
@@ -32,8 +32,6 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
     const [promoInput, setPromoInput] = useState('');
     const [promoStatus, setPromoStatus] = useState(null);
     const [promoLoading, setPromoLoading] = useState(false);
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
     const onChange = e => {
         const { name, value } = e.target;
         setForm(p => ({
@@ -48,7 +46,7 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
         if (!promoInput.trim()) return;
         setPromoLoading(true);
         try {
-            const res = await axios.post(`${backendUrl}/api/promo/validate`, {
+            const res = await api.post('/api/promo/validate', {
                 code: promoInput.trim().toUpperCase(),
                 competitionType: 'olympiad',
             });
@@ -88,7 +86,7 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
 
         setLoading(true);
         try {
-            const res = await axios.post(`${backendUrl}/api/olympiad/register`, form);
+            const res = await api.post('/api/olympiad/register', form);
             if (res.data.success) {
                 setDone(true);
                 toast.success('Registered successfully!');

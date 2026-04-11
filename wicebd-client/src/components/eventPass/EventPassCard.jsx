@@ -1,257 +1,325 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, CircularProgress, Paper, Chip } from '@mui/material';
-import { QrCode2, Download, CheckCircle, CardMembership } from '@mui/icons-material';
+import {
+  Box, Typography, Button, CircularProgress, Paper, Chip, Grid,
+} from '@mui/material';
+import { QrCode2, Download, CheckCircle, Badge, Lock } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/index';
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+const C = {
+  bg:      '#0d0006',
+  border:  'rgba(255,255,255,0.07)',
+  primary: '#800020',
+  accent:  '#c0002a',
+  muted:   'rgba(255,255,255,0.38)',
+  card:    'rgba(255,255,255,0.04)',
+};
 
-const EventPassCard = ({ user }) => {
-  const [pass, setPass] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [requesting, setRequesting] = useState(false);
-  const passRef = useRef(null);
+const TYPE_META = {
+  project:         { label: 'Project Competition', color: '#800020', prefix: 'PRJ' },
+  'wall-magazine': { label: 'Wall Magazine',        color: '#10b981', prefix: 'MAG' },
+  olympiad:        { label: 'Science Olympiad',     color: '#0f3460', prefix: 'OLY' },
+};
 
-  useEffect(() => {
-    api.get('/api/event-pass/my-pass')
-      .then(({ data }) => { if (data.success) setPass(data.pass); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  const handleRequest = async () => {
-    setRequesting(true);
-    try {
-      const { data } = await api.get('/api/event-pass/my-pass');
-      if (data.success) setPass(data.pass);
-    } catch {
-      // pass
-    } finally { setRequesting(false); }
-  };
+/* ── Single ID card visual ── */
+const IDCardVisual = ({ reg, card }) => {
+  const cardRef = useRef(null);
+  const meta    = TYPE_META[reg.type] || TYPE_META.project;
+  const verifyUrl = card?.qr_data || '';
 
   const handleDownload = () => {
-    if (!passRef.current) return;
+    if (!cardRef.current) return;
     import('html2canvas').then(({ default: html2canvas }) => {
-      html2canvas(passRef.current, { scale: 3, backgroundColor: null, useCORS: true }).then(canvas => {
+      html2canvas(cardRef.current, { scale: 3, backgroundColor: null, useCORS: true }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `WICE-EventPass-${pass.pass_id}.png`;
+        link.download = `WICE-IDCard-${card.card_uid}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
-    }).catch(() => {
-      // html2canvas not installed — skip silently
-    });
+    }).catch(() => {});
   };
-
-  const verifyUrl = `${BACKEND}/api/event-pass/verify/${pass?.pass_id}`;
-
-  if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-      <CircularProgress sx={{ color: '#800020' }} />
-    </Box>
-  );
-
-  if (!pass) return (
-    <Box sx={{ textAlign: 'center', py: 6 }}>
-      <CardMembership sx={{ fontSize: 64, color: 'rgba(128,0,32,0.3)', mb: 2 }} />
-      <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 18, mb: 1 }}>
-        Get Your Free Event Pass
-      </Typography>
-      <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 13.5, mb: 3, maxWidth: 360, mx: 'auto' }}>
-        Your event pass gives you access to WICE Bangladesh 2026. It includes a QR code for quick check-in at the venue.
-      </Typography>
-      <Button
-        onClick={handleRequest}
-        disabled={requesting}
-        startIcon={requesting ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <QrCode2 />}
-        sx={{
-          background: 'linear-gradient(135deg, #800020, #c0002a)',
-          color: '#fff', textTransform: 'none', fontWeight: 700,
-          fontSize: 14, borderRadius: 2, px: 4, py: 1.3,
-          boxShadow: '0 6px 20px rgba(128,0,32,0.4)',
-          '&:hover': { opacity: 0.9 },
-          '&:disabled': { background: 'rgba(128,0,32,0.3)', color: 'rgba(255,255,255,0.4)' },
-        }}
-      >
-        {requesting ? 'Generating…' : 'Generate My Pass'}
-      </Button>
-    </Box>
-  );
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>Event Pass</Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: 13.5, mt: 0.5 }}>
-            Your official WICE Bangladesh 2026 — 8th Edition entry pass
-          </Typography>
-        </Box>
-        <Button
-          onClick={handleDownload}
-          startIcon={<Download />}
-          variant="outlined"
-          size="small"
-          sx={{
-            borderColor: 'rgba(128,0,32,0.5)', color: 'rgba(255,255,255,0.7)',
-            textTransform: 'none', fontWeight: 600, borderRadius: 2,
-            '&:hover': { borderColor: '#800020', background: 'rgba(128,0,32,0.1)', color: '#fff' },
-          }}
-        >
-          Download Pass
-        </Button>
-      </Box>
-
-      {/* ── Pass Card ── */}
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Box
-          ref={passRef}
-          sx={{
-            width: { xs: '100%', sm: 480 },
-            maxWidth: 480,
-            borderRadius: 4,
-            overflow: 'hidden',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
-            position: 'relative',
-          }}
-        >
-          {/* ── Header band ── */}
-          <Box sx={{
-            background: 'linear-gradient(135deg, #5a0010 0%, #8b0020 50%, #6e0018 100%)',
-            px: 3, py: 2.5,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            {/* Decorative circles */}
-            <Box sx={{ position: 'absolute', right: -40, top: -40, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
-            <Box sx={{ position: 'absolute', right: 20, top: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, zIndex: 1 }}>
-              <img
-                src="/images/logo-normal.PNG"
-                alt="WICE"
-                style={{ height: 42, objectFit: 'contain', filter: 'brightness(1.15)' }}
-              />
-            </Box>
-
-            <Box sx={{ textAlign: 'right', zIndex: 1 }}>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700 }}>
-                8th Edition
-              </Typography>
-              <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: 15, letterSpacing: '0.05em', lineHeight: 1.2 }}>
-                EVENT PASS
-              </Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 9.5, letterSpacing: '0.08em' }}>
-                WICE BANGLADESH 2026
-              </Typography>
-            </Box>
+      {/* Card */}
+      <Box
+        ref={cardRef}
+        sx={{
+          width: '100%', maxWidth: 420, mx: 'auto',
+          borderRadius: 3, overflow: 'hidden',
+          boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)`,
+        }}
+      >
+        {/* Header band */}
+        <Box sx={{
+          background: `linear-gradient(135deg, ${meta.color}cc 0%, ${meta.color} 60%, ${meta.color}99 100%)`,
+          px: 2.5, py: 2,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <Box sx={{ position: 'absolute', right: -30, top: -30, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, zIndex: 1 }}>
+            <img src="/images/logo-normal.PNG" alt="WICE" style={{ height: 36, objectFit: 'contain', filter: 'brightness(1.2)' }} />
           </Box>
+          <Box sx={{ textAlign: 'right', zIndex: 1 }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700 }}>
+              8th Edition
+            </Typography>
+            <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: 13, letterSpacing: '0.06em', lineHeight: 1.2 }}>
+              PARTICIPANT ID CARD
+            </Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 8.5, letterSpacing: '0.08em' }}>
+              WICE BANGLADESH 2026
+            </Typography>
+          </Box>
+        </Box>
 
-          {/* ── Body ── */}
-          <Box sx={{
-            background: 'linear-gradient(180deg, #12000a 0%, #0d0006 100%)',
-            px: 3, py: 3,
-            display: 'flex', gap: 3, alignItems: 'flex-start',
-          }}>
-            {/* Left — holder info */}
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', mb: 0.5 }}>
-                Attendee
-              </Typography>
-              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 20, lineHeight: 1.2, letterSpacing: '-0.3px' }}>
-                {pass.name}
-              </Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, mt: 0.4, mb: 2.5 }}>
-                {pass.email}
-              </Typography>
+        {/* Body */}
+        <Box sx={{
+          background: 'linear-gradient(180deg, #12000a 0%, #0d0006 100%)',
+          px: 2.5, py: 2.5,
+          display: 'flex', gap: 2.5, alignItems: 'flex-start',
+        }}>
+          {/* Left */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', mb: 0.4 }}>
+              Participant
+            </Typography>
+            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.2px', wordBreak: 'break-word' }}>
+              {reg.name}
+            </Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, mt: 0.3, mb: 2 }}>
+              {reg.email}
+            </Typography>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
-                <InfoRow label="Pass ID" value={pass.pass_id} mono />
-                <InfoRow label="Event" value="WICE Bangladesh 2026" />
-                <InfoRow label="Venue" value="Dhaka, Bangladesh" />
-                <InfoRow label="Date" value="May 9, 2026" />
-                <InfoRow label="Status" value={
-                  <Chip
-                    icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
-                    label="Valid"
-                    size="small"
-                    sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 10.5, height: 22, fontWeight: 700 }}
-                  />
-                } />
-              </Box>
-            </Box>
-
-            {/* Right — QR code */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <Box sx={{
-                p: 1.5, borderRadius: 2.5,
-                background: '#fff',
-                boxShadow: '0 4px 20px rgba(128,0,32,0.3)',
-              }}>
-                <QRCodeSVG
-                  value={verifyUrl}
-                  size={100}
-                  level="M"
-                  bgColor="#ffffff"
-                  fgColor="#1a0008"
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <CardRow label="Competition" value={meta.label} />
+              {reg.title && <CardRow label={reg.type === 'olympiad' ? 'Institution' : 'Project / Title'} value={reg.title} />}
+              <CardRow label="Registration ID" value={reg.reg_id} mono />
+              <CardRow label="Card ID" value={card.card_uid} mono />
+              <CardRow label="Event" value="WICE Bangladesh 2026" />
+              <Box>
+                <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
+                  Status
+                </Typography>
+                <Chip
+                  icon={<CheckCircle sx={{ fontSize: '12px !important', color: '#10b981 !important' }} />}
+                  label="Valid"
+                  size="small"
+                  sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 10, height: 20, fontWeight: 700 }}
                 />
               </Box>
-              <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, textAlign: 'center', letterSpacing: '0.05em' }}>
-                Scan to verify
-              </Typography>
             </Box>
           </Box>
 
-          {/* ── Perforated divider ── */}
-          <Box sx={{
-            height: 1,
-            background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 8px, transparent 8px, transparent 14px)',
-            mx: 3,
-          }} />
-
-          {/* ── Footer strip ── */}
-          <Box sx={{
-            background: 'linear-gradient(180deg, #0d0006 0%, #120009 100%)',
-            px: 3, py: 1.8,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              wicebd.com
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              {[...Array(8)].map((_, i) => (
-                <Box key={i} sx={{ width: 3, height: 3, borderRadius: '50%', background: i % 2 === 0 ? 'rgba(128,0,32,0.5)' : 'rgba(255,255,255,0.1)' }} />
-              ))}
+          {/* Right — QR */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+            <Box sx={{ p: 1.2, borderRadius: 2, background: '#fff', boxShadow: `0 4px 16px ${meta.color}44` }}>
+              <QRCodeSVG value={verifyUrl || 'https://wicebd.com'} size={90} level="M" bgColor="#ffffff" fgColor="#1a0008" />
             </Box>
-            <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 10, letterSpacing: '0.08em' }}>
-              Free Entry
+            <Typography sx={{ color: 'rgba(255,255,255,0.22)', fontSize: 8.5, textAlign: 'center', letterSpacing: '0.04em' }}>
+              Scan to verify
             </Typography>
           </Box>
         </Box>
+
+        {/* Footer strip */}
+        <Box sx={{
+          background: 'rgba(255,255,255,0.03)',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+          px: 2.5, py: 1.2,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.18)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            wicebd.com
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {[...Array(8)].map((_, i) => (
+              <Box key={i} sx={{ width: 3, height: 3, borderRadius: '50%', background: i % 2 === 0 ? `${meta.color}88` : 'rgba(255,255,255,0.1)' }} />
+            ))}
+          </Box>
+          <Typography sx={{ color: 'rgba(255,255,255,0.18)', fontSize: 9, letterSpacing: '0.08em' }}>
+            {meta.prefix} · 8th Ed.
+          </Typography>
+        </Box>
       </Box>
 
-      {/* Info below pass */}
-      <Paper sx={{ mt: 3, p: 2.5, borderRadius: 3, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', maxWidth: 480, mx: 'auto' }}>
-        <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, lineHeight: 1.7, textAlign: 'center' }}>
-          Present this pass (digital or printed) at the venue gate. The QR code will be scanned by our team for quick entry verification.
-        </Typography>
-      </Paper>
+      {/* Download button */}
+      <Box sx={{ textAlign: 'center', mt: 2 }}>
+        <Button
+          onClick={handleDownload}
+          startIcon={<Download sx={{ fontSize: 16 }} />}
+          size="small"
+          variant="outlined"
+          sx={{
+            borderColor: `${meta.color}66`, color: 'rgba(255,255,255,0.6)',
+            textTransform: 'none', fontWeight: 600, borderRadius: 2, fontSize: 12.5,
+            '&:hover': { borderColor: meta.color, background: `${meta.color}15`, color: '#fff' },
+          }}
+        >
+          Download ID Card
+        </Button>
+      </Box>
     </Box>
   );
 };
 
-/* Small helper row */
-const InfoRow = ({ label, value, mono = false }) => (
-  <Box>
-    <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9.5, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
-      {label}
-    </Typography>
-    {typeof value === 'string' ? (
-      <Typography sx={{ color: '#fff', fontSize: 12.5, fontWeight: 600, fontFamily: mono ? 'monospace' : 'inherit', letterSpacing: mono ? '0.08em' : 'normal' }}>
-        {value}
-      </Typography>
-    ) : value}
-  </Box>
-);
+/* ── Registration slot (one per reg) ── */
+const RegSlot = ({ reg, onGenerated }) => {
+  const [loading, setLoading] = useState(false);
+  const [card, setCard]       = useState(reg.card);
+  const meta = TYPE_META[reg.type] || TYPE_META.project;
 
-export default EventPassCard;
+  const generate = async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.post('/api/id-card/generate', {
+        registration_type: reg.type,
+        registration_id:   reg.reg_id,
+      });
+      if (data.success) {
+        setCard(data.card);
+        onGenerated?.();
+      }
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Paper sx={{
+      p: 3, borderRadius: 3,
+      background: `linear-gradient(135deg, ${meta.color}10 0%, ${meta.color}04 100%)`,
+      border: `1px solid ${meta.color}28`,
+    }}>
+      {/* Header row */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
+        <Box>
+          <Chip
+            label={meta.label}
+            size="small"
+            sx={{ background: `${meta.color}20`, color: meta.color, border: `1px solid ${meta.color}33`, fontSize: 11, fontWeight: 700, mb: 0.8 }}
+          />
+          <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{reg.name}</Typography>
+          {reg.title && (
+            <Typography sx={{ color: C.muted, fontSize: 12.5, mt: 0.3 }}>{reg.title}</Typography>
+          )}
+          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.5, fontFamily: 'monospace' }}>
+            {reg.reg_id}
+          </Typography>
+        </Box>
+        {card ? (
+          <Chip
+            icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
+            label="Card Generated"
+            size="small"
+            sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
+          />
+        ) : (
+          <Button
+            onClick={generate}
+            disabled={loading}
+            size="small"
+            startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <QrCode2 sx={{ fontSize: 16 }} />}
+            sx={{
+              background: `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)`,
+              color: '#fff', textTransform: 'none', fontWeight: 700, fontSize: 12.5,
+              borderRadius: 2, px: 2, py: 0.9,
+              boxShadow: `0 4px 14px ${meta.color}44`,
+              '&:hover': { opacity: 0.9 },
+              '&:disabled': { background: `${meta.color}44`, color: 'rgba(255,255,255,0.4)' },
+            }}
+          >
+            {loading ? 'Generating…' : 'Generate ID Card'}
+          </Button>
+        )}
+      </Box>
+
+      {/* Show card if generated */}
+      {card && <IDCardVisual reg={reg} card={card} />}
+    </Paper>
+  );
+};
+
+/* ── Main section ── */
+const IDCardSection = ({ user }) => {
+  const [data, setData]       = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = () => {
+    api.get('/api/id-card/my-cards')
+      .then(({ data: d }) => { if (d.success) setData(d); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress sx={{ color: C.primary }} />
+    </Box>
+  );
+
+  const regs = data?.registrations || [];
+  const hasRegs = regs.length > 0;
+
+  return (
+    <Box>
+      {/* Page header */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>ID Cards</Typography>
+        <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>
+          Generate your official WICE Bangladesh 2026 participant ID card for each competition you've registered in.
+        </Typography>
+      </Box>
+
+      {!hasRegs ? (
+        /* No registrations */
+        <Paper sx={{ p: 6, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, textAlign: 'center' }}>
+          <Lock sx={{ fontSize: 56, color: 'rgba(255,255,255,0.1)', mb: 2 }} />
+          <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 17, mb: 1 }}>
+            Registration Required
+          </Typography>
+          <Typography sx={{ color: C.muted, fontSize: 13.5, mb: 3, maxWidth: 400, mx: 'auto', lineHeight: 1.7 }}>
+            ID cards are exclusively for registered WICE participants. Register for the Project Competition, Wall Magazine, or Science Olympiad to get your card.
+          </Typography>
+          <Button
+            component="a" href="/registration"
+            sx={{
+              background: `linear-gradient(135deg, ${C.primary}, ${C.accent})`,
+              color: '#fff', textTransform: 'none', fontWeight: 700,
+              fontSize: 14, borderRadius: 2, px: 4, py: 1.3,
+              boxShadow: '0 6px 20px rgba(128,0,32,0.4)',
+              '&:hover': { opacity: 0.9 },
+            }}
+          >
+            Register Now
+          </Button>
+        </Paper>
+      ) : (
+        /* Registration slots */
+        <Grid container spacing={3}>
+          {regs.map(reg => (
+            <Grid size={{ xs: 12, lg: 6 }} key={`${reg.type}:${reg.reg_id}`}>
+              <RegSlot reg={reg} onGenerated={load} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {/* Info note */}
+      {hasRegs && (
+        <Paper sx={{ mt: 3, p: 2.5, borderRadius: 3, background: C.card, border: `1px solid ${C.border}` }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.32)', fontSize: 12, lineHeight: 1.7, textAlign: 'center' }}>
+            Present your ID card (digital or printed) at the WICE Bangladesh 2026 venue gate. Each competition registration generates a unique card with its own QR code.
+          </Typography>
+        </Paper>
+      )}
+    </Box>
+  );
+};
+
+export default IDCardSection;

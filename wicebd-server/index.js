@@ -18,6 +18,7 @@ const olympiadExamRoutes = require('./routes/olympiadExamRoutes');
 const campusAmbassadorRoutes = require('./routes/campusAmbassadorRoutes');
 const clubPartnerRoutes = require('./routes/clubPartnerRoutes');
 const eventPassRoutes = require('./routes/eventPassRoutes');
+const idCardRoutes = require('./routes/idCardRoutes');
 const promoCodeRoutes = require('./routes/promoCodeRoutes');
 
 
@@ -100,6 +101,7 @@ app.use('/api/olympiad-exam', olympiadExamRoutes);
 app.use('/api/campus-ambassador', campusAmbassadorRoutes);
 app.use('/api/club-partner', clubPartnerRoutes);
 app.use('/api/event-pass', eventPassRoutes);
+app.use('/api/id-card', idCardRoutes);
 app.use('/api/promo', promoCodeRoutes);
 
 // ----------------------------

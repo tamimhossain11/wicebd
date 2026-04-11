@@ -25,6 +25,11 @@ const HeaderV1 = ({ headerStyle, parentMenu }) => {
         };
     }, []);
 
+    // Clean up body overflow lock on unmount
+    useEffect(() => {
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+
     // Search Bar
     const [openSearch, setOpenSearch] = useState(false);
 
@@ -42,13 +47,13 @@ const HeaderV1 = ({ headerStyle, parentMenu }) => {
 
     const handleOpenMenu = (event) => {
         event.preventDefault();
-        setOpenMenu(!openMenu)
-        document.querySelector(".page-wrapper").classList.add("no-color-palate")
+        setOpenMenu(true);
+        document.body.style.overflow = 'hidden';
     }
 
     const handleCloseMenu = () => {
-        setOpenMenu(false)
-        document.querySelector(".page-wrapper").classList.remove("no-color-palate")
+        setOpenMenu(false);
+        document.body.style.overflow = '';
     }
 
     const toggleMenu = (e) => {
@@ -150,17 +155,64 @@ const HeaderV1 = ({ headerStyle, parentMenu }) => {
                         </div>
                     </div>
                 </div>
-                <div className={`${openMenu ? "mobile-menu-visible" : ""}`}>
-                    <div className="mobile-menu">
-                        <div className="menu-backdrop" onClick={handleCloseMenu}></div>
-                        <nav className="menu-box">
-                            <div className="nav-logo"><Link to="/#"><img src="/images/logo-normal.PNG" alt="WICEBD" /></Link></div>
-                            <MainMenu toggleMultiMenu={toggleMultiMenu} toggleMenu={toggleMenu} parentMenu={parentMenu} />
-                        </nav>
-                        <div className="close-btn" onClick={handleCloseMenu}><span className="icon flaticon-cancel-music"></span></div>
-                    </div>
-                </div>
             </header>
+
+            {/* ── Mobile menu — rendered OUTSIDE <header> so page sections can't cover it ── */}
+            <div className={`wice-mobile-overlay${openMenu ? ' wice-mobile-overlay--open' : ''}`}>
+                {/* Backdrop */}
+                <div className="wice-mobile-backdrop" onClick={handleCloseMenu} />
+
+                {/* Slide-in panel */}
+                <nav className="wice-mobile-panel">
+                    {/* Top: logo + close */}
+                    <div className="wice-mobile-panel__header">
+                        <Link to="/#" onClick={handleCloseMenu}>
+                            <img src="/images/logo-normal.PNG" alt="WICEBD" style={{ height: 38, objectFit: 'contain' }} />
+                        </Link>
+                        <button
+                            onClick={handleCloseMenu}
+                            className="wice-mobile-panel__close"
+                            aria-label="Close menu"
+                        >
+                            <span className="icon flaticon-cancel-music" />
+                        </button>
+                    </div>
+
+                    {/* Nav links */}
+                    <div className="wice-mobile-panel__nav">
+                        <MainMenu toggleMultiMenu={toggleMultiMenu} toggleMenu={toggleMenu} parentMenu={parentMenu} />
+                    </div>
+
+                    {/* Bottom: auth */}
+                    <div className="wice-mobile-panel__auth">
+                        {user ? (
+                            <>
+                                <Link
+                                    to={role === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                                    onClick={handleCloseMenu}
+                                    className="wice-mobile-auth-user"
+                                >
+                                    <span className="fa fa-user-circle" />
+                                    <span>{user.name?.split(' ')[0]}</span>
+                                    <span className="wice-mobile-auth-badge">
+                                        {role === 'admin' ? 'Admin' : 'Dashboard'}
+                                    </span>
+                                </Link>
+                                <button onClick={() => { handleCloseMenu(); logout(); }} className="wice-mobile-auth-signout">
+                                    <span className="fa fa-sign-out-alt" />
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <Link to="/sign-in" onClick={handleCloseMenu} className="wice-mobile-auth-signin">
+                                <span className="fa fa-user" />
+                                Sign In
+                            </Link>
+                        )}
+                    </div>
+                </nav>
+            </div>
+
             <SearchPopup openSearch={openSearch} searchClose={searchClose} />
         </>
     );

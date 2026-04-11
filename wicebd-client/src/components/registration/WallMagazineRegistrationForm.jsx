@@ -6,8 +6,8 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 import { toast } from 'react-toastify';
+import api from '../../api/index';
 import ReferenceSearch from './ReferenceSearch';
 
 /* ─── Shared field style ─── */
@@ -106,7 +106,7 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
     const [promoInput, setPromoInput] = useState('');
     const [promoStatus, setPromoStatus] = useState(null);
     const [promoLoading, setPromoLoading] = useState(false);
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 
     const set = (name, value) => setForm(p => ({
         ...p, [name]: value,
@@ -121,7 +121,7 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
         if (!promoInput.trim()) return;
         setPromoLoading(true);
         try {
-            const res = await axios.post(`${backendUrl}/api/promo/validate`, {
+            const res = await api.post('/api/promo/validate', {
                 code: promoInput.trim().toUpperCase(),
                 competitionType: 'wall-magazine',
             });
@@ -183,10 +183,10 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const saveRes = await axios.post(`${backendUrl}/api/registration/start`, form);
+            const saveRes = await api.post('/api/registration/start', form);
             const { paymentID } = saveRes.data;
             if (!paymentID) { toast.error('Failed to initiate registration'); return; }
-            const payRes = await axios.post(`${backendUrl}/api/payment/initiate`, { paymentID, formData: form });
+            const payRes = await api.post('/api/payment/initiate', { paymentID, formData: form });
             const { bkashURL, paymentID: bkashID } = payRes.data;
             if (bkashURL && bkashID) {
                 sessionStorage.setItem('bkashPaymentID', bkashID);

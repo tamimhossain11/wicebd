@@ -4,6 +4,7 @@ const db = require('../db');
 const startRegistration = async (req, res) => {
   const data = req.body;
   const paymentID = uuidv4();
+  const user_id = req.user?.id || null;
 
   const {
     competitionCategory, projectSubcategory, categories, crReference,
@@ -15,16 +16,16 @@ const startRegistration = async (req, res) => {
 
   const sql = `
   INSERT INTO temp_registrations (
-    paymentID, competitionCategory, projectSubcategory, categories, crReference,
+    paymentID, user_id, competitionCategory, projectSubcategory, categories, crReference,
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
     socialMedia, infoSource, ca_code, club_code
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 const values = [
-  paymentID, competitionCategory, projectSubcategory, categories, crReference,
+  paymentID, user_id, competitionCategory, projectSubcategory, categories, crReference,
   leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
   member2 || null, institution2 || null, tshirtSize2 || null,
   member3 || null, institution3 || null, tshirtSize3 || null,
