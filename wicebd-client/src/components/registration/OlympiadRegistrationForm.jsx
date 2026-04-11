@@ -87,6 +87,7 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
 
         const checkoutData = {
             ...form,
+            competitionCategory: 'Olympiad', // always explicit — never rely on form state default
             _promoCode: promoStatus?.valid ? promoInput.trim().toUpperCase() : '',
             _promoDiscount: promoStatus?.valid ? (promoStatus.discountPercentage || 0) : 0,
         };
