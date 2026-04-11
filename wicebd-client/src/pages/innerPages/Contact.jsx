@@ -43,12 +43,12 @@ const INFO = [
     {
         icon: 'fa-phone-alt',
         title: 'Phone',
-        lines: ['+880 1XXX-XXXXXX', 'Mon – Fri, 10 AM – 6 PM'],
+        lines: ['+880 1754002201', 'Mon – Fri, 10 AM – 6 PM'],
     },
     {
         icon: 'fa-envelope',
         title: 'Email',
-        lines: ['info@wicebd.com', 'support@wicebd.com'],
+        lines: ['contact@wicebd.com', 'wicebangladeshofficial@gmail.com'],
     },
     {
         icon: 'fa-clock',
@@ -353,9 +353,9 @@ export default function Contact() {
                                     </h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                         {[
-                                            { icon: 'fa-facebook-f', label: 'Facebook', handle: '@wicebd', href: 'https://www.facebook.com/wicebd' },
-                                            { icon: 'fa-youtube',    label: 'YouTube',  handle: '@wicebd', href: 'https://www.youtube.com/@wicebd' },
-                                            { icon: 'fa-instagram',  label: 'Instagram',handle: '@wicebd', href: 'https://www.instagram.com/wicebd' },
+                                            { icon: 'fa-facebook-f', label: 'Facebook', handle: '@wicebd', href: 'https://www.facebook.com/profile.php?id=61574064543823' },
+                                            { icon: 'fa-youtube',    label: 'YouTube',  handle: '@wicebd', href: 'https://www.youtube.com/@wicebd_official' },
+                                            { icon: 'fa-instagram',  label: 'Instagram',handle: '@wicebd', href: 'https://www.instagram.com/wicebangladeshofficial?igsh=MWNlaDg4bGpxcTVpYw%3D%3D&utm_source=qr' },
                                         ].map(s => (
                                             <a key={s.label} href={s.href} target="_blank" rel="noreferrer"
                                                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14,
