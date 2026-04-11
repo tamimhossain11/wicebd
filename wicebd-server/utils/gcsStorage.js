@@ -1,5 +1,4 @@
 const { Storage } = require('@google-cloud/storage');
-const path = require('path');
 
 const BUCKET_NAME = process.env.GCS_BUCKET || 'w-test01';
 
@@ -28,7 +27,8 @@ async function uploadBuffer(buffer, destPath, contentType = 'application/octet-s
   await file.save(buffer, {
     metadata: { contentType },
     resumable: false,
-    public: true,          // makes the object publicly readable
+    // No per-object ACL — bucket uses uniform bucket-level access.
+    // Public read is granted via bucket IAM: allUsers → storage.objectViewer
   });
   return `https://storage.googleapis.com/${BUCKET_NAME}/${destPath}`;
 }

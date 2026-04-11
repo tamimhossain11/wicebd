@@ -3,3 +3,6 @@
 .env.*
 !.env.example
 node_modules/
+
+# GCP service account keys
+*.json
