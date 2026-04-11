@@ -4,9 +4,9 @@ import {
     Typography, Grid, FormHelperText, CircularProgress,
     Step, Stepper, StepLabel, Checkbox,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast as _toast } from 'react-toastify'; // kept for potential future use
 import api from '../../api/index';
 import ReferenceSearch from './ReferenceSearch';
 
@@ -89,6 +89,7 @@ const NavRow = ({ step, total, onBack, loading, lastLabel }) => (
 );
 
 export default function WallMagazineRegistrationForm({ onPromoChange }) {
+    const navigate = useNavigate();
     const [step, setStep] = useState(0);
     const [form, setForm] = useState({
         competitionCategory: 'Megazine', categories: '',
@@ -102,8 +103,9 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
         previousCompetition: '', socialMedia: '', infoSource: '',
         promo_code: '',
     });
+    const [extraMembers, setExtraMembers] = useState([]); // which extra slots are active: [4] or [4,5]
     const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [promoInput, setPromoInput] = useState('');
     const [promoStatus, setPromoStatus] = useState(null);
@@ -182,25 +184,14 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
         else handleSubmit();
     };
 
-    const handleSubmit = async () => {
-        setLoading(true);
-        try {
-            const saveRes = await api.post('/api/registration/start', form);
-            const { paymentID } = saveRes.data;
-            if (!paymentID) { toast.error('Failed to initiate registration'); return; }
-            const payRes = await api.post('/api/payment/initiate', { paymentID });
-            const { payment_url, invoice_number } = payRes.data;
-            if (payment_url && invoice_number) {
-                sessionStorage.setItem('paystationInvoice', invoice_number);
-                window.location.href = payment_url;
-            } else {
-                toast.error('Payment URL not received');
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+    const handleSubmit = () => {
+        const checkoutData = {
+            ...form,
+            _promoCode: promoStatus?.valid ? promoInput.trim().toUpperCase() : '',
+            _promoDiscount: promoStatus?.valid ? (promoStatus.discountPercentage || 0) : 0,
+        };
+        sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+        navigate('/checkout');
     };
 
     return (
@@ -369,11 +360,10 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
                             <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', mt: 4, mb: 2 }}>
                                 Additional Members — Optional
                             </Typography>
-                            {[2, 3, 4, 5].map(n => (
+                            {/* Members 2 & 3 — always visible */}
+                            {[2, 3].map(n => (
                                 <Box key={n} sx={{ mb: 2.5, p: 3, borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.025)' }}>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', mb: 2 }}>
-                                        Member {n} {n >= 4 ? <span style={{ color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>(optional)</span> : ''}
-                                    </Typography>
+                                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', mb: 2 }}>Member {n}</Typography>
                                     <Grid container spacing={2.5}>
                                         <Grid size={{ xs: 12, sm: 5 }}>
                                             <TextField fullWidth label="Name" name={`member${n}`} value={form[`member${n}`]} onChange={onChange} sx={f} size="small" />
@@ -391,6 +381,57 @@ export default function WallMagazineRegistrationForm({ onPromoChange }) {
                                         </Grid>
                                     </Grid>
                                 </Box>
+                            ))}
+
+                            {/* Members 4 & 5 — optional, +300 BDT each */}
+                            {[4, 5].map(n => (
+                                extraMembers.includes(n) ? (
+                                    <Box key={n} sx={{ mb: 2.5, p: 3, borderRadius: '12px', border: '1px solid rgba(128,0,32,0.3)', background: 'rgba(128,0,32,0.06)' }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>
+                                                Member {n} <span style={{ color: '#c0002a', fontSize: '11px' }}>+৳120</span>
+                                            </Typography>
+                                            <button type="button" onClick={() => {
+                                                setExtraMembers(p => p.filter(x => x !== n));
+                                                set(`member${n}`, ''); set(`institution${n}`, ''); set(`tshirtSize${n}`, '');
+                                                if (n === 4) { setExtraMembers([]); set('member5', ''); set('institution5', ''); set('tshirtSize5', ''); }
+                                            }} style={{
+                                                padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(255,80,80,0.35)',
+                                                background: 'rgba(255,80,80,0.08)', color: '#ff7070', fontSize: '11px',
+                                                cursor: 'pointer', fontWeight: 600,
+                                            }}>Remove</button>
+                                        </Box>
+                                        <Grid container spacing={2.5}>
+                                            <Grid size={{ xs: 12, sm: 5 }}>
+                                                <TextField fullWidth label="Name" name={`member${n}`} value={form[`member${n}`]} onChange={onChange} sx={f} size="small" />
+                                            </Grid>
+                                            <Grid size={{ xs: 12, sm: 5 }}>
+                                                <TextField fullWidth label="Institution" name={`institution${n}`} value={form[`institution${n}`]} onChange={onChange} sx={f} size="small" />
+                                            </Grid>
+                                            <Grid size={{ xs: 12, sm: 2 }}>
+                                                <FormControl fullWidth sx={f} size="small">
+                                                    <InputLabel>Size</InputLabel>
+                                                    <Select name={`tshirtSize${n}`} value={form[`tshirtSize${n}`]} onChange={onChange} label="Size" MenuProps={MP}>
+                                                        {['S','M','L','XL','XXL'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                ) : (
+                                    (n === 4 || extraMembers.includes(4)) && !extraMembers.includes(n) && (
+                                        <Box key={n} sx={{ mb: 2 }}>
+                                            <button type="button" onClick={() => setExtraMembers(p => [...p, n])} style={{
+                                                width: '100%', padding: '12px', borderRadius: '12px',
+                                                border: '1px dashed rgba(128,0,32,0.4)', background: 'transparent',
+                                                color: 'rgba(255,255,255,0.45)', fontSize: '13px', fontWeight: 600,
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                            }}>
+                                                <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Add Member {n} <span style={{ color: '#c0002a', fontSize: '12px' }}>(+৳120 per member)</span>
+                                            </button>
+                                        </Box>
+                                    )
+                                )
                             ))}
                         </Box>
                     )}

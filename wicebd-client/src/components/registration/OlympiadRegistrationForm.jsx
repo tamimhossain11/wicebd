@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Box, TextField, Typography, Grid, CircularProgress, Checkbox, FormHelperText } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
-import api from '../../api/index';
+import { useNavigate } from 'react-router-dom';
 import ReferenceSearch from './ReferenceSearch';
 
 const f = {
@@ -24,9 +23,10 @@ const f = {
 };
 
 export default function OlympiadRegistrationForm({ onPromoChange }) {
+    const navigate = useNavigate();
     const [form, setForm] = useState({ fullName: '', email: '', phone: '', address: '', institution: '', ca_code: '', club_code: '', promo_code: '' });
     const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [done, setDone] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [promoInput, setPromoInput] = useState('');
@@ -84,24 +84,13 @@ export default function OlympiadRegistrationForm({ onPromoChange }) {
         setErrors(errs);
         if (Object.keys(errs).length) return;
 
-        setLoading(true);
-        try {
-            const saveRes = await api.post('/api/olympiad/start', form);
-            const { paymentID } = saveRes.data;
-            if (!paymentID) { toast.error('Failed to initiate registration'); return; }
-            const payRes = await api.post('/api/payment/initiate', { paymentID });
-            const { payment_url, invoice_number } = payRes.data;
-            if (payment_url && invoice_number) {
-                sessionStorage.setItem('paystationInvoice', invoice_number);
-                window.location.href = payment_url;
-            } else {
-                toast.error('Payment URL not received');
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to submit. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        const checkoutData = {
+            ...form,
+            _promoCode: promoStatus?.valid ? promoInput.trim().toUpperCase() : '',
+            _promoDiscount: promoStatus?.valid ? (promoStatus.discountPercentage || 0) : 0,
+        };
+        sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+        navigate('/checkout');
     };
 
     if (done) {

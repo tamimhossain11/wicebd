@@ -31,7 +31,7 @@ const initiatePayment = async (req, res) => {
   try {
     // 1. Get temp registration data
     const [tempData] = await db.query(
-      'SELECT competitionCategory, leader, leaderPhone, leaderEmail FROM temp_registrations WHERE paymentID = ?',
+      'SELECT competitionCategory, leader, leaderPhone, leaderEmail, member4, member5 FROM temp_registrations WHERE paymentID = ?',
       [paymentID]
     );
 
@@ -41,9 +41,13 @@ const initiatePayment = async (req, res) => {
 
     const registration = tempData[0];
 
-    // 2. Determine amount based on competition category
+    // 2. Determine amount based on competition category + extra members (300 BDT each beyond member3)
     const cat = registration.competitionCategory.toLowerCase();
-    const amount = cat === 'megazine' ? 200 : cat === 'olympiad' ? 50 : 620;
+    const baseAmount = cat === 'megazine' ? 200 : cat === 'olympiad' ? 50 : 620;
+    const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
+    const extraCharge = cat === 'megazine' ? 120 : 300;
+    const amount = baseAmount + (extraMembers * extraCharge);
+    console.log(`💰 Amount: ${baseAmount} base + ${extraMembers} extra member(s) × 300 = ${amount} BDT`);
 
     // 3. Generate unique numeric invoice number
     const invoiceNumber = `${Date.now()}${Math.floor(Math.random() * 1000)}`;

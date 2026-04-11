@@ -17,6 +17,7 @@ import BlogSingle from './pages/innerPages/BlogSingle';
 import Contact from './pages/innerPages/Contact';
 import ErrorPage from './pages/innerPages/ErrorPage';
 import PaymentCallback from './pages/callback/PaymentCallback';
+import CheckoutPage from './pages/checkout/CheckoutPage';
 import ThankYou from './pages/callback/PaymentSuccess';
 import PaymentError from './pages/callback/PaymentError';
 import PaymentCancelled from './pages/callback/PaymentCancelled';
@@ -103,6 +104,7 @@ const Routers = () => {
                 <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
                 <Route path='/return-refund-policy' element={<ReturnRefundPolicy />} />
                 <Route path='/delivery-policy' element={<DeliveryPolicy />} />
+                <Route path='/checkout' element={<CheckoutPage />} />
                 <Route path='/callback' element={<PaymentCallback />}></Route>
                 <Route path='/thank-you' element={<ThankYou />}></Route>
                 <Route path="/payment-error" element={<PaymentError />} />
