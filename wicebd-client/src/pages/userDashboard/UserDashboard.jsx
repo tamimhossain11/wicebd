@@ -749,15 +749,23 @@ export default function UserDashboard() {
                 : <Grid container spacing={2}>
                     {announcements.map(ann => (
                       <Grid size={{ xs: 12, md: 6 }} key={ann.id}>
-                        <Paper sx={{ p: 3, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, height: '100%' }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                            <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14, lineHeight: 1.4, flex: 1, mr: 1 }}>{ann.title}</Typography>
-                            <Chip label={ann.target_audience} size="small" sx={{ background: `${C.primary}18`, color: C.accent, fontSize: 10, height: 20, flexShrink: 0 }} />
+                        <Paper sx={{ borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                          {ann.image_url && (
+                            <Box sx={{ height: 180, overflow: 'hidden', flexShrink: 0 }}>
+                              <img src={ann.image_url} alt={ann.title}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            </Box>
+                          )}
+                          <Box sx={{ p: 3, flex: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                              <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14, lineHeight: 1.4, flex: 1, mr: 1 }}>{ann.title}</Typography>
+                              <Chip label={ann.target_audience} size="small" sx={{ background: `${C.primary}18`, color: C.accent, fontSize: 10, height: 20, flexShrink: 0 }} />
+                            </Box>
+                            <Typography sx={{ color: C.muted, fontSize: 13, lineHeight: 1.7 }}>{ann.body}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, mt: 2 }}>
+                              {new Date(ann.created_at).toLocaleDateString('en-BD', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </Typography>
                           </Box>
-                          <Typography sx={{ color: C.muted, fontSize: 13, lineHeight: 1.7 }}>{ann.body}</Typography>
-                          <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, mt: 2 }}>
-                            {new Date(ann.created_at).toLocaleDateString('en-BD', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </Typography>
                         </Paper>
                       </Grid>
                     ))}
