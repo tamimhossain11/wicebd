@@ -176,6 +176,12 @@ router.post('/attendance/:cardUid/checkin', authenticateAdmin, async (req, res) 
 router.post('/attendance/:cardUid/lunch', authenticateAdmin, async (req, res) => {
   const { cardUid } = req.params;
   try {
+    // Olympiad participants are not eligible for lunch
+    const [[card]] = await db.query('SELECT registration_type FROM id_cards WHERE card_uid = ?', [cardUid]);
+    if (card?.registration_type === 'olympiad') {
+      return res.status(400).json({ success: false, message: 'Olympiad participants are not eligible for lunch' });
+    }
+
     const [existing] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
     if (!existing.length) return res.status(400).json({ success: false, message: 'Not checked in yet' });
     if (existing[0].lunch_claimed_at) {

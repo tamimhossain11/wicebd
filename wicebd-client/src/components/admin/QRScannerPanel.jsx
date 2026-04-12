@@ -68,6 +68,22 @@ export default function QRScannerPanel() {
     try {
       const res = await api.get(`/api/admin-manage/attendance/${encodeURIComponent(uid)}`);
       setResult(res.data);
+      // Add to session log immediately on lookup
+      const { card, attendance } = res.data;
+      if (card) {
+        setLog(prev => {
+          const idx = prev.findIndex(e => e.card_uid === card.card_uid);
+          const entry = {
+            card_uid: card.card_uid,
+            name: card.user_name,
+            type: card.registration_type,
+            checked_in_at: attendance?.checked_in_at,
+            lunch_claimed_at: attendance?.lunch_claimed_at,
+          };
+          if (idx >= 0) { const next = [...prev]; next[idx] = entry; return next; }
+          return [entry, ...prev];
+        });
+      }
     } catch (err) {
       setActionMsg(err.response?.data?.message || 'Card not found');
     } finally {
