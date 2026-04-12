@@ -161,14 +161,15 @@ const confirmPayment = async (req, res) => {
       await db.query(
         `INSERT INTO olympiad_registrations (
           registration_id, user_id, full_name, email, phone,
-          address, institution, cr_reference, ca_code, club_code, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          address, institution, cr_reference, ca_code, club_code, promo_code, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           registrationId, verified_user_id, registration.leader,
           registration.leaderEmail, registration.leaderPhone,
           registration.projectTitle,  // address stored here
           registration.institution, registration.crRefrence || '',
           registration.ca_code || null, registration.club_code || null,
+          registration.promo_code || null,
           'registered'
         ]
       );
@@ -187,8 +188,9 @@ const confirmPayment = async (req, res) => {
           member4, institution4, tshirtSize4,
           member5, institution5, tshirtSize5,
           projectTitle, projectCategory, participatedBefore,
-          previousCompetition, socialMedia, infoSource, paymentID, bkashTrxId
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          previousCompetition, socialMedia, infoSource,
+          paymentID, bkashTrxId, amount, ca_code, club_code, promo_code
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           registration.user_id || null,
           registration.competitionCategory, registration.projectSubcategory,
@@ -201,7 +203,11 @@ const confirmPayment = async (req, res) => {
           registration.member5 || null, registration.institution5 || null, registration.tshirtSize5 || null,
           registration.projectTitle, registration.projectCategory, registration.participatedBefore,
           registration.previousCompetition, registration.socialMedia,
-          registration.infoSource, invoice_number, verifiedTrxId
+          registration.infoSource, invoice_number, verifiedTrxId,
+          amount,
+          registration.ca_code || null,
+          registration.club_code || null,
+          registration.promo_code || null,
         ]
       );
 
