@@ -60,7 +60,7 @@ const CATEGORIES = [
     },
     {
         id: '04',
-        title: 'STEM Olympuad',
+        title: 'STEM Olympiad',
         subtitle: 'Choose · Submit · Sharp Mind',
         description:
             'Test your knowledge in science and technology through challenging problems and puzzles.',
