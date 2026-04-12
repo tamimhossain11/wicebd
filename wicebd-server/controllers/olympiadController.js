@@ -53,14 +53,14 @@ const startOlympiadRegistration = async (req, res) => {
         leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
         member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
         projectTitle, projectCategory, participatedBefore, previousCompetition,
-        socialMedia, infoSource, ca_code, club_code
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        socialMedia, infoSource, ca_code, club_code, promo_code
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         paymentID, verified_user_id, 'Olympiad', null, null, crReference,
         fullName, institution, phone, phone, email, null,
         null, null, null, null, null, null,
         address, null, null, null,
-        null, null, ca_code || null, club_code || null,
+        null, null, ca_code || null, club_code || null, promo_code || null,
       ]
     );
     console.log('✅ Olympiad temp registration saved. paymentID:', paymentID);

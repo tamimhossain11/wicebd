@@ -23,7 +23,7 @@ const startRegistration = async (req, res) => {
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     member4, institution4, tshirtSize4, member5, institution5, tshirtSize5,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
-    socialMedia, infoSource, ca_code, club_code
+    socialMedia, infoSource, ca_code, club_code, promo_code
   } = data;
 
   const sql = `
@@ -33,8 +33,8 @@ const startRegistration = async (req, res) => {
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     member4, institution4, tshirtSize4, member5, institution5, tshirtSize5,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
-    socialMedia, infoSource, ca_code, club_code
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    socialMedia, infoSource, ca_code, club_code, promo_code
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 const n = v => (v === undefined ? null : v || null);
@@ -47,7 +47,7 @@ const values = [
   n(member4), n(institution4), n(tshirtSize4),
   n(member5), n(institution5), n(tshirtSize5),
   n(projectTitle), n(projectCategory), n(participatedBefore), n(previousCompetition),
-  n(socialMedia), n(infoSource), n(ca_code), n(club_code)
+  n(socialMedia), n(infoSource), n(ca_code), n(club_code), n(promo_code)
 ];
 
 

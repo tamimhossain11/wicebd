@@ -31,7 +31,7 @@ const initiatePayment = async (req, res) => {
   try {
     // 1. Get temp registration data
     const [tempData] = await db.query(
-      'SELECT competitionCategory, leader, leaderPhone, leaderEmail, member4, member5 FROM temp_registrations WHERE paymentID = ?',
+      'SELECT competitionCategory, leader, leaderPhone, leaderEmail, member4, member5, promo_code FROM temp_registrations WHERE paymentID = ?',
       [paymentID]
     );
 
@@ -46,8 +46,24 @@ const initiatePayment = async (req, res) => {
     const baseAmount = cat === 'megazine' ? 399 : cat === 'olympiad' ? 50 : 999;
     const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
     const extraCharge = cat === 'megazine' ? 120 : 300;
-    const amount = baseAmount + (extraMembers * extraCharge);
-    console.log(`💰 Amount: ${baseAmount} base + ${extraMembers} extra member(s) × 300 = ${amount} BDT`);
+    let amount = baseAmount + (extraMembers * extraCharge);
+    console.log(`💰 Amount: ${baseAmount} base + ${extraMembers} extra member(s) × ${extraCharge} = ${amount} BDT`);
+
+    // 3. Apply promo code discount if present
+    if (registration.promo_code) {
+      const [promoRows] = await db.query(
+        `SELECT discount_percentage FROM promo_codes
+         WHERE code = ? AND is_active = 1
+           AND (competition_type = ? OR competition_type = 'all')
+         LIMIT 1`,
+        [registration.promo_code.toUpperCase().trim(), registration.competitionCategory]
+      );
+      if (promoRows.length > 0) {
+        const discount = promoRows[0].discount_percentage;
+        amount = Math.round(amount * (1 - discount / 100));
+        console.log(`🎟️  Promo code ${registration.promo_code} applied: ${discount}% off → ${amount} BDT`);
+      }
+    }
 
     // 3. Generate unique numeric invoice number
     const invoiceNumber = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
