@@ -5,7 +5,7 @@ import {
   Chip, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, FormControl, InputLabel,
   Select, MenuItem, Switch, FormControlLabel, CircularProgress,
-  Alert, Tooltip, Avatar, Drawer, ListItem,
+  Alert, Tooltip, Avatar, Drawer, ListItem, InputAdornment,
   ListItemButton, ListItemIcon, ListItemText, Divider,
   useMediaQuery, useTheme, LinearProgress,
 } from '@mui/material';
@@ -23,7 +23,7 @@ import {
   EmojiPeople, Group, UploadFile, Dashboard,
   ArrowUpward, ArrowDownward,
   Inbox, Campaign, Notifications,
-  QrCodeScanner, ManageAccounts, LockReset,
+  QrCodeScanner, ManageAccounts, LockReset, Visibility, VisibilityOff,
 } from '@mui/icons-material';
 import OlympiadExamTab from '../../components/admin/OlympiadExamTab';
 import QRScannerPanel from '../../components/admin/QRScannerPanel';
@@ -230,11 +230,13 @@ export default function AdminDashboard() {
   const [adminUserDialog, setAdminUserDialog] = useState(false);
   const [adminUserForm, setAdminUserForm] = useState({ username: '', email: '', password: '', role: 'data_extractor' });
   const [adminUserLoading, setAdminUserLoading] = useState(false);
+  const [showAdminPwd, setShowAdminPwd]         = useState(false);
 
   // Reset password dialog
   const [resetPwdDialog, setResetPwdDialog] = useState({ open: false, type: '', id: null, name: '' });
   const [resetPwdValue, setResetPwdValue]   = useState('');
   const [resetPwdLoading, setResetPwdLoading] = useState(false);
+  const [showResetPwd, setShowResetPwd]       = useState(false);
 
   // Advisor image uploading
   const [advisorImgUploading, setAdvisorImgUploading] = useState(false);
@@ -671,6 +673,14 @@ export default function AdminDashboard() {
                 <Refresh sx={{ fontSize: 20 }} />
               </IconButton>
             </Tooltip>
+            {isMobile && (
+              <Tooltip title="Sign Out">
+                <IconButton onClick={() => { logout(); navigate('/sign-in'); }}
+                  sx={{ color: RED, '&:hover': { background: `${RED}18` } }}>
+                  <Logout sx={{ fontSize: 20 }} />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         </Box>
 
@@ -1030,7 +1040,7 @@ export default function AdminDashboard() {
               </Grid>
 
               {/* Add Admin Dialog */}
-              <Dialog open={adminUserDialog} onClose={() => setAdminUserDialog(false)} maxWidth="xs" fullWidth
+              <Dialog open={adminUserDialog} onClose={() => { setAdminUserDialog(false); setShowAdminPwd(false); }} maxWidth="xs" fullWidth
                 slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
                 <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><ManageAccounts sx={{ color: RED }} />New Admin Account</Box>
@@ -1038,7 +1048,16 @@ export default function AdminDashboard() {
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
                   <TextField label="Username *" fullWidth value={adminUserForm.username} onChange={e => setAdminUserForm(p => ({ ...p, username: e.target.value.toLowerCase().replace(/\s/g,'') }))} sx={inputSx} />
                   <TextField label="Email (optional)" fullWidth value={adminUserForm.email} onChange={e => setAdminUserForm(p => ({ ...p, email: e.target.value }))} sx={inputSx} />
-                  <TextField label="Password *" type="password" fullWidth value={adminUserForm.password} onChange={e => setAdminUserForm(p => ({ ...p, password: e.target.value }))} sx={inputSx} />
+                  <TextField label="Password *" type={showAdminPwd ? 'text' : 'password'} fullWidth value={adminUserForm.password}
+                    onChange={e => setAdminUserForm(p => ({ ...p, password: e.target.value }))}
+                    slotProps={{ input: { endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton size="small" onClick={() => setShowAdminPwd(v => !v)} sx={{ color: 'rgba(255,255,255,0.45)' }}>
+                          {showAdminPwd ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                        </IconButton>
+                      </InputAdornment>
+                    ) } }}
+                    sx={inputSx} />
                   <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
                     <InputLabel>Role</InputLabel>
                     <Select value={adminUserForm.role} label="Role" onChange={e => setAdminUserForm(p => ({ ...p, role: e.target.value }))}
@@ -1076,7 +1095,7 @@ export default function AdminDashboard() {
           )}
 
       {/* ══ Reset Password Dialog (shared for admin + portal users) ══ */}
-      <Dialog open={resetPwdDialog.open} onClose={() => setResetPwdDialog({ open: false, type: '', id: null, name: '' })} maxWidth="xs" fullWidth
+      <Dialog open={resetPwdDialog.open} onClose={() => { setResetPwdDialog({ open: false, type: '', id: null, name: '' }); setShowResetPwd(false); }} maxWidth="xs" fullWidth
         slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
         <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -1089,9 +1108,16 @@ export default function AdminDashboard() {
             Enter a new password for this {resetPwdDialog.type === 'admin' ? 'admin account' : 'user account'}. Minimum 6 characters.
           </Typography>
           <TextField
-            label="New Password" type="password" fullWidth
+            label="New Password" type={showResetPwd ? 'text' : 'password'} fullWidth
             value={resetPwdValue} onChange={e => setResetPwdValue(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleResetPassword(); }}
+            slotProps={{ input: { endAdornment: (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setShowResetPwd(v => !v)} sx={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {showResetPwd ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                </IconButton>
+              </InputAdornment>
+            ) } }}
             sx={inputSx}
           />
         </DialogContent>
