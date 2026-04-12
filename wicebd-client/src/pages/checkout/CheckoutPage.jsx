@@ -54,7 +54,7 @@ export default function CheckoutPage() {
 
     const promoDiscount = formData._promoDiscount || 0;
     const promoCode = formData._promoCode || '';
-    const promoSaving = promoDiscount > 0 ? Math.round(baseFee * promoDiscount / 100) : 0;
+    const promoSaving = promoDiscount > 0 ? Math.round((baseFee + extraTotal) * promoDiscount / 100) : 0;
 
     const total = baseFee + extraTotal - promoSaving;
 
