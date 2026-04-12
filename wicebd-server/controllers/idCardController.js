@@ -21,7 +21,7 @@ const getMyCards = async (req, res) => {
       [userId]
     );
     const [cards] = await db.query(
-      'SELECT registration_type, registration_id, card_uid, generated_at FROM id_cards WHERE user_id = ?',
+      'SELECT registration_type, registration_id, card_uid, qr_data, generated_at FROM id_cards WHERE user_id = ?',
       [userId]
     );
 
