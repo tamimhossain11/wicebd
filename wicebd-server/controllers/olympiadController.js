@@ -236,7 +236,7 @@ const getOlympiadParticipants = async (req, res) => {
   try {
     const [results] = await db.query(`
       SELECT id, registration_id, full_name, email, phone,
-             institution, address, cr_reference,
+             institution, class_grade, district, address, cr_reference,
              ca_code, club_code, promo_code, status, created_at
       FROM olympiad_registrations
       ORDER BY created_at DESC
