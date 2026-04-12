@@ -216,4 +216,132 @@ router.get('/attendance', authenticateAdmin, async (req, res) => {
   }
 });
 
+/* ══ STUCK PAYMENT RECOVERY ═════════════════════════════════════════
+   POST /api/admin-manage/recover-stuck-payments
+   Finds temp_registrations with a verified PayStation payment but no
+   final registration. Inserts missing records and cleans up temp data.
+   super_admin only. Pass { commit: true } to apply; default is dry-run.
+*/
+router.post('/recover-stuck-payments', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const { commit = false } = req.body;
+  const { v4: uuidv4 } = require('uuid');
+  const { getTransactionStatus } = require('../utils/paystation');
+
+  try {
+    // Find stuck: have invoice number, but no final registration
+    const [stuck] = await db.query(`
+      SELECT t.*
+      FROM temp_registrations t
+      WHERE t.bkash_payment_id IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM registrations r WHERE r.paymentID = t.bkash_payment_id
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM olympiad_registrations o
+          WHERE o.email = t.leaderEmail
+            AND t.competitionCategory = 'Olympiad'
+        )
+    `);
+
+    if (stuck.length === 0) {
+      return res.json({ success: true, message: 'No stuck registrations found.', results: [] });
+    }
+
+    const results = [];
+
+    for (const reg of stuck) {
+      const invoice = reg.bkash_payment_id;
+      const cat = (reg.competitionCategory || '').toLowerCase();
+      const entry = { invoice, category: reg.competitionCategory, leader: reg.leader, email: reg.leaderEmail, action: null };
+
+      // Verify with PayStation (works from Cloud Run)
+      let statusResult;
+      try { statusResult = await getTransactionStatus(invoice); } catch (e) {
+        entry.action = `paystation_error: ${e.message}`;
+        results.push(entry);
+        continue;
+      }
+
+      const trxStatus = (statusResult?.data?.trx_status || '').toLowerCase();
+      const verified  = statusResult?.status_code === '200' &&
+                        (trxStatus === 'successful' || trxStatus === 'success');
+
+      if (!verified) {
+        entry.action = `not_verified (paystation: ${trxStatus || statusResult?.message})`;
+        results.push(entry);
+        continue;
+      }
+
+      const verifiedTrxId = statusResult.data.trx_id;
+      const amount = parseFloat(statusResult.data.request_amount || 0);
+      entry.trxId = verifiedTrxId;
+      entry.amount = amount;
+
+      if (!commit) {
+        entry.action = `would_insert (trxId=${verifiedTrxId}, amount=${amount})`;
+        results.push(entry);
+        continue;
+      }
+
+      try {
+        if (cat === 'olympiad') {
+          const [existOly] = await db.query('SELECT id FROM olympiad_registrations WHERE email = ?', [reg.leaderEmail]);
+          if (existOly.length > 0) { entry.action = 'already_exists'; results.push(entry); continue; }
+
+          let verified_user_id = null;
+          if (reg.user_id) {
+            const [ur] = await db.query('SELECT id FROM users WHERE id = ?', [reg.user_id]);
+            if (ur.length > 0) verified_user_id = reg.user_id;
+          }
+          const registrationId = `OLY-${uuidv4().substring(0, 8).toUpperCase()}`;
+          await db.query(
+            `INSERT INTO olympiad_registrations
+              (registration_id, user_id, full_name, email, phone, address, institution, cr_reference, ca_code, club_code, promo_code, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [registrationId, verified_user_id, reg.leader, reg.leaderEmail, reg.leaderPhone,
+             reg.projectTitle, reg.institution, reg.crReference || '',
+             reg.ca_code || null, reg.club_code || null, reg.promo_code || null, 'registered']
+          );
+          entry.registrationId = registrationId;
+        } else {
+          const [existReg] = await db.query('SELECT id FROM registrations WHERE paymentID = ?', [invoice]);
+          if (existReg.length > 0) { entry.action = 'already_exists'; results.push(entry); continue; }
+
+          await db.query(
+            `INSERT INTO registrations
+              (user_id, paymentID, bkashTrxId, amount, competitionCategory, projectSubcategory,
+               categories, crReference, leader, institution, leaderPhone, leaderWhatsApp,
+               leaderEmail, tshirtSizeLeader,
+               member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
+               member4, institution4, tshirtSize4, member5, institution5, tshirtSize5,
+               projectTitle, projectCategory, participatedBefore, previousCompetition,
+               socialMedia, infoSource, ca_code, club_code, promo_code)
+             VALUES (?,?,?,?,?,?, ?,?,?,?,?,?, ?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?)`,
+            [reg.user_id || null, invoice, verifiedTrxId, amount, reg.competitionCategory, reg.projectSubcategory,
+             reg.categories, reg.crReference, reg.leader, reg.institution, reg.leaderPhone, reg.leaderWhatsApp,
+             reg.leaderEmail, reg.tshirtSizeLeader,
+             reg.member2 || null, reg.institution2 || null, reg.tshirtSize2 || null,
+             reg.member3 || null, reg.institution3 || null, reg.tshirtSize3 || null,
+             reg.member4 || null, reg.institution4 || null, reg.tshirtSize4 || null,
+             reg.member5 || null, reg.institution5 || null, reg.tshirtSize5 || null,
+             reg.projectTitle, reg.projectCategory, reg.participatedBefore, reg.previousCompetition,
+             reg.socialMedia, reg.infoSource, reg.ca_code || null, reg.club_code || null, reg.promo_code || null]
+          );
+        }
+
+        await db.query('DELETE FROM temp_registrations WHERE bkash_payment_id = ?', [invoice]);
+        entry.action = 'inserted_and_cleaned';
+      } catch (insertErr) {
+        entry.action = `insert_error: ${insertErr.message}`;
+      }
+
+      results.push(entry);
+    }
+
+    res.json({ success: true, commit, total_stuck: stuck.length, results });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
