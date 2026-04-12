@@ -32,7 +32,7 @@ router.post('/admins', authenticateAdmin, requireRole('super_admin'), async (req
   try {
     const hash = await bcrypt.hash(password, 10);
     await db.query(
-      'INSERT INTO admins (username, email, password, role) VALUES (?, ?, ?, ?)',
+      'INSERT INTO admins (username, email, password, role, is_active) VALUES (?, ?, ?, ?, 1)',
       [username.trim().toLowerCase(), email || null, hash, role]
     );
     res.json({ success: true, message: 'Admin created' });

@@ -314,8 +314,9 @@ const getMyRegistrations = async (req, res) => {
 };
 
 // ─── Unified Login (users + admins) ───────────────────────────────────────────
-// Checks users table first (by email), then admins table (by username).
-// Returns role: 'user' | 'admin' so the frontend can redirect accordingly.
+// Checks admins table FIRST (by username), then users table (by email).
+// Admin check must come first so that an admin whose username is an email address
+// is not accidentally matched against a portal user with the same email.
 const unifiedLogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -324,7 +325,38 @@ const unifiedLogin = async (req, res) => {
   }
 
   try {
-    // 1. Try user login by email
+    // 1. Try admin login first (by username)
+    const [adminRows] = await db.query(
+      'SELECT id, username, password, role, is_active FROM admins WHERE username = ?',
+      [email.trim().toLowerCase()]
+    );
+
+    if (adminRows.length > 0) {
+      const admin = adminRows[0];
+      const isMatch = await bcrypt.compare(password, admin.password);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+
+      if (!admin.is_active) {
+        return res.status(403).json({ success: false, message: 'Account is disabled. Please contact a super admin.' });
+      }
+
+      const token = jwt.sign(
+        { id: admin.id, username: admin.username, role: 'admin', adminRole: admin.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '8h' }
+      );
+
+      return res.json({
+        success: true,
+        role: 'admin',
+        token,
+        user: { id: admin.id, name: admin.username, email: admin.username }
+      });
+    }
+
+    // 2. Try portal user login (by email)
     const [userRows] = await db.query('SELECT * FROM users WHERE email = ?', [email.toLowerCase()]);
 
     if (userRows.length > 0) {
@@ -352,37 +384,6 @@ const unifiedLogin = async (req, res) => {
         role: 'user',
         token,
         user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar }
-      });
-    }
-
-    // 2. Try admin login by username (email field used as username for admins)
-    const [adminRows] = await db.query(
-      'SELECT id, username, password, role, is_active FROM admins WHERE username = ?',
-      [email.trim().toLowerCase()]
-    );
-
-    if (adminRows.length > 0) {
-      const admin = adminRows[0];
-      const isMatch = await bcrypt.compare(password, admin.password);
-      if (!isMatch) {
-        return res.status(401).json({ success: false, message: 'Invalid credentials' });
-      }
-
-      if (!admin.is_active) {
-        return res.status(403).json({ success: false, message: 'Account is disabled' });
-      }
-
-      const token = jwt.sign(
-        { id: admin.id, username: admin.username, role: 'admin', adminRole: admin.role },
-        process.env.JWT_SECRET,
-        { expiresIn: '8h' }
-      );
-
-      return res.json({
-        success: true,
-        role: 'admin',
-        token,
-        user: { id: admin.id, name: admin.username, email: admin.username }
       });
     }
 
