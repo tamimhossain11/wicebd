@@ -191,7 +191,7 @@ const confirmPayment = async (req, res) => {
         ]
       );
 
-      sendOlympiadConfirmationEmail(registration, { trxID: verifiedTrxId, invoiceNumber: invoice_number, registrationId });
+      sendOlympiadConfirmationEmail(registration, { trxID: verifiedTrxId, invoiceNumber: invoice_number, registrationId, amount });
     } else {
       await db.query(
         `INSERT INTO registrations (
@@ -228,7 +228,7 @@ const confirmPayment = async (req, res) => {
         ]
       );
 
-      sendConfirmationEmail(registration, { trxID: verifiedTrxId, invoiceNumber: invoice_number });
+      sendConfirmationEmail(registration, { trxID: verifiedTrxId, invoiceNumber: invoice_number, amount });
     }
 
     // 6. Cleanup temp data (fire-and-forget)
@@ -337,10 +337,12 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
     const cat = (registration.competitionCategory || '').toLowerCase();
     const isWallMag = cat === 'megazine';
     const categoryLabel = isWallMag ? 'Wall Magazine' : 'Project';
-    const baseAmount = isWallMag ? 399 : 999;
-    const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
-    const extraCharge = isWallMag ? 120 : 300;
-    const totalAmount = baseAmount + (extraMembers * extraCharge);
+    const totalAmount = paymentDetails.amount ?? (() => {
+      const base = isWallMag ? 399 : 999;
+      const extraCharge = isWallMag ? 120 : 300;
+      const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
+      return base + extraMembers * extraCharge;
+    })();
 
     const members = [
       registration.leader     ? memberRow(registration.leader,  'Leader') : '',
@@ -448,7 +450,7 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
       <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
         ${infoRow('Invoice Number', paymentDetails.invoiceNumber)}
         ${infoRow('Transaction ID', paymentDetails.trxID)}
-        ${infoRow('Amount Paid', '৳50 BDT')}
+        ${infoRow('Amount Paid', `৳${(paymentDetails.amount ?? 50).toLocaleString()} BDT`)}
         ${infoRow('Payment Method', 'bKash via PayStation')}
         ${infoRow('Status', '&#10003; Completed', true)}
       </table>
@@ -486,7 +488,7 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
       to: registration.leaderEmail,
       subject: `Olympiad Registration Confirmed — 8th WICE Bangladesh · ${paymentDetails.registrationId}`,
       html: emailBase(body),
-      text: `8th WICE Bangladesh — Science Olympiad Registration Confirmed\n\nDear ${registration.leader},\n\nYour Olympiad registration is confirmed.\n\nRegistration ID: ${paymentDetails.registrationId}\nInvoice: ${paymentDetails.invoiceNumber}\nTransaction ID: ${paymentDetails.trxID}\nAmount: ৳50 BDT\nStatus: Completed\n\nInstitution: ${registration.institution}\n\nFor questions: contact@wicebd.com\nwww.wicebd.com`,
+      text: `8th WICE Bangladesh — Science Olympiad Registration Confirmed\n\nDear ${registration.leader},\n\nYour Olympiad registration is confirmed.\n\nRegistration ID: ${paymentDetails.registrationId}\nInvoice: ${paymentDetails.invoiceNumber}\nTransaction ID: ${paymentDetails.trxID}\nAmount: ৳${(paymentDetails.amount ?? 50).toLocaleString()} BDT\nStatus: Completed\n\nInstitution: ${registration.institution}\n\nFor questions: contact@wicebd.com\nwww.wicebd.com`,
     });
     console.log(`✅ Olympiad confirmation email sent to ${registration.leaderEmail}`);
   } catch (error) {

@@ -226,6 +226,22 @@ const FooterV2 = () => (
                 </div>
             </div>
 
+            {/* Payment methods banner */}
+            <div style={{
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+                padding: '28px 0',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+            }}>
+                <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.25)' }}>
+                    Secure Payment Via
+                </span>
+                <img
+                    src="/images/payment-supported.png"
+                    alt="Supported payment methods"
+                    style={{ maxWidth: 420, width: '100%', objectFit: 'contain', opacity: 0.85 }}
+                />
+            </div>
+
             {/* Bottom bar */}
             <div className="wice-footer-bottom">
                 <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, margin: 0 }}>
