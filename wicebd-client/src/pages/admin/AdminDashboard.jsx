@@ -24,6 +24,7 @@ import {
   ArrowUpward, ArrowDownward,
   Inbox, Campaign, Notifications,
   QrCodeScanner, ManageAccounts, LockReset, Visibility, VisibilityOff,
+  Search, Clear,
 } from '@mui/icons-material';
 import OlympiadExamTab from '../../components/admin/OlympiadExamTab';
 import QRScannerPanel from '../../components/admin/QRScannerPanel';
@@ -185,6 +186,7 @@ export default function AdminDashboard() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [activeNav, setActiveNav]     = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [analytics, setAnalytics]     = useState(null);
   const [participants, setParticipants] = useState([]);
@@ -521,6 +523,16 @@ export default function AdminDashboard() {
   const projects     = participants.filter(p => p.competitionCategory !== 'Megazine');
   const wallMagazine = participants.filter(p => p.competitionCategory === 'Megazine');
 
+  /* ── Search filter ── */
+  const activeRows = activeNav === 1 ? projects : activeNav === 2 ? olympiad : activeNav === 3 ? wallMagazine : users;
+  const filteredRows = searchQuery.trim()
+    ? activeRows.filter(row =>
+        Object.values(row).some(val =>
+          val != null && String(val).toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      )
+    : activeRows;
+
   /* ── Chart data ── */
   const buildChartData = () => {
     if (!analytics?.charts) return [];
@@ -593,7 +605,7 @@ export default function AdminDashboard() {
                   return (
                     <ListItem key={item.index} disablePadding sx={{ mb: 0.3 }}>
                       <ListItemButton
-                        onClick={() => { setActiveNav(item.index); if (isMobile) setMobileOpen(false); }}
+                        onClick={() => { setActiveNav(item.index); setSearchQuery(''); if (isMobile) setMobileOpen(false); }}
                         sx={{
                           borderRadius: 2, py: 1, px: 1.5, minHeight: 40,
                           background: active ? `linear-gradient(135deg, ${RED}22, ${ACCENT}11)` : 'transparent',
@@ -861,25 +873,78 @@ export default function AdminDashboard() {
           {/* ══════════════ DATA TABLES ══════════════ */}
           {[1, 2, 3, 4].includes(activeNav) && (
             <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5, gap: 1 }}>
+              {/* ── Search & Actions bar ── */}
+              <Box sx={{ display: 'flex', gap: 1.5, mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Search field */}
+                <Box sx={{ flex: 1, minWidth: 220, position: 'relative' }}>
+                  <Box sx={{
+                    display: 'flex', alignItems: 'center', gap: 1,
+                    background: '#0e0e1c',
+                    border: `1.5px solid ${searchQuery ? RED : BORDER}`,
+                    borderRadius: 2.5,
+                    px: 1.5, py: 0.8,
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                    boxShadow: searchQuery ? `0 0 0 3px ${RED}18` : 'none',
+                    '&:focus-within': {
+                      borderColor: RED,
+                      boxShadow: `0 0 0 3px ${RED}18`,
+                    },
+                  }}>
+                    <Search sx={{ color: searchQuery ? RED : 'rgba(255,255,255,0.3)', fontSize: 20, flexShrink: 0 }} />
+                    <input
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder={`Search ${activeNav === 1 ? 'project' : activeNav === 2 ? 'olympiad' : activeNav === 3 ? 'wall magazine' : 'users'} registrations…`}
+                      style={{
+                        flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                        color: '#fff', fontSize: 14, fontFamily: 'inherit',
+                      }}
+                    />
+                    {searchQuery && (
+                      <Box
+                        onClick={() => setSearchQuery('')}
+                        sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', '&:hover': { color: '#fff' } }}
+                      >
+                        <Clear sx={{ fontSize: 17 }} />
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+
+                {/* Result count badge */}
+                <Box sx={{
+                  display: 'flex', alignItems: 'center', gap: 0.8,
+                  px: 1.5, py: 0.8, borderRadius: 2,
+                  background: searchQuery ? `${ACCENT}15` : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${searchQuery ? `${ACCENT}40` : BORDER}`,
+                  whiteSpace: 'nowrap',
+                }}>
+                  <Typography sx={{ color: searchQuery ? ACCENT : 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700 }}>
+                    {filteredRows.length}
+                  </Typography>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
+                    {searchQuery ? `of ${activeRows.length}` : 'records'}
+                  </Typography>
+                </Box>
+
+                {/* Export button */}
                 {(activeNav === 1 || activeNav === 2) && (
                   <Button startIcon={<FileDownload />}
                     onClick={() => handleExport(activeNav === 1 ? 'project' : 'olympiad')}
                     variant="outlined" size="small"
-                    sx={{ color: RED, borderColor: `${RED}50`, textTransform: 'none', borderRadius: 2, '&:hover': { borderColor: RED, background: `${RED}10` } }}>
+                    sx={{ color: RED, borderColor: `${RED}50`, textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: RED, background: `${RED}10` } }}>
                     Export CSV
                   </Button>
                 )}
               </Box>
+
               <Paper sx={{ borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, height: '74vh', overflow: 'hidden' }}>
                 <DataGrid
-                  rows={activeNav === 1 ? projects : activeNav === 2 ? olympiad : activeNav === 3 ? wallMagazine : users}
+                  rows={filteredRows}
                   columns={activeNav === 1 ? projectCols : activeNav === 2 ? olympiadCols : activeNav === 3 ? wallMagazineCols : userCols}
                   pageSizeOptions={[10, 25, 50]}
                   initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
                   loading={loading}
-                  slots={{ toolbar: GridToolbar }}
-                  slotProps={{ toolbar: { showQuickFilter: true, quickFilterProps: { debounceMs: 400 } } }}
                   sx={dataGridSx}
                 />
               </Paper>
