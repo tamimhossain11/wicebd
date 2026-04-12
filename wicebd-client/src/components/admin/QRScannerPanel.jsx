@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   Box, Typography, Paper, Button, Chip, CircularProgress,
   Divider, Avatar, Table, TableBody, TableCell,
@@ -42,7 +42,20 @@ export default function QRScannerPanel() {
   const [result, setResult]               = useState(null);   // { card, attendance }
   const [loading, setLoading]             = useState(false);
   const [actionMsg, setActionMsg]         = useState('');
-  const [log, setLog]                     = useState([]);     // persistent scan log
+  const [allAttendance, setAllAttendance] = useState([]);
+  const [logLoading, setLogLoading]       = useState(true);
+
+  /* ── Fetch all attendance records from server ── */
+  const fetchAll = useCallback(async () => {
+    setLogLoading(true);
+    try {
+      const res = await api.get('/api/admin-manage/attendance');
+      setAllAttendance(res.data.attendance || []);
+    } catch { /* silently ignore */ }
+    finally { setLogLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   /* ── Start / stop camera ── */
   const stopScanner = () => setScannerActive(false);
@@ -68,47 +81,11 @@ export default function QRScannerPanel() {
     try {
       const res = await api.get(`/api/admin-manage/attendance/${encodeURIComponent(uid)}`);
       setResult(res.data);
-      // Add to session log immediately on lookup
-      const { card, attendance } = res.data;
-      if (card) {
-        setLog(prev => {
-          const idx = prev.findIndex(e => e.card_uid === card.card_uid);
-          const entry = {
-            card_uid: card.card_uid,
-            name: card.user_name,
-            type: card.registration_type,
-            checked_in_at: attendance?.checked_in_at,
-            lunch_claimed_at: attendance?.lunch_claimed_at,
-          };
-          if (idx >= 0) { const next = [...prev]; next[idx] = entry; return next; }
-          return [entry, ...prev];
-        });
-      }
     } catch (err) {
       setActionMsg(err.response?.data?.message || 'Card not found');
     } finally {
       setLoading(false);
     }
-  };
-
-  /* ── Update log entry after action ── */
-  const updateLog = (att, card) => {
-    setLog(prev => {
-      const idx = prev.findIndex(e => e.card_uid === card.card_uid);
-      const entry = {
-        card_uid: card.card_uid,
-        name: card.user_name,
-        type: card.registration_type,
-        checked_in_at: att?.checked_in_at,
-        lunch_claimed_at: att?.lunch_claimed_at,
-      };
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = entry;
-        return next;
-      }
-      return [entry, ...prev];
-    });
   };
 
   /* ── Check-in ── */
@@ -120,7 +97,7 @@ export default function QRScannerPanel() {
       const updated = { ...result, attendance: res.data.attendance };
       setResult(updated);
       setActionMsg(res.data.already ? 'Already checked in.' : '✅ Checked in successfully!');
-      updateLog(res.data.attendance, result.card);
+      fetchAll(); // refresh server log
     } catch (err) {
       setActionMsg(err.response?.data?.message || 'Check-in failed');
     } finally { setLoading(false); }
@@ -135,7 +112,7 @@ export default function QRScannerPanel() {
       const updated = { ...result, attendance: res.data.attendance };
       setResult(updated);
       setActionMsg(res.data.already ? 'Lunch already claimed.' : '🍱 Lunch marked!');
-      updateLog(res.data.attendance, result.card);
+      fetchAll(); // refresh server log
     } catch (err) {
       setActionMsg(err.response?.data?.message || 'Failed to mark lunch');
     } finally { setLoading(false); }
@@ -339,23 +316,43 @@ export default function QRScannerPanel() {
         </Box>
       </Box>
 
-      {/* ── Scan log ── */}
-      {log.length > 0 && (
-        <Paper sx={{ mt: 4, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
-          <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* ── Attendance Log (server-fetched, persists across sessions) ── */}
+      <Paper sx={{ mt: 4, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+        <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14 }}>
-              Session Log — {log.length} participant{log.length !== 1 ? 's' : ''}
+              Attendance Log
             </Typography>
-            <Button size="small" onClick={() => setLog([])}
-              sx={{ color: 'rgba(255,255,255,0.3)', textTransform: 'none', fontSize: 11 }}>
-              Clear
-            </Button>
+            {!logLoading && (
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Chip label={`${allAttendance.length} checked in`} size="small"
+                  sx={{ background: `${C.green}18`, color: C.green, fontSize: 11, fontWeight: 700 }} />
+                <Chip label={`${allAttendance.filter(e => e.lunch_claimed_at && e.registration_type !== 'olympiad').length} meals`} size="small"
+                  sx={{ background: `${C.amber}18`, color: C.amber, fontSize: 11, fontWeight: 700 }} />
+              </Box>
+            )}
           </Box>
+          <Button size="small" startIcon={logLoading ? <CircularProgress size={12} sx={{ color: C.cyan }} /> : <Refresh sx={{ fontSize: 14 }} />}
+            onClick={fetchAll} disabled={logLoading}
+            sx={{ color: C.cyan, textTransform: 'none', fontSize: 12, border: `1px solid ${C.cyan}30`, borderRadius: 2, px: 1.5 }}>
+            Refresh
+          </Button>
+        </Box>
+
+        {logLoading ? (
+          <Box sx={{ py: 5, textAlign: 'center' }}>
+            <CircularProgress size={28} sx={{ color: C.red }} />
+          </Box>
+        ) : allAttendance.length === 0 ? (
+          <Box sx={{ py: 6, textAlign: 'center' }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>No check-ins yet.</Typography>
+          </Box>
+        ) : (
           <TableContainer>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {['Name', 'Type', 'Card UID', 'Check-in', 'Lunch'].map(h => (
+                  {['Name', 'Type', 'Card UID', 'Check-in Time', 'Meal'].map(h => (
                     <TableCell key={h} sx={{ color: 'rgba(255,255,255,0.4)', borderColor: C.border, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       {h}
                     </TableCell>
@@ -363,30 +360,31 @@ export default function QRScannerPanel() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {log.map(entry => (
+                {allAttendance.map(entry => (
                   <TableRow key={entry.card_uid} sx={{ '&:hover': { background: 'rgba(255,255,255,0.03)' } }}>
-                    <TableCell sx={{ color: '#fff', borderColor: C.border, fontSize: 13, fontWeight: 600 }}>{entry.name}</TableCell>
+                    <TableCell sx={{ color: '#fff', borderColor: C.border, fontSize: 13, fontWeight: 600 }}>{entry.participant_name}</TableCell>
                     <TableCell sx={{ borderColor: C.border }}>
-                      <Chip label={ROLE_LABELS[entry.type] || entry.type} size="small"
-                        sx={{ background: `${ROLE_COLORS[entry.type] || C.red}20`, color: ROLE_COLORS[entry.type] || C.red, fontSize: 10, fontWeight: 700 }} />
+                      <Chip label={ROLE_LABELS[entry.registration_type] || entry.registration_type} size="small"
+                        sx={{ background: `${ROLE_COLORS[entry.registration_type] || C.red}20`, color: ROLE_COLORS[entry.registration_type] || C.red, fontSize: 10, fontWeight: 700 }} />
                     </TableCell>
                     <TableCell sx={{ color: 'rgba(255,255,255,0.5)', borderColor: C.border, fontSize: 11, fontFamily: 'monospace' }}>{entry.card_uid}</TableCell>
                     <TableCell sx={{ borderColor: C.border }}>
                       {entry.checked_in_at
                         ? <Chip icon={<CheckCircle sx={{ fontSize: '11px !important', color: `${C.green} !important` }} />}
-                            label={new Date(entry.checked_in_at).toLocaleTimeString()} size="small"
+                            label={new Date(entry.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} size="small"
                             sx={{ background: `${C.green}18`, color: C.green, fontSize: 10 }} />
                         : <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>—</Typography>
                       }
                     </TableCell>
                     <TableCell sx={{ borderColor: C.border }}>
-                      {entry.type === 'olympiad'
+                      {entry.registration_type === 'olympiad'
                         ? <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>N/A</Typography>
                         : entry.lunch_claimed_at
                           ? <Chip icon={<LunchDining sx={{ fontSize: '11px !important', color: `${C.amber} !important` }} />}
-                              label={new Date(entry.lunch_claimed_at).toLocaleTimeString()} size="small"
+                              label={new Date(entry.lunch_claimed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} size="small"
                               sx={{ background: `${C.amber}18`, color: C.amber, fontSize: 10 }} />
-                          : <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>—</Typography>
+                          : <Chip label="Not claimed" size="small"
+                              sx={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.25)', fontSize: 10 }} />
                       }
                     </TableCell>
                   </TableRow>
@@ -394,8 +392,8 @@ export default function QRScannerPanel() {
               </TableBody>
             </Table>
           </TableContainer>
-        </Paper>
-      )}
+        )}
+      </Paper>
     </Box>
   );
 }
