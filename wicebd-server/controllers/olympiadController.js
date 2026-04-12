@@ -14,6 +14,7 @@ const startOlympiadRegistration = async (req, res) => {
     crReference = '',
     ca_code = null,
     club_code = null,
+    promo_code = null,
   } = req.body;
 
   if (!fullName || !email || !phone || !address || !institution) {
