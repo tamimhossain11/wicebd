@@ -325,10 +325,10 @@ const unifiedLogin = async (req, res) => {
   }
 
   try {
-    // 1. Try admin login first (by username)
+    // 1. Try admin login first — match by username OR email
     const [adminRows] = await db.query(
-      'SELECT id, username, password, role, is_active FROM admins WHERE username = ?',
-      [email.trim().toLowerCase()]
+      'SELECT id, username, password, role, is_active FROM admins WHERE username = ? OR (email IS NOT NULL AND email = ?)',
+      [email.trim().toLowerCase(), email.trim().toLowerCase()]
     );
 
     if (adminRows.length > 0) {
