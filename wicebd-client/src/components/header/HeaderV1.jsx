@@ -101,52 +101,28 @@ const HeaderV1 = ({ headerStyle, parentMenu }) => {
                                     <div className="search-box-btn"><span className={`flaticon-search`} onClick={searchOpen}></span></div>
                                 </div>
                                 {user ? (
-                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginLeft: 16 }}>
+                                    <div className="wice-header-auth">
                                         <Link
                                             to={role === 'admin' ? '/admin/dashboard' : '/dashboard'}
-                                            style={{
-                                                color: 'rgba(255,255,255,0.9)',
-                                                fontSize: 14,
-                                                fontWeight: 600,
-                                                textDecoration: 'none',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 6,
-                                            }}
+                                            className="wice-header-auth__user"
                                         >
-                                            <span className="fa fa-user-circle" style={{ fontSize: 18 }}></span>
-                                            {user.name?.split(' ')[0]}
+                                            <span className="fa fa-user-circle" />
+                                            <span className="wice-header-auth__name">
+                                                {user.name?.split(' ')[0]}
+                                            </span>
                                         </Link>
                                         <button
                                             onClick={logout}
-                                            style={{
-                                                background: 'rgba(255,255,255,0.12)',
-                                                border: '1px solid rgba(255,255,255,0.25)',
-                                                borderRadius: 4,
-                                                color: '#fff',
-                                                fontSize: 12,
-                                                padding: '4px 10px',
-                                                cursor: 'pointer',
-                                            }}
+                                            className="wice-header-auth__signout"
                                         >
-                                            Sign Out
+                                            <span className="wice-header-auth__signout-text">Sign Out</span>
+                                            <span className="fa fa-sign-out-alt wice-header-auth__signout-icon" />
                                         </button>
                                     </div>
                                 ) : (
                                     <Link
                                         to="/sign-in"
-                                        style={{
-                                            marginLeft: 16,
-                                            background: '#e94560',
-                                            color: '#fff',
-                                            padding: '8px 20px',
-                                            borderRadius: 4,
-                                            fontSize: 14,
-                                            fontWeight: 600,
-                                            textDecoration: 'none',
-                                            display: 'inline-block',
-                                            transition: 'background 0.2s',
-                                        }}
+                                        className="wice-header-auth__signin"
                                     >
                                         Sign In
                                     </Link>

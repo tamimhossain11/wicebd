@@ -753,3 +753,92 @@
     padding-bottom: 50px !important;
   }
 }
+
+/* ============================================================
+   HEADER AUTH — responsive user section
+   ============================================================ */
+
+.wice-header-auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.wice-header-auth__user {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  min-width: 0;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+.wice-header-auth__user:hover { color: #e94560; }
+.wice-header-auth__user .fa-user-circle { font-size: 17px; flex-shrink: 0; }
+
+.wice-header-auth__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wice-header-auth__signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s;
+}
+.wice-header-auth__signout:hover {
+  background: rgba(233,69,96,0.18);
+  border-color: rgba(233,69,96,0.5);
+}
+.wice-header-auth__signout-icon { display: none; }
+
+.wice-header-auth__signin {
+  margin-left: 12px;
+  background: #e94560;
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.wice-header-auth__signin:hover { background: #c73352; color: #fff; }
+
+/* ── Between lg and xl (992–1199px): compress to icon + short name ── */
+@media (max-width: 1199px) {
+  .wice-header-auth { gap: 6px; margin-left: 8px; }
+  .wice-header-auth__user { font-size: 12px; max-width: 80px; }
+  .wice-header-auth__signout { padding: 4px 8px; font-size: 11px; }
+  .wice-header-auth__signin { padding: 6px 12px; font-size: 12px; }
+}
+
+/* ── At the tightest desktop breakpoint (~992–1050px): icon-only signout ── */
+@media (max-width: 1080px) {
+  .wice-header-auth__signout-text { display: none; }
+  .wice-header-auth__signout-icon { display: inline-block; font-size: 13px; }
+  .wice-header-auth__signout { padding: 5px 8px; }
+  .wice-header-auth__name { display: none; }
+  .wice-header-auth__user { max-width: 26px; }
+}

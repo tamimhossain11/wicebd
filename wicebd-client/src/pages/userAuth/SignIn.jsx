@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
@@ -50,8 +50,21 @@ const SignIn = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleBtnWidth, setGoogleBtnWidth] = useState(400);
+  const googleContainerRef = useRef(null);
   const { loginAsUser, loginAsAdmin } = useAuth();
   const navigate = useNavigate();
+
+  // Dynamically measure container so GoogleLogin iframe matches its width
+  useEffect(() => {
+    const el = googleContainerRef.current;
+    if (!el) return;
+    const measure = () => setGoogleBtnWidth(Math.max(200, Math.floor(el.offsetWidth)));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const handleRedirect = (role) =>
     navigate(role === 'admin' ? '/admin/dashboard' : '/dashboard', { replace: true });
@@ -149,20 +162,21 @@ const SignIn = () => {
               {/* Google */}
               {GOOGLE_ENABLED ? (
                 <Box
+                  ref={googleContainerRef}
                   sx={{
                     borderRadius: '10px', overflow: 'hidden',
                     border: '1px solid rgba(255,255,255,0.12)',
-                    '& > div': { width: '100% !important' },
-                    '& iframe': { width: '100% !important' },
+                    width: '100%',
                   }}
                 >
                   <GoogleLogin
+                    key={googleBtnWidth}
                     onSuccess={handleGoogleSuccess}
                     onError={() => toast.error('Google sign-in failed')}
                     text="signin_with"
                     shape="rectangular"
                     theme="filled_black"
-                    width="440"
+                    width={String(googleBtnWidth)}
                   />
                 </Box>
               ) : (
