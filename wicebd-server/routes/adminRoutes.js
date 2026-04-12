@@ -25,6 +25,12 @@ router.get('/participants', authenticateAdmin, async (req, res) => {
         member3,
         institution3,
         tshirtSize3,
+        member4,
+        institution4,
+        tshirtSize4,
+        member5,
+        institution5,
+        tshirtSize5,
         projectTitle,
         projectCategory,
         participatedBefore,
@@ -33,6 +39,9 @@ router.get('/participants', authenticateAdmin, async (req, res) => {
         infoSource,
         ca_code,
         club_code,
+        promo_code,
+        bkashTrxId,
+        amount,
         paymentID,
         created_at as createdAt
       FROM registrations
