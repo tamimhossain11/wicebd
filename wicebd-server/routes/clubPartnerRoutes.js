@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const authenticateAdmin = require('../middleware/auth');
+const requireRole = require('../middleware/requireRole');
 
 /* ── Code generator ── */
 async function generateCLCode(clubName) {
@@ -64,7 +65,7 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
 });
 
 /* ── ADMIN: add single ── */
-router.post('/', authenticateAdmin, async (req, res) => {
+router.post('/', authenticateAdmin, requireRole('super_admin', 'ca_cl_manager'), async (req, res) => {
   const { club_name, institution_name, institution_address } = req.body;
   if (!club_name || !institution_name || !institution_address) {
     return res.status(400).json({ error: 'All fields are required' });
@@ -82,7 +83,7 @@ router.post('/', authenticateAdmin, async (req, res) => {
 });
 
 /* ── ADMIN: bulk add ── */
-router.post('/bulk', authenticateAdmin, async (req, res) => {
+router.post('/bulk', authenticateAdmin, requireRole('super_admin', 'ca_cl_manager'), async (req, res) => {
   const { entries } = req.body;
   if (!Array.isArray(entries) || entries.length === 0) {
     return res.status(400).json({ error: 'entries must be a non-empty array' });
@@ -110,7 +111,7 @@ router.post('/bulk', authenticateAdmin, async (req, res) => {
 });
 
 /* ── ADMIN: delete ── */
-router.delete('/:id', authenticateAdmin, async (req, res) => {
+router.delete('/:id', authenticateAdmin, requireRole('super_admin', 'ca_cl_manager'), async (req, res) => {
   try {
     await db.execute('DELETE FROM club_partners WHERE id = ?', [req.params.id]);
     res.json({ success: true });

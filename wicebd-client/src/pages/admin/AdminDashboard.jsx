@@ -48,20 +48,26 @@ const SIDEBAR_W = 256;
 // indices: 0=Dashboard,1=ProjectRegs,2=OlympiadRegs,3=WallMagRegs,4=Users,
 //          5=Announcements,6=Advisors,7=OlympiadExam,8=CampusAmbassadors,
 //          9=ClubPartners,10=PromoCodes,11=QRScanner,12=AdminUsers
+// roles: which adminRoles can see this item (super_admin always has full access)
+const SA  = ['super_admin'];
+const DE  = ['super_admin', 'data_extractor'];
+const CA  = ['super_admin', 'ca_cl_manager'];
+const ALL = ['super_admin', 'data_extractor', 'ca_cl_manager'];
+
 const NAV_ITEMS = [
-  { label: 'Dashboard',          icon: <Dashboard />,          section: 'main' },
-  { label: 'Project Regs',       icon: <Assignment />,          section: 'data' },
-  { label: 'Olympiad Regs',      icon: <EmojiEvents />,         section: 'data' },
-  { label: 'Wall Magazine Regs', icon: <Campaign />,            section: 'data' },
-  { label: 'Users',              icon: <People />,              section: 'data' },
-  { label: 'Announcements',      icon: <Notifications />,       section: 'manage' },
-  { label: 'Advisors',           icon: <RecordVoiceOver />,     section: 'manage' },
-  { label: 'Olympiad Exam',      icon: <Quiz />,                section: 'manage' },
-  { label: 'Campus Ambassadors', icon: <EmojiPeople />,         section: 'network' },
-  { label: 'Club Partners',      icon: <Group />,               section: 'network' },
-  { label: 'Promo Codes',        icon: <Inbox />,               section: 'manage' },
-  { label: 'QR Scanner',         icon: <QrCodeScanner />,       section: 'event',  superOnly: false },
-  { label: 'Admin Users',        icon: <ManageAccounts />,      section: 'event',  superOnly: true },
+  { label: 'Dashboard',          icon: <Dashboard />,          section: 'main',    roles: ALL },
+  { label: 'Project Regs',       icon: <Assignment />,          section: 'data',    roles: DE  },
+  { label: 'Olympiad Regs',      icon: <EmojiEvents />,         section: 'data',    roles: DE  },
+  { label: 'Wall Magazine Regs', icon: <Campaign />,            section: 'data',    roles: DE  },
+  { label: 'Users',              icon: <People />,              section: 'data',    roles: DE  },
+  { label: 'Announcements',      icon: <Notifications />,       section: 'manage',  roles: SA  },
+  { label: 'Advisors',           icon: <RecordVoiceOver />,     section: 'manage',  roles: SA  },
+  { label: 'Olympiad Exam',      icon: <Quiz />,                section: 'manage',  roles: SA  },
+  { label: 'Campus Ambassadors', icon: <EmojiPeople />,         section: 'network', roles: CA  },
+  { label: 'Club Partners',      icon: <Group />,               section: 'network', roles: CA  },
+  { label: 'Promo Codes',        icon: <Inbox />,               section: 'manage',  roles: SA  },
+  { label: 'QR Scanner',         icon: <QrCodeScanner />,       section: 'event',   roles: SA  },
+  { label: 'Admin Users',        icon: <ManageAccounts />,      section: 'event',   roles: SA  },
 ];
 
 /* ─── Custom tooltip for charts ─── */
@@ -185,7 +191,9 @@ export default function AdminDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [activeNav, setActiveNav]     = useState(0);
+  // Admin role from token (derived early so useState can use it)
+  const adminRoleInit = (() => { try { const d = JSON.parse(atob(localStorage.getItem('adminToken')?.split('.')[1] || '')); return d?.adminRole || 'super_admin'; } catch { return 'super_admin'; } })();
+  const [activeNav, setActiveNav]     = useState(adminRoleInit === 'ca_cl_manager' ? 8 : 0);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [analytics, setAnalytics]     = useState(null);
@@ -222,8 +230,7 @@ export default function AdminDashboard() {
   const [promoForm, setPromoForm]       = useState({ code: '', discount_percentage: '', competition_type: 'all' });
   const [promoLoading, setPromoLoading] = useState(false);
 
-  // Admin role from token
-  const adminRole = (() => { try { const d = JSON.parse(atob(localStorage.getItem('adminToken')?.split('.')[1] || '')); return d?.adminRole || 'super_admin'; } catch { return 'super_admin'; } })();
+  const adminRole = adminRoleInit;
 
   // (QR Scanner state lives inside QRScannerPanel component)
 
@@ -595,7 +602,7 @@ export default function AdminDashboard() {
           {sections.map(sec => {
             const items = NAV_ITEMS.map((item, i) => ({ ...item, index: i }))
               .filter(item => item.section === sec.key)
-              .filter(item => !item.superOnly || adminRole === 'super_admin');
+              .filter(item => item.roles.includes(adminRole));
             if (!items.length) return null;
             return (
               <Box key={sec.key} sx={{ mb: 1 }}>
@@ -718,6 +725,20 @@ export default function AdminDashboard() {
         {/* Content */}
         <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, overflowY: 'auto' }}>
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setError('')}>{error}</Alert>}
+
+          {/* ══════════════ ACCESS GUARD ══════════════ */}
+          {!NAV_ITEMS[activeNav]?.roles.includes(adminRole) && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 2 }}>
+              <Box sx={{ width: 72, height: 72, borderRadius: '50%', background: `${RED}15`, border: `1px solid ${RED}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AdminPanelSettings sx={{ fontSize: 34, color: RED }} />
+              </Box>
+              <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 20 }}>Access Restricted</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textAlign: 'center', maxWidth: 340 }}>
+                Your account role <Chip label={adminRole.replace(/_/g, ' ')} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11, fontWeight: 700, mx: 0.5 }} /> does not have permission to access this section.
+              </Typography>
+            </Box>
+          )}
+          {NAV_ITEMS[activeNav]?.roles.includes(adminRole) && (<>
 
           {/* ══════════════ DASHBOARD ══════════════ */}
           {activeNav === 0 && analytics && (
@@ -1177,6 +1198,9 @@ export default function AdminDashboard() {
               </Dialog>
             </Box>
           )}
+
+          </>)}
+          {/* end role-guard wrapper */}
 
       {/* ══ Reset Password Dialog (shared for admin + portal users) ══ */}
       <Dialog open={resetPwdDialog.open} onClose={() => { setResetPwdDialog({ open: false, type: '', id: null, name: '' }); setShowResetPwd(false); }} maxWidth="xs" fullWidth
