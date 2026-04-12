@@ -113,6 +113,7 @@ const confirmPayment = async (req, res) => {
     }
 
     const verifiedTrxId = statusResult.data.trx_id || trx_id;
+    const amount = parseFloat(statusResult.data.request_amount || 0);
 
     // 2. Get temp registration by invoice_number (stored in bkash_payment_id column)
     const [tempData] = await db.query(
