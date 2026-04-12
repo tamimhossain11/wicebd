@@ -168,7 +168,7 @@ const confirmPayment = async (req, res) => {
           registrationId, verified_user_id, registration.leader,
           registration.leaderEmail, registration.leaderPhone,
           registration.projectTitle,  // address stored here
-          registration.institution, registration.crRefrence || '',
+          registration.institution, registration.crReference || '',
           registration.ca_code || null, registration.club_code || null,
           registration.promo_code || null,
           'registered'
@@ -195,7 +195,7 @@ const confirmPayment = async (req, res) => {
         [
           registration.user_id || null,
           registration.competitionCategory, registration.projectSubcategory,
-          registration.categories, registration.crRefrence, registration.leader,
+          registration.categories, registration.crReference, registration.leader,
           registration.institution, registration.leaderPhone, registration.leaderWhatsApp,
           registration.leaderEmail, registration.tshirtSizeLeader,
           registration.member2 || null, registration.institution2 || null, registration.tshirtSize2 || null,
@@ -321,7 +321,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
     const cat = (registration.competitionCategory || '').toLowerCase();
     const isWallMag = cat === 'megazine';
     const categoryLabel = isWallMag ? 'Wall Magazine' : 'Project';
-    const baseAmount = isWallMag ? 10 : 20;
+    const baseAmount = isWallMag ? 399 : 999;
     const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
     const extraCharge = isWallMag ? 120 : 300;
     const totalAmount = baseAmount + (extraMembers * extraCharge);
