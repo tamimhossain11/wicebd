@@ -59,6 +59,18 @@ const FBVideoPlayer = ({ url }) => {
    Video data — grouped by category
    ───────────────────────────────────────────── */
 const TABS = [
+   {
+        id: 'Promotional Videos',
+        label: '🎬 Event Promotional Videos',
+        videos: [
+            {
+                id: 1,
+                title: '8th WICEBD — Registration Details',
+                desc: 'Exclusive teaser for the 8th World Invention Competition & Exhibition Bangladesh.',
+                url: 'https://youtu.be/MUzuEb_qjTQ?si=esI1Qc2B8FmfYTLC',
+            },
+        ],
+    },
     {
         id: 'teasers',
         label: '🎬 Event Teasers',
