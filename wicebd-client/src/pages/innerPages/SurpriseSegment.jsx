@@ -77,7 +77,7 @@ export default function SurpriseSegment() {
                             transition={{ delay: 0.5, duration: 0.55 }}
                             style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, maxWidth: 520, margin: '0 auto 48px', lineHeight: 1.9 }}
                         >
-                            Something extraordinary is being prepared for WICE Bangladesh 2025.
+                            Something extraordinary is being prepared for WICE Bangladesh 2026.
                             A brand-new competition segment will be revealed at the event.
                             Stay tuned for the big announcement.
                         </motion.p>
