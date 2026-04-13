@@ -460,10 +460,10 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
         </Box>
       </Box>
 
-      {/* Collapsible card visual */}
-      <Collapse in={!!(card && expanded)} timeout={300}>
+      {/* Collapsible card visual — unmountOnExit prevents rendering with card=null */}
+      <Collapse in={!!(card && expanded)} timeout={300} unmountOnExit>
         <Box sx={{ mt: 2.5 }}>
-          <IDCardVisual member={member} reg={reg} card={card} />
+          {card && <IDCardVisual member={member} reg={reg} card={card} />}
         </Box>
       </Collapse>
     </Box>
