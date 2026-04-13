@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 import { HashLink as Link } from 'react-router-hash-link'
 
 const AboutV2 = () => {
@@ -9,9 +9,7 @@ const AboutV2 = () => {
                 <div className="anim-icons full-width">
                     <span className="icon icon-circle-blue wow fadeIn"></span>
                     <span className="icon icon-dots wow fadeInleft"></span>
-                    <ReactWOW animation='zoomIn'>
-                        <span className="icon icon-circle-1 wow "></span>
-                    </ReactWOW>
+                    <span className="icon icon-circle-1"></span>
                 </div>
                 <div className="auto-container">
                     <div className="row">

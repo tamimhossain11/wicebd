@@ -1,6 +1,6 @@
 import React from 'react';
 import { toast } from 'react-toastify';
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 
 const SubscribeV2 = () => {
 
@@ -18,27 +18,25 @@ const SubscribeV2 = () => {
                     <span className="icon icon-line-1 wow fadeIn"></span>
                 </div>
                 <div className="auto-container">
-                    <ReactWOW animation="fadeInUp" delay='500'>
-                        <div className="subscribe-form">
-                            <div className="envelope-image"></div>
-                            <div className="form-inner">
-                                <div className="upper-box">
-                                    <div className="sec-title text-center">
-                                        <div className="icon-box"><span className="fa fa-envelope"></span></div>
-                                        <h2>Subscribe our newslatter</h2>
-                                        <div className="text">Lorem ipsum dolor amet consectetur adipisicing elit sed eiusm
-                                            <br />tempor incididunt ut labore dolore magna.</div>
-                                    </div>
+                    <div className="subscribe-form">
+                        <div className="envelope-image"></div>
+                        <div className="form-inner">
+                            <div className="upper-box">
+                                <div className="sec-title text-center">
+                                    <div className="icon-box"><span className="fa fa-envelope"></span></div>
+                                    <h2>Subscribe our newslatter</h2>
+                                    <div className="text">Lorem ipsum dolor amet consectetur adipisicing elit sed eiusm
+                                        <br />tempor incididunt ut labore dolore magna.</div>
                                 </div>
-                                <form onSubmit={handleSubscribe}>
-                                    <div className="form-group">
-                                        <input type="email" name="email" placeholder="Your email" autoComplete='off' required />
-                                        <button type="submit" className="theme-btn"><span className="fa fa-paper-plane"></span></button>
-                                    </div>
-                                </form>
                             </div>
+                            <form onSubmit={handleSubscribe}>
+                                <div className="form-group">
+                                    <input type="email" name="email" placeholder="Your email" autoComplete='off' required />
+                                    <button type="submit" className="theme-btn"><span className="fa fa-paper-plane"></span></button>
+                                </div>
+                            </form>
                         </div>
-                    </ReactWOW>
+                    </div>
                 </div>
             </section>
         </>

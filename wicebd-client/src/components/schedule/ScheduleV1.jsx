@@ -2,7 +2,7 @@ import React from 'react';
 import ScheduleListV1Data from '../../jsonData/schedule/ScheduleListV1Data.json'
 import ScheduleV1Data from '../../jsonData/schedule/ScheduleV1Data.json'
 import ScheduleList from './ScheduleList';
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 import { HashLink as Link } from 'react-router-hash-link'
 
 const ScheduleV1 = () => {
@@ -10,12 +10,8 @@ const ScheduleV1 = () => {
         <>
             <section className="schedule-section">
                 <div className="anim-icons">
-                    <ReactWOW animation='zoomIn'>
-                        <span className="icon icon-circle-4"></span>
-                    </ReactWOW>
-                    <ReactWOW animation='zoomIn'>
-                        <span className="icon icon-circle-3"></span>
-                    </ReactWOW>
+                    <span className="icon icon-circle-4"></span>
+                    <span className="icon icon-circle-3"></span>
                 </div>
                 <div className="auto-container">
                     <div className="sec-title text-center">

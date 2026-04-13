@@ -1,18 +1,16 @@
 import React from 'react';
 import PriceV3Data from '../../jsonData/price/PriceV3Data.json'
 import SinglePriceV3 from './SinglePriceV3';
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 
 const PriceV3 = () => {
     return (
         <>
             <section className="pricing-section-three">
                 <div className="anim-icons">
-                    <span className="icon icon-line-1 wow zoomIn"></span>
-                    <ReactWOW animation='zoomIn'>
-                        <span className="icon icon-circle-1"></span>
-                    </ReactWOW>
-                    <span className="icon icon-dots wow zoomIn"></span>
+                    <span className="icon icon-line-1 zoomIn"></span>
+                    <span className="icon icon-circle-1"></span>
+                    <span className="icon icon-dots zoomIn"></span>
                 </div>
                 <div className="auto-container">
                     <div className="sec-title text-center">

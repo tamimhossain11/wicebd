@@ -1,7 +1,7 @@
 import React from 'react';
 import AboutV1Data from '../../jsonData/about/AboutV1Data.json'
 import { HashLink as Link } from 'react-router-hash-link'
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 
 const AboutV1 = () => {
     return (
@@ -9,12 +9,8 @@ const AboutV1 = () => {
             <section className="about-section">
                 <div className="anim-icons full-width">
                     <span className="icon icon-circle-blue"></span>
-                    <ReactWOW animation='fadeInLeft'>
-                        <span className="icon icon-dots"></span>
-                    </ReactWOW>
-                    <ReactWOW animation='zoomIn'>
-                        <span className="icon icon-circle-1"></span>
-                    </ReactWOW>
+                    <span className="icon icon-dots"></span>
+                    <span className="icon icon-circle-1"></span>
                 </div>
                 <div className="auto-container">
                     <div className="row">
@@ -35,9 +31,7 @@ const AboutV1 = () => {
                         </div>
                         <div className="image-column col-lg-6 col-md-12 col-sm-12">
                             <div className="image-box">
-                                <ReactWOW animation='fadeIn'>
-                                    <figure className="image"><img src="../images/resource/about-img-1.jpg" alt="image" /></figure>
-                                </ReactWOW>
+                                <figure className="image"><img src="../images/resource/about-img-1.jpg" alt="image" /></figure>
                             </div>
                         </div>
                     </div>

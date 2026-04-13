@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashLink as Link } from 'react-router-hash-link'
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 
 const AppV1 = () => {
     return (

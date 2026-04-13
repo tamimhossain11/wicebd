@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 import BlogContentV1Data from '../../jsonData/blog/BlogContentV1Data.json'
 import SingleBlogV1 from './SingleBlogV1';
 
@@ -10,16 +10,10 @@ const BlogV1 = ({ hasShape = false }) => {
                 {hasShape ?
                     <>
                         <div className="anim-icons">
-                            <span className="icon icon-circle-blue wow fadeIn"></span>
-                            <ReactWOW animation='zoomIn'>
-                                <span className="icon twist-line-1"></span>
-                            </ReactWOW>
-                            <ReactWOW animation='zoomIn'>
-                                <span className="icon twist-line-2"></span>
-                            </ReactWOW>
-                            <ReactWOW animation='zoomIn'>
-                                <span className="icon twist-line-3"></span>
-                            </ReactWOW>
+                            <span className="icon icon-circle-blue fadeIn"></span>
+                            <span className="icon twist-line-1"></span>
+                            <span className="icon twist-line-2"></span>
+                            <span className="icon twist-line-3"></span>
                         </div>
                     </>
                     : <></>}

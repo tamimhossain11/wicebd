@@ -1,7 +1,7 @@
 import React from 'react';
 import { HashLink as Link } from 'react-router-hash-link'
 import { toast } from 'react-toastify';
-import ReactWOW from 'react-wow';
+// import ReactWOW from 'react-wow';
 import TimeV2 from '../counter/TimeV2';
 import SocialShare from '../others/SocialShare';
 
@@ -22,9 +22,7 @@ const ComingSoonContent = () => {
                     <span className="icon icon-circle-blue wow fadeIn"></span>
                     <span className="icon icon-dots wow fadeInleft"></span>
                     <span className="icon icon-line-1 wow zoomIn"></span>
-                    <ReactWOW animation='zoomIn'>
-                        <span className="icon icon-circle-1"></span>
-                    </ReactWOW>
+                    <span className="icon icon-circle-1"></span>
                 </div>
                 <div className="auto-container">
                     <div className="content">
