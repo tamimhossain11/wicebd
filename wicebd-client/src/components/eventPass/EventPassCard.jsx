@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Button, CircularProgress, Paper, Chip, Grid,
+  Collapse, TextField, MenuItem as MuiMenuItem, Divider,
 } from '@mui/material';
-import { QrCode2, Download, CheckCircle, Lock } from '@mui/icons-material';
+import {
+  QrCode2, Download, CheckCircle, Lock, ExpandMore, ExpandLess,
+  Person, Group, Edit, Save,
+} from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/index';
 
+/* ── Brand ── */
 const C = {
   bg:      '#0d0006',
   border:  'rgba(255,255,255,0.07)',
@@ -15,7 +20,39 @@ const C = {
   card:    'rgba(255,255,255,0.04)',
 };
 
-/* ── Small label/value row used inside the card ── */
+const fSx = {
+  '& .MuiOutlinedInput-root': {
+    color: '#fff', borderRadius: '8px', background: 'rgba(255,255,255,0.04)',
+    '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+    '&:hover fieldset': { borderColor: 'rgba(128,0,32,0.5)' },
+    '&.Mui-focused fieldset': { borderColor: '#800020', borderWidth: 2 },
+  },
+  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.4)' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#c0002a' },
+  '& .MuiSelect-icon': { color: 'rgba(255,255,255,0.35)' },
+};
+
+const MP = {
+  PaperProps: {
+    sx: {
+      background: '#1a000a', border: '1px solid rgba(128,0,32,0.3)',
+      '& .MuiMenuItem-root': {
+        color: 'rgba(255,255,255,0.8)',
+        '&:hover': { background: 'rgba(128,0,32,0.2)' },
+      },
+    },
+  },
+};
+
+const TYPE_META = {
+  project:         { label: 'Project Competition', color: '#800020', prefix: 'PRJ' },
+  'wall-magazine': { label: 'Wall Magazine',        color: '#10b981', prefix: 'MAG' },
+  olympiad:        { label: 'Science Olympiad',     color: '#0f3460', prefix: 'OLY' },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   CardRow — label/value inside the ID card visual
+   ───────────────────────────────────────────────────────────── */
 const CardRow = ({ label, value, mono = false }) => (
   <Box>
     <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
@@ -29,14 +66,10 @@ const CardRow = ({ label, value, mono = false }) => (
   </Box>
 );
 
-const TYPE_META = {
-  project:         { label: 'Project Competition', color: '#800020', prefix: 'PRJ' },
-  'wall-magazine': { label: 'Wall Magazine',        color: '#10b981', prefix: 'MAG' },
-  olympiad:        { label: 'Science Olympiad',     color: '#0f3460', prefix: 'OLY' },
-};
-
-/* ── Single ID card visual ── */
-const IDCardVisual = ({ reg, card }) => {
+/* ─────────────────────────────────────────────────────────────
+   IDCardVisual — the printed-looking card + download button
+   ───────────────────────────────────────────────────────────── */
+const IDCardVisual = ({ member, reg, card }) => {
   const cardRef = useRef(null);
   const meta    = TYPE_META[reg.type] || TYPE_META.project;
   const verifyUrl = card?.qr_data || '';
@@ -55,15 +88,11 @@ const IDCardVisual = ({ reg, card }) => {
 
   return (
     <Box>
-      {/* Card */}
-      <Box
-        ref={cardRef}
-        sx={{
-          width: '100%', maxWidth: 420, mx: 'auto',
-          borderRadius: 3, overflow: 'hidden',
-          boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)`,
-        }}
-      >
+      <Box ref={cardRef} sx={{
+        width: '100%', maxWidth: 420, mx: 'auto',
+        borderRadius: 3, overflow: 'hidden',
+        boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)`,
+      }}>
         {/* Header band */}
         <Box sx={{
           background: `linear-gradient(135deg, ${meta.color}cc 0%, ${meta.color} 60%, ${meta.color}99 100%)`,
@@ -91,24 +120,24 @@ const IDCardVisual = ({ reg, card }) => {
         {/* Body */}
         <Box sx={{
           background: 'linear-gradient(180deg, #12000a 0%, #0d0006 100%)',
-          px: 2.5, py: 2.5,
-          display: 'flex', gap: 2.5, alignItems: 'flex-start',
+          px: 2.5, py: 2.5, display: 'flex', gap: 2.5, alignItems: 'flex-start',
         }}>
-          {/* Left */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', mb: 0.4 }}>
               Participant
             </Typography>
             <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.2px', wordBreak: 'break-word' }}>
-              {reg.name}
+              {member.name}
             </Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, mt: 0.3, mb: 2 }}>
-              {reg.email}
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {member.email && (
+              <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, mt: 0.3, mb: 2 }}>
+                {member.email}
+              </Typography>
+            )}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: member.email ? 0 : 2 }}>
               <CardRow label="Competition" value={meta.label} />
-              {reg.title && <CardRow label={reg.type === 'olympiad' ? 'Institution' : 'Project / Title'} value={reg.title} />}
+              {reg.title && <CardRow label={reg.type === 'olympiad' ? 'Institution' : 'Project Title'} value={reg.title} />}
+              {member.institution && <CardRow label="Institution" value={member.institution} />}
               <CardRow label="Registration ID" value={reg.reg_id} mono />
               <CardRow label="Card ID" value={card.card_uid} mono />
               <CardRow label="Event" value="WICE Bangladesh 2026" />
@@ -118,31 +147,28 @@ const IDCardVisual = ({ reg, card }) => {
                 </Typography>
                 <Chip
                   icon={<CheckCircle sx={{ fontSize: '12px !important', color: '#10b981 !important' }} />}
-                  label="Valid"
-                  size="small"
+                  label="Valid" size="small"
                   sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 10, height: 20, fontWeight: 700 }}
                 />
               </Box>
             </Box>
           </Box>
 
-          {/* Right — QR */}
+          {/* QR */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 }}>
             <Box sx={{ p: 1.2, borderRadius: 2, background: '#fff', boxShadow: `0 4px 16px ${meta.color}44` }}>
               <QRCodeSVG value={verifyUrl || 'https://wicebd.com'} size={90} level="M" bgColor="#ffffff" fgColor="#1a0008" />
             </Box>
-            <Typography sx={{ color: 'rgba(255,255,255,0.22)', fontSize: 8.5, textAlign: 'center', letterSpacing: '0.04em' }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.22)', fontSize: 8.5, textAlign: 'center' }}>
               Admin scan only
             </Typography>
           </Box>
         </Box>
 
-        {/* Footer strip */}
+        {/* Footer */}
         <Box sx={{
-          background: 'rgba(255,255,255,0.03)',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          px: 2.5, py: 1.2,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.05)',
+          px: 2.5, py: 1.2, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <Typography sx={{ color: 'rgba(255,255,255,0.18)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             wicebd.com
@@ -158,13 +184,11 @@ const IDCardVisual = ({ reg, card }) => {
         </Box>
       </Box>
 
-      {/* Download button */}
       <Box sx={{ textAlign: 'center', mt: 2 }}>
         <Button
           onClick={handleDownload}
           startIcon={<Download sx={{ fontSize: 16 }} />}
-          size="small"
-          variant="outlined"
+          size="small" variant="outlined"
           sx={{
             borderColor: `${meta.color}66`, color: 'rgba(255,255,255,0.6)',
             textTransform: 'none', fontWeight: 600, borderRadius: 2, fontSize: 12.5,
@@ -178,11 +202,157 @@ const IDCardVisual = ({ reg, card }) => {
   );
 };
 
-/* ── Registration slot (one per reg) ── */
-const RegSlot = ({ reg, onGenerated, profileComplete }) => {
+/* ─────────────────────────────────────────────────────────────
+   MemberProfileForm — inline form to fill family info for a
+   team member before their ID card can be generated
+   ───────────────────────────────────────────────────────────── */
+const GENDER_OPTS = ['Male', 'Female', 'Other', 'Prefer not to say'];
+
+const MemberProfileForm = ({ paymentId, slot, onSaved }) => {
+  const [open, setOpen]     = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm]     = useState({
+    father_name: '', father_occupation: '', mother_name: '', mother_occupation: '',
+    guardian_phone: '', address: '', date_of_birth: '', gender: '', class_grade: '',
+  });
+
+  /* Load existing data when expanding */
+  useEffect(() => {
+    if (!open) return;
+    api.get(`/api/id-card/member-profile/${paymentId}/${slot}`)
+      .then(({ data }) => {
+        if (data.success && data.profile) {
+          const p = data.profile;
+          setForm({
+            father_name:        p.father_name        || '',
+            father_occupation:  p.father_occupation  || '',
+            mother_name:        p.mother_name        || '',
+            mother_occupation:  p.mother_occupation  || '',
+            guardian_phone:     p.guardian_phone     || '',
+            address:            p.address            || '',
+            date_of_birth:      p.date_of_birth ? p.date_of_birth.slice(0, 10) : '',
+            gender:             p.gender             || '',
+            class_grade:        p.class_grade        || '',
+          });
+        }
+      })
+      .catch(() => {});
+  }, [open, paymentId, slot]);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { data } = await api.post('/api/id-card/member-profile', {
+        payment_id: paymentId, member_slot: slot, ...form,
+      });
+      if (data.success) { setOpen(false); onSaved?.(); }
+    } catch { /* noop */ }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <Box>
+      <Button
+        onClick={() => setOpen(o => !o)}
+        size="small"
+        startIcon={<Edit sx={{ fontSize: 14 }} />}
+        endIcon={open ? <ExpandLess sx={{ fontSize: 14 }} /> : <ExpandMore sx={{ fontSize: 14 }} />}
+        sx={{
+          background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.35)',
+          color: '#f59e0b', textTransform: 'none', fontWeight: 700, fontSize: 12, borderRadius: 2, px: 1.8, py: 0.7,
+          '&:hover': { background: 'rgba(245,158,11,0.18)' },
+        }}
+      >
+        Fill Family Info
+      </Button>
+
+      <Collapse in={open}>
+        <Box sx={{
+          mt: 2, p: 2.5, borderRadius: 2,
+          background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.18)',
+        }}>
+          <Typography sx={{ color: '#f59e0b', fontWeight: 700, fontSize: 13, mb: 2 }}>
+            Family &amp; Personal Information — required before generating ID card
+          </Typography>
+
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Father's Name" value={form.father_name}
+                onChange={e => set('father_name', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Father's Occupation" value={form.father_occupation}
+                onChange={e => set('father_occupation', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Mother's Name" value={form.mother_name}
+                onChange={e => set('mother_name', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Mother's Occupation" value={form.mother_occupation}
+                onChange={e => set('mother_occupation', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Guardian Phone" value={form.guardian_phone}
+                onChange={e => set('guardian_phone', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Date of Birth" type="date" value={form.date_of_birth}
+                onChange={e => set('date_of_birth', e.target.value)} sx={fSx} size="small"
+                slotProps={{ inputLabel: { shrink: true } }} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth select label="Gender" value={form.gender}
+                onChange={e => set('gender', e.target.value)} sx={fSx} size="small"
+                slotProps={{ select: { MenuProps: MP } }}>
+                {GENDER_OPTS.map(g => <MuiMenuItem key={g} value={g}>{g}</MuiMenuItem>)}
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField fullWidth label="Class / Grade" value={form.class_grade}
+                onChange={e => set('class_grade', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField fullWidth label="Home Address" value={form.address} multiline rows={2}
+                onChange={e => set('address', e.target.value)} sx={fSx} size="small" />
+            </Grid>
+          </Grid>
+
+          <Box sx={{ mt: 2, display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+            <Button size="small" onClick={() => setOpen(false)}
+              sx={{ color: C.muted, textTransform: 'none', fontWeight: 600 }}>
+              Cancel
+            </Button>
+            <Button
+              size="small" onClick={handleSave} disabled={saving}
+              startIcon={saving ? <CircularProgress size={13} sx={{ color: '#fff' }} /> : <Save sx={{ fontSize: 14 }} />}
+              sx={{
+                background: 'linear-gradient(135deg,#800020,#c0002a)', color: '#fff',
+                textTransform: 'none', fontWeight: 700, fontSize: 12.5, borderRadius: 2, px: 2.5,
+                '&:hover': { opacity: 0.9 },
+                '&:disabled': { background: 'rgba(128,0,32,0.3)', color: 'rgba(255,255,255,0.4)' },
+              }}
+            >
+              {saving ? 'Saving…' : 'Save Info'}
+            </Button>
+          </Box>
+        </Box>
+      </Collapse>
+    </Box>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────
+   MemberSlot — one row per team member (or leader)
+   ───────────────────────────────────────────────────────────── */
+const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
   const [loading, setLoading] = useState(false);
-  const [card, setCard]       = useState(reg.card);
+  const [card, setCard]       = useState(member.card);
+  const [profDone, setProfDone] = useState(member.profile_completed);
   const meta = TYPE_META[reg.type] || TYPE_META.project;
+  const isLeader = member.slot === null;
 
   const generate = async () => {
     setLoading(true);
@@ -190,30 +360,60 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
       const { data } = await api.post('/api/id-card/generate', {
         registration_type: reg.type,
         registration_id:   reg.reg_id,
+        member_slot:       member.slot,
       });
       if (data.success) { setCard(data.card); onGenerated?.(); }
     } catch { /* user can retry */ }
     finally { setLoading(false); }
   };
 
+  /* After saving member profile, mark complete so generate becomes available */
+  const handleProfileSaved = () => {
+    setProfDone(true);
+    onGenerated?.();     // re-fetch parent list
+  };
+
+  const canGenerate = isLeader ? profileComplete : profDone;
+
   return (
-    <Paper sx={{
-      p: 3, borderRadius: 3,
-      background: `linear-gradient(135deg, ${meta.color}10 0%, ${meta.color}04 100%)`,
-      border: `1px solid ${meta.color}28`,
+    <Box sx={{
+      p: 2.5, borderRadius: 2,
+      background: isLeader ? `${meta.color}10` : 'rgba(255,255,255,0.025)',
+      border: `1px solid ${isLeader ? meta.color + '30' : 'rgba(255,255,255,0.07)'}`,
     }}>
-      {/* Header row */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
-        <Box>
-          <Chip
-            label={meta.label} size="small"
-            sx={{ background: `${meta.color}20`, color: meta.color, border: `1px solid ${meta.color}33`, fontSize: 11, fontWeight: 700, mb: 0.8 }}
-          />
-          <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{reg.name}</Typography>
-          {reg.title && <Typography sx={{ color: C.muted, fontSize: 12.5, mt: 0.3 }}>{reg.title}</Typography>}
-          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.5, fontFamily: 'monospace' }}>{reg.reg_id}</Typography>
+      {/* Member header row */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: card ? 2.5 : 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+          <Box sx={{
+            width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+            background: isLeader ? `linear-gradient(135deg,${meta.color},${meta.color}aa)` : 'rgba(255,255,255,0.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {isLeader
+              ? <Person sx={{ fontSize: 16, color: '#fff' }} />
+              : <Group sx={{ fontSize: 15, color: 'rgba(255,255,255,0.5)' }} />
+            }
+          </Box>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>
+                {member.name}
+              </Typography>
+              {isLeader && (
+                <Chip label="Leader" size="small"
+                  sx={{ background: `${meta.color}20`, color: meta.color, border: `1px solid ${meta.color}33`, fontSize: 10, height: 18, fontWeight: 700 }} />
+              )}
+            </Box>
+            {member.institution && (
+              <Typography sx={{ color: C.muted, fontSize: 12, mt: 0.2 }}>{member.institution}</Typography>
+            )}
+            {member.email && (
+              <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.1 }}>{member.email}</Typography>
+            )}
+          </Box>
         </Box>
 
+        {/* Action area */}
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
           {card ? (
             <Chip
@@ -221,14 +421,14 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
               label="Card Generated" size="small"
               sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
             />
-          ) : profileComplete ? (
+          ) : canGenerate ? (
             <Button
               onClick={generate} disabled={loading} size="small"
-              startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <QrCode2 sx={{ fontSize: 16 }} />}
+              startIcon={loading ? <CircularProgress size={13} sx={{ color: '#fff' }} /> : <QrCode2 sx={{ fontSize: 15 }} />}
               sx={{
-                background: `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)`,
-                color: '#fff', textTransform: 'none', fontWeight: 700, fontSize: 12.5,
-                borderRadius: 2, px: 2, py: 0.9,
+                background: `linear-gradient(135deg,${meta.color},${meta.color}cc)`,
+                color: '#fff', textTransform: 'none', fontWeight: 700, fontSize: 12,
+                borderRadius: 2, px: 1.8, py: 0.7,
                 boxShadow: `0 4px 14px ${meta.color}44`,
                 '&:hover': { opacity: 0.9 },
                 '&:disabled': { background: `${meta.color}44`, color: 'rgba(255,255,255,0.4)' },
@@ -236,26 +436,120 @@ const RegSlot = ({ reg, onGenerated, profileComplete }) => {
             >
               {loading ? 'Generating…' : 'Generate ID Card'}
             </Button>
+          ) : !isLeader ? (
+            /* Member needs family info first */
+            null
           ) : (
-            <Chip
-              label="Complete profile first" size="small"
-              sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }}
+            <Chip label="Complete profile first" size="small"
+              sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }} />
+          )}
+
+          {/* Family info form for non-leader members (only if no card yet) */}
+          {!isLeader && !card && (
+            <MemberProfileForm
+              paymentId={reg.reg_id}
+              slot={member.slot}
+              onSaved={handleProfileSaved}
             />
           )}
         </Box>
       </Box>
 
-      {card && <IDCardVisual reg={reg} card={card} />}
+      {card && <IDCardVisual member={member} reg={reg} card={card} />}
+    </Box>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────
+   RegSlot — one card per registration, expands to show all
+   team members for project / wall-magazine registrations
+   ───────────────────────────────────────────────────────────── */
+const RegSlot = ({ reg, onGenerated, profileComplete }) => {
+  const meta    = TYPE_META[reg.type] || TYPE_META.project;
+  const members = reg.members || [];
+  const leader  = members[0];
+  const extras  = members.slice(1);
+  const hasTeam = extras.length > 0;
+
+  const totalCards    = members.filter(m => m.card).length;
+  const totalMembers  = members.length;
+
+  return (
+    <Paper sx={{
+      p: 3, borderRadius: 3,
+      background: `linear-gradient(135deg,${meta.color}10 0%,${meta.color}04 100%)`,
+      border: `1px solid ${meta.color}28`,
+    }}>
+      {/* Registration header */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
+        <Box>
+          <Chip label={meta.label} size="small"
+            sx={{ background: `${meta.color}20`, color: meta.color, border: `1px solid ${meta.color}33`, fontSize: 11, fontWeight: 700, mb: 0.8 }} />
+          {reg.title && (
+            <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{reg.title}</Typography>
+          )}
+          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.4, fontFamily: 'monospace' }}>
+            {reg.reg_id}
+          </Typography>
+        </Box>
+        <Chip
+          label={`${totalCards} / ${totalMembers} card${totalMembers > 1 ? 's' : ''} generated`}
+          size="small"
+          sx={{
+            background: totalCards === totalMembers ? '#10b98118' : 'rgba(255,255,255,0.06)',
+            color: totalCards === totalMembers ? '#10b981' : C.muted,
+            border: `1px solid ${totalCards === totalMembers ? '#10b98130' : 'rgba(255,255,255,0.1)'}`,
+            fontSize: 11, fontWeight: 700,
+          }}
+        />
+      </Box>
+
+      {/* Member slots */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {/* Leader */}
+        {leader && (
+          <MemberSlot
+            member={leader}
+            reg={reg}
+            profileComplete={profileComplete}
+            onGenerated={onGenerated}
+          />
+        )}
+
+        {/* Additional team members */}
+        {hasTeam && (
+          <>
+            <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', my: 0.5 }}>
+              <Typography sx={{ color: C.muted, fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', px: 1 }}>
+                Team Members
+              </Typography>
+            </Divider>
+
+            {extras.map(m => (
+              <MemberSlot
+                key={`slot-${m.slot}`}
+                member={m}
+                reg={reg}
+                profileComplete={false}    /* members always need their own form */
+                onGenerated={onGenerated}
+              />
+            ))}
+          </>
+        )}
+      </Box>
     </Paper>
   );
 };
 
-/* ── Main section ── */
+/* ─────────────────────────────────────────────────────────────
+   IDCardSection — main export
+   ───────────────────────────────────────────────────────────── */
 const IDCardSection = ({ profileComplete }) => {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = () => {
+    setLoading(true);
     api.get('/api/id-card/my-cards')
       .then(({ data: d }) => { if (d.success) setData(d); })
       .catch(() => {})
@@ -270,25 +564,24 @@ const IDCardSection = ({ profileComplete }) => {
     </Box>
   );
 
-  const regs = data?.registrations || [];
+  const regs    = data?.registrations || [];
   const hasRegs = regs.length > 0;
 
   return (
     <Box>
-      {/* Page header */}
+      {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>ID Cards</Typography>
         <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>
-          Generate your official WICE Bangladesh 2026 participant ID card for each competition you've registered in.
+          Generate official WICE Bangladesh 2026 participant ID cards. Team leaders can generate cards for every team member — fill in their family info first.
         </Typography>
       </Box>
 
-      {/* Profile incomplete gate */}
+      {/* Profile incomplete warning (for leader) */}
       {!profileComplete && (
         <Paper sx={{
           p: 3, mb: 3, borderRadius: 3,
-          background: 'rgba(245,158,11,0.08)',
-          border: '1px solid rgba(245,158,11,0.3)',
+          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
           display: 'flex', alignItems: 'center', gap: 2.5, flexWrap: 'wrap',
         }}>
           <Box sx={{
@@ -300,16 +593,15 @@ const IDCardSection = ({ profileComplete }) => {
           </Box>
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <Typography sx={{ color: '#f59e0b', fontWeight: 700, fontSize: 14, mb: 0.3 }}>
-              Profile Incomplete — Required Before Generating ID Card
+              Complete Your Profile First
             </Typography>
             <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 1.6 }}>
-              You must complete your profile (personal &amp; family information) before you can generate a participant ID card. This ensures your card displays accurate details.
+              Your profile must be completed before you can generate your own ID card. Team members' cards require their family info to be filled separately.
             </Typography>
           </Box>
           <Button
-            component="a" href="#profile"
-            onClick={(e) => { e.preventDefault(); document.dispatchEvent(new CustomEvent('dashboard:navigate', { detail: 'profile' })); }}
             size="small"
+            onClick={() => document.dispatchEvent(new CustomEvent('dashboard:navigate', { detail: 'profile' }))}
             sx={{
               background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)',
               color: '#f59e0b', textTransform: 'none', fontWeight: 700,
@@ -323,7 +615,6 @@ const IDCardSection = ({ profileComplete }) => {
       )}
 
       {!hasRegs ? (
-        /* No registrations */
         <Paper sx={{ p: 6, borderRadius: 3, background: C.card, border: `1px solid ${C.border}`, textAlign: 'center' }}>
           <Lock sx={{ fontSize: 56, color: 'rgba(255,255,255,0.1)', mb: 2 }} />
           <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 17, mb: 1 }}>
@@ -335,7 +626,7 @@ const IDCardSection = ({ profileComplete }) => {
           <Button
             component="a" href="/registration"
             sx={{
-              background: `linear-gradient(135deg, ${C.primary}, ${C.accent})`,
+              background: `linear-gradient(135deg,${C.primary},${C.accent})`,
               color: '#fff', textTransform: 'none', fontWeight: 700,
               fontSize: 14, borderRadius: 2, px: 4, py: 1.3,
               boxShadow: '0 6px 20px rgba(128,0,32,0.4)',
@@ -346,7 +637,6 @@ const IDCardSection = ({ profileComplete }) => {
           </Button>
         </Paper>
       ) : (
-        /* Registration slots */
         <Grid container spacing={3}>
           {regs.map(reg => (
             <Grid size={{ xs: 12, lg: 6 }} key={`${reg.type}:${reg.reg_id}`}>
@@ -356,11 +646,10 @@ const IDCardSection = ({ profileComplete }) => {
         </Grid>
       )}
 
-      {/* Info note */}
       {hasRegs && (
         <Paper sx={{ mt: 3, p: 2.5, borderRadius: 3, background: C.card, border: `1px solid ${C.border}` }}>
           <Typography sx={{ color: 'rgba(255,255,255,0.32)', fontSize: 12, lineHeight: 1.7, textAlign: 'center' }}>
-            Present your ID card (digital or printed) at the WICE Bangladesh 2026 venue gate. Each competition registration generates a unique card with its own QR code.
+            Present your ID card (digital or printed) at the WICE Bangladesh 2026 venue gate. Each team member gets their own unique card with an individual QR code.
           </Typography>
         </Paper>
       )}

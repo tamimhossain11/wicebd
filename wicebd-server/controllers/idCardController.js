@@ -1,17 +1,63 @@
-const db = require('../db');
+const db     = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const QRCode = require('qrcode');
 const { uploadBuffer } = require('../utils/gcsStorage');
 
-const BACKEND_URL = process.env.BACKEND_URL || process.env.FRONTEND_BASE_URL?.split(',')[0]?.trim() || 'https://wicebd.com';
-const VERIFY_BASE  = `${process.env.BACKEND_API_URL || 'https://api.wicebd.com'}/api/id-card/verify`;
+const VERIFY_BASE = `${process.env.BACKEND_API_URL || 'https://api.wicebd.com'}/api/id-card/verify`;
 
-// GET /api/id-card/my-cards  — returns all registrations with their card status
+/* ─────────────────────────────────────────────────────────────
+   Helper — generate a card_uid, create QR, persist to id_cards
+   ───────────────────────────────────────────────────────────── */
+async function issueCard ({ userId, registrationType, registrationId, memberSlot, name, email, title }) {
+  const prefix  = registrationType === 'olympiad'
+    ? 'OLY' : registrationType === 'wall-magazine'
+    ? 'MAG' : 'PRJ';
+  const slotTag = memberSlot ? `-M${memberSlot}` : '';
+  const cardUid = `WICE-${prefix}-${uuidv4().slice(0, 8).toUpperCase()}${slotTag}`;
+  const verifyUrl = `${VERIFY_BASE}/${cardUid}`;
+
+  let imageUrl = null;
+  try {
+    const qrBuffer = await QRCode.toBuffer(verifyUrl, {
+      type: 'png', errorCorrectionLevel: 'H', margin: 2, width: 400,
+    });
+    imageUrl = await uploadBuffer(qrBuffer, `id-cards/${cardUid}.png`, 'image/png');
+  } catch (gcsErr) {
+    console.error('GCS upload failed for ID card, falling back to data URL:', gcsErr.message);
+  }
+
+  await db.query(
+    `INSERT INTO id_cards
+       (user_id, registration_type, registration_id, member_slot, card_uid, qr_data, image_url)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [userId, registrationType, registrationId, memberSlot ?? null, cardUid, verifyUrl, imageUrl]
+  );
+
+  const qrImage = imageUrl || await QRCode.toDataURL(verifyUrl);
+  return {
+    card_uid: cardUid, qr_data: verifyUrl, image_url: imageUrl,
+    qrImage, registration_type: registrationType, registration_id: registrationId,
+    member_slot: memberSlot ?? null, generated_at: new Date(),
+    name, title, email,
+  };
+}
+
+/* ─────────────────────────────────────────────────────────────
+   GET /api/id-card/my-cards
+   Returns all registrations the logged-in user owns, each with
+   their card status and (for project/mag regs) team member list.
+   ───────────────────────────────────────────────────────────── */
 const getMyCards = async (req, res) => {
   const userId = req.user.id;
   try {
     const [regRows] = await db.query(
-      `SELECT paymentID, competitionCategory, projectTitle, leader, leaderEmail, created_at
+      `SELECT paymentID, competitionCategory, projectTitle,
+              leader, leaderEmail, leaderPhone,
+              member2, institution2,
+              member3, institution3,
+              member4, institution4,
+              member5, institution5,
+              created_at
        FROM registrations WHERE user_id = ? ORDER BY created_at DESC`,
       [userId]
     );
@@ -20,41 +66,89 @@ const getMyCards = async (req, res) => {
        FROM olympiad_registrations WHERE user_id = ? ORDER BY created_at DESC`,
       [userId]
     );
+
+    // Fetch all id_cards for this user (includes member_slot)
     const [cards] = await db.query(
-      'SELECT registration_type, registration_id, card_uid, qr_data, generated_at FROM id_cards WHERE user_id = ?',
+      `SELECT registration_type, registration_id, member_slot,
+              card_uid, qr_data, image_url, generated_at
+       FROM id_cards WHERE user_id = ?`,
       [userId]
     );
 
-    // Index cards by "type:reg_id"
+    // Index: "type:reg_id:slot" → card  (slot null → "null")
     const cardMap = {};
-    cards.forEach(c => { cardMap[`${c.registration_type}:${c.registration_id}`] = c; });
+    cards.forEach(c => {
+      const slotKey = c.member_slot ?? 'null';
+      cardMap[`${c.registration_type}:${c.registration_id}:${slotKey}`] = c;
+    });
+
+    // Fetch saved team-member profiles for all payment IDs
+    const paymentIds = regRows.map(r => r.paymentID);
+    let memberProfiles = [];
+    if (paymentIds.length) {
+      [memberProfiles] = await db.query(
+        `SELECT payment_id, member_slot, name, institution, profile_completed
+         FROM team_member_profiles WHERE payment_id IN (?)`,
+        [paymentIds]
+      );
+    }
+
+    // Index: "paymentId:slot" → profile
+    const profileMap = {};
+    memberProfiles.forEach(p => { profileMap[`${p.payment_id}:${p.member_slot}`] = p; });
 
     const registrations = [];
 
     regRows.forEach(r => {
-      const type = r.competitionCategory === 'Megazine' ? 'wall-magazine' : 'project';
+      const type  = r.competitionCategory === 'Megazine' ? 'wall-magazine' : 'project';
+      const slots = [
+        { slot: null, name: r.leader,   institution: r.institution,  email: r.leaderEmail },
+        r.member2 ? { slot: 2, name: r.member2, institution: r.institution2 } : null,
+        r.member3 ? { slot: 3, name: r.member3, institution: r.institution3 } : null,
+        r.member4 ? { slot: 4, name: r.member4, institution: r.institution4 } : null,
+        r.member5 ? { slot: 5, name: r.member5, institution: r.institution5 } : null,
+      ].filter(Boolean);
+
+      const memberCards = slots.map(s => {
+        const slotKey = s.slot ?? 'null';
+        const card = cardMap[`${type}:${r.paymentID}:${slotKey}`] || null;
+        const profile = s.slot ? (profileMap[`${r.paymentID}:${s.slot}`] || null) : null;
+        return {
+          slot: s.slot,
+          name: s.name,
+          institution: s.institution || '',
+          email: s.email || '',
+          profile_completed: s.slot === null ? true : (profile?.profile_completed === 1),
+          card,
+        };
+      });
+
       registrations.push({
         type,
-        reg_id:       r.paymentID,
-        label:        type === 'wall-magazine' ? 'Wall Magazine' : 'Project Competition',
-        name:         r.leader,
-        title:        r.projectTitle || '',
-        email:        r.leaderEmail,
+        reg_id:        r.paymentID,
+        label:         type === 'wall-magazine' ? 'Wall Magazine' : 'Project Competition',
+        title:         r.projectTitle || '',
         registered_at: r.created_at,
-        card:         cardMap[`${type}:${r.paymentID}`] || null,
+        members:       memberCards,  // first entry is always the leader (slot=null)
       });
     });
 
     olympiadRows.forEach(r => {
+      const card = cardMap[`olympiad:${r.registration_id}:null`] || null;
       registrations.push({
         type:          'olympiad',
         reg_id:        r.registration_id,
         label:         'Science Olympiad',
-        name:          r.full_name,
         title:         r.institution || '',
-        email:         r.email,
         registered_at: r.created_at,
-        card:          cardMap[`olympiad:${r.registration_id}`] || null,
+        members: [{
+          slot: null,
+          name:  r.full_name,
+          institution: r.institution,
+          email: r.email,
+          profile_completed: true,  // olympiad is individual
+          card,
+        }],
       });
     });
 
@@ -65,10 +159,95 @@ const getMyCards = async (req, res) => {
   }
 };
 
-// POST /api/id-card/generate  — { registration_type, registration_id }
+/* ─────────────────────────────────────────────────────────────
+   GET /api/id-card/member-profile/:paymentId/:slot
+   ───────────────────────────────────────────────────────────── */
+const getMemberProfile = async (req, res) => {
+  const userId = req.user.id;
+  const { paymentId, slot } = req.params;
+  try {
+    // Verify the registration belongs to this user
+    const [[reg]] = await db.query(
+      'SELECT paymentID FROM registrations WHERE paymentID = ? AND user_id = ?',
+      [paymentId, userId]
+    );
+    if (!reg) return res.status(403).json({ success: false, message: 'Not authorised' });
+
+    const [[profile]] = await db.query(
+      'SELECT * FROM team_member_profiles WHERE payment_id = ? AND member_slot = ?',
+      [paymentId, slot]
+    );
+    res.json({ success: true, profile: profile || null });
+  } catch (err) {
+    console.error('getMemberProfile error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch member profile' });
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────
+   POST /api/id-card/member-profile
+   Body: { payment_id, member_slot, ...fields }
+   ───────────────────────────────────────────────────────────── */
+const saveMemberProfile = async (req, res) => {
+  const userId = req.user.id;
+  const {
+    payment_id, member_slot,
+    father_name, father_occupation, mother_name, mother_occupation,
+    guardian_phone, address, date_of_birth, gender, class_grade,
+  } = req.body;
+
+  if (!payment_id || !member_slot) {
+    return res.status(400).json({ success: false, message: 'payment_id and member_slot are required' });
+  }
+
+  try {
+    // Verify the registration belongs to this user
+    const [[reg]] = await db.query(
+      'SELECT paymentID FROM registrations WHERE paymentID = ? AND user_id = ?',
+      [payment_id, userId]
+    );
+    if (!reg) return res.status(403).json({ success: false, message: 'Not authorised' });
+
+    const n = v => (v === undefined || v === '' ? null : v);
+
+    await db.query(`
+      INSERT INTO team_member_profiles
+        (payment_id, member_slot, father_name, father_occupation, mother_name, mother_occupation,
+         guardian_phone, address, date_of_birth, gender, class_grade, profile_completed)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+      ON DUPLICATE KEY UPDATE
+        father_name        = VALUES(father_name),
+        father_occupation  = VALUES(father_occupation),
+        mother_name        = VALUES(mother_name),
+        mother_occupation  = VALUES(mother_occupation),
+        guardian_phone     = VALUES(guardian_phone),
+        address            = VALUES(address),
+        date_of_birth      = VALUES(date_of_birth),
+        gender             = VALUES(gender),
+        class_grade        = VALUES(class_grade),
+        profile_completed  = 1,
+        updated_at         = NOW()
+    `, [
+      payment_id, member_slot,
+      n(father_name), n(father_occupation), n(mother_name), n(mother_occupation),
+      n(guardian_phone), n(address), n(date_of_birth) || null, n(gender), n(class_grade),
+    ]);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('saveMemberProfile error:', err);
+    res.status(500).json({ success: false, message: 'Failed to save member profile' });
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────
+   POST /api/id-card/generate
+   Body: { registration_type, registration_id, member_slot? }
+   member_slot is omitted/null for the leader's own card
+   ───────────────────────────────────────────────────────────── */
 const generateCard = async (req, res) => {
   const userId = req.user.id;
-  const { registration_type, registration_id } = req.body;
+  const { registration_type, registration_id, member_slot = null } = req.body;
 
   if (!registration_type || !registration_id) {
     return res.status(400).json({ success: false, message: 'registration_type and registration_id are required' });
@@ -77,18 +256,19 @@ const generateCard = async (req, res) => {
   try {
     // Return existing card if already generated
     const [existing] = await db.query(
-      'SELECT * FROM id_cards WHERE user_id = ? AND registration_type = ? AND registration_id = ?',
-      [userId, registration_type, registration_id]
+      `SELECT * FROM id_cards
+       WHERE user_id = ? AND registration_type = ? AND registration_id = ?
+         AND (member_slot <=> ?)`,
+      [userId, registration_type, registration_id, member_slot]
     );
     if (existing.length > 0) {
       const card = existing[0];
-      // Use stored GCS URL if available, else regenerate data URL as fallback
       const qrImage = card.image_url || await QRCode.toDataURL(`${VERIFY_BASE}/${card.card_uid}`);
       return res.json({ success: true, card: { ...card, qrImage } });
     }
 
-    // Verify the registration belongs to this user & get display info
     let name = '', title = '', email = '';
+
     if (registration_type === 'olympiad') {
       const [[reg]] = await db.query(
         'SELECT full_name, email, institution FROM olympiad_registrations WHERE registration_id = ? AND user_id = ?',
@@ -96,7 +276,31 @@ const generateCard = async (req, res) => {
       );
       if (!reg) return res.status(403).json({ success: false, message: 'Registration not found' });
       name = reg.full_name; email = reg.email; title = reg.institution;
+
+    } else if (member_slot) {
+      // Team member card — verify registration belongs to user
+      const [[reg]] = await db.query(
+        `SELECT member${member_slot} AS mname, institution${member_slot} AS minst, projectTitle
+         FROM registrations WHERE paymentID = ? AND user_id = ?`,
+        [registration_id, userId]
+      );
+      if (!reg || !reg.mname) {
+        return res.status(403).json({ success: false, message: 'Member slot not found on this registration' });
+      }
+      // Check member profile is complete
+      const [[prof]] = await db.query(
+        'SELECT profile_completed FROM team_member_profiles WHERE payment_id = ? AND member_slot = ?',
+        [registration_id, member_slot]
+      );
+      if (!prof || !prof.profile_completed) {
+        return res.status(400).json({ success: false, message: 'Complete member family info first' });
+      }
+      name  = reg.mname;
+      title = reg.projectTitle || '';
+      email = '';
+
     } else {
+      // Leader's own card
       const [[reg]] = await db.query(
         'SELECT leader, leaderEmail, projectTitle FROM registrations WHERE paymentID = ? AND user_id = ?',
         [registration_id, userId]
@@ -105,54 +309,27 @@ const generateCard = async (req, res) => {
       name = reg.leader; email = reg.leaderEmail; title = reg.projectTitle || '';
     }
 
-    const prefix  = registration_type === 'olympiad' ? 'OLY' : registration_type === 'wall-magazine' ? 'MAG' : 'PRJ';
-    const cardUid = `WICE-${prefix}-${uuidv4().slice(0, 8).toUpperCase()}`;
-    const verifyUrl = `${VERIFY_BASE}/${cardUid}`;
-
-    // Generate QR as PNG buffer and upload to GCS
-    let imageUrl = null;
-    try {
-      const qrBuffer = await QRCode.toBuffer(verifyUrl, {
-        type: 'png', errorCorrectionLevel: 'H', margin: 2, width: 400,
-      });
-      imageUrl = await uploadBuffer(qrBuffer, `id-cards/${cardUid}.png`, 'image/png');
-    } catch (gcsErr) {
-      console.error('GCS upload failed for ID card, falling back to data URL:', gcsErr.message);
-    }
-
-    await db.query(
-      'INSERT INTO id_cards (user_id, registration_type, registration_id, card_uid, qr_data, image_url) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, registration_type, registration_id, cardUid, verifyUrl, imageUrl]
-    );
-
-    // Return GCS URL if available, else generate data URL on the fly
-    const qrImage = imageUrl || await QRCode.toDataURL(verifyUrl);
-
-    res.json({
-      success: true,
-      card: {
-        card_uid: cardUid,
-        qr_data: verifyUrl,
-        image_url: imageUrl,
-        qrImage,
-        registration_type,
-        registration_id,
-        generated_at: new Date(),
-        name, title, email,
-      },
+    const card = await issueCard({
+      userId, registrationType: registration_type, registrationId: registration_id,
+      memberSlot: member_slot, name, email, title,
     });
+
+    res.json({ success: true, card });
   } catch (err) {
     console.error('generateCard error:', err);
     res.status(500).json({ success: false, message: 'Failed to generate ID card' });
   }
 };
 
-// GET /api/id-card/verify/:cardUid  — public, for QR scan
+/* ─────────────────────────────────────────────────────────────
+   GET /api/id-card/verify/:cardUid  — admin-only QR scan
+   ───────────────────────────────────────────────────────────── */
 const verifyCard = async (req, res) => {
   const { cardUid } = req.params;
   try {
     const [rows] = await db.query(`
-      SELECT ic.card_uid, ic.registration_type, ic.registration_id, ic.generated_at,
+      SELECT ic.card_uid, ic.registration_type, ic.registration_id,
+             ic.member_slot, ic.generated_at,
              u.id AS user_id, u.name AS user_name, u.email AS user_email
       FROM id_cards ic
       LEFT JOIN users u ON ic.user_id = u.id
@@ -164,22 +341,41 @@ const verifyCard = async (req, res) => {
     const card = rows[0];
     let detail = {};
 
-    // Fetch registration-specific detail
     if (card.registration_type === 'olympiad') {
       const [[reg]] = await db.query(
-        'SELECT full_name, institution, class_grade, phone, email, registration_id FROM olympiad_registrations WHERE registration_id = ?',
+        `SELECT full_name, institution, class_grade, phone, email, registration_id
+         FROM olympiad_registrations WHERE registration_id = ?`,
         [card.registration_id]
       );
       detail = reg || {};
+
+    } else if (card.member_slot) {
+      // Team member card
+      const [[reg]] = await db.query(
+        `SELECT member${card.member_slot} AS full_name,
+                institution${card.member_slot} AS institution,
+                projectTitle, competitionCategory, paymentID
+         FROM registrations WHERE paymentID = ?`,
+        [card.registration_id]
+      );
+      const [[prof]] = await db.query(
+        `SELECT father_name, father_occupation, mother_name, mother_occupation,
+                guardian_phone, address, date_of_birth, gender, class_grade
+         FROM team_member_profiles WHERE payment_id = ? AND member_slot = ?`,
+        [card.registration_id, card.member_slot]
+      );
+      detail = { ...(reg || {}), ...(prof || {}) };
+
     } else {
       const [[reg]] = await db.query(
-        'SELECT leader, institution, leaderEmail, leaderPhone, projectTitle, competitionCategory, paymentID FROM registrations WHERE paymentID = ?',
+        `SELECT leader, institution, leaderEmail, leaderPhone,
+                projectTitle, competitionCategory, paymentID
+         FROM registrations WHERE paymentID = ?`,
         [card.registration_id]
       );
       detail = reg || {};
     }
 
-    // Attendance status
     const [attRows] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
 
     res.json({ success: true, data: { ...card, detail, attendance: attRows[0] || null } });
@@ -189,21 +385,24 @@ const verifyCard = async (req, res) => {
   }
 };
 
-// DELETE /api/id-card/delete — user deletes their own card to regenerate
+/* ─────────────────────────────────────────────────────────────
+   DELETE /api/id-card/delete — admin only
+   ───────────────────────────────────────────────────────────── */
 const deleteCard = async (req, res) => {
   const userId = req.user.id;
-  const { registration_type, registration_id } = req.body;
+  const { registration_type, registration_id, member_slot = null } = req.body;
   if (!registration_type || !registration_id) {
     return res.status(400).json({ success: false, message: 'registration_type and registration_id required' });
   }
   try {
     const [existing] = await db.query(
-      'SELECT * FROM id_cards WHERE user_id = ? AND registration_type = ? AND registration_id = ?',
-      [userId, registration_type, registration_id]
+      `SELECT * FROM id_cards
+       WHERE user_id = ? AND registration_type = ? AND registration_id = ?
+         AND (member_slot <=> ?)`,
+      [userId, registration_type, registration_id, member_slot]
     );
     if (!existing.length) return res.status(404).json({ success: false, message: 'Card not found' });
 
-    // Delete QR image from GCS if stored there
     const card = existing[0];
     if (card.image_url) {
       const { deleteFile } = require('../utils/gcsStorage');
@@ -211,8 +410,10 @@ const deleteCard = async (req, res) => {
     }
 
     await db.query(
-      'DELETE FROM id_cards WHERE user_id = ? AND registration_type = ? AND registration_id = ?',
-      [userId, registration_type, registration_id]
+      `DELETE FROM id_cards
+       WHERE user_id = ? AND registration_type = ? AND registration_id = ?
+         AND (member_slot <=> ?)`,
+      [userId, registration_type, registration_id, member_slot]
     );
     res.json({ success: true });
   } catch (err) {
@@ -221,4 +422,4 @@ const deleteCard = async (req, res) => {
   }
 };
 
-module.exports = { getMyCards, generateCard, verifyCard, deleteCard };
+module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile };
