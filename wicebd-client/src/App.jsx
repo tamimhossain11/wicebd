@@ -23,12 +23,20 @@ import { ToastContainer } from 'react-toastify';
 import { Helmet } from 'react-helmet';
 import { useState } from 'react';
 
+const INTRO_KEY = 'wice_intro_shown';
+
 function App() {
-  const [showIntro, setShowIntro] = useState(true);
+  // Only show intro on a fresh browser session (not on every page refresh)
+  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem(INTRO_KEY));
+
+  const handleIntroComplete = () => {
+    sessionStorage.setItem(INTRO_KEY, '1');
+    setShowIntro(false);
+  };
 
   return (
     <>
-      {showIntro && <IntroVideo onComplete={() => setShowIntro(false)} />}
+      {showIntro && <IntroVideo onComplete={handleIntroComplete} />}
       <div className='app-wrapper'>
         <Helmet>
           <title>WICEBD - </title>

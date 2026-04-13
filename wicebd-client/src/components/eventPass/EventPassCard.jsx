@@ -348,9 +348,10 @@ const MemberProfileForm = ({ paymentId, slot, onSaved }) => {
    MemberSlot — one row per team member (or leader)
    ───────────────────────────────────────────────────────────── */
 const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
-  const [loading, setLoading] = useState(false);
-  const [card, setCard]       = useState(member.card);
+  const [loading, setLoading]   = useState(false);
+  const [card, setCard]         = useState(member.card);
   const [profDone, setProfDone] = useState(member.profile_completed);
+  const [expanded, setExpanded] = useState(false);   // card starts collapsed
   const meta = TYPE_META[reg.type] || TYPE_META.project;
   const isLeader = member.slot === null;
 
@@ -362,7 +363,7 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
         registration_id:   reg.reg_id,
         member_slot:       member.slot,
       });
-      if (data.success) { setCard(data.card); onGenerated?.(); }
+      if (data.success) { setCard(data.card); setExpanded(true); onGenerated?.(); }
     } catch { /* user can retry */ }
     finally { setLoading(false); }
   };
@@ -382,7 +383,7 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
       border: `1px solid ${isLeader ? meta.color + '30' : 'rgba(255,255,255,0.07)'}`,
     }}>
       {/* Member header row */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: card ? 2.5 : 0 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
           <Box sx={{
             width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
@@ -396,9 +397,7 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
           </Box>
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>
-                {member.name}
-              </Typography>
+              <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>{member.name}</Typography>
               {isLeader && (
                 <Chip label="Leader" size="small"
                   sx={{ background: `${meta.color}20`, color: meta.color, border: `1px solid ${meta.color}33`, fontSize: 10, height: 18, fontWeight: 700 }} />
@@ -416,11 +415,24 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
         {/* Action area */}
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
           {card ? (
-            <Chip
-              icon={<CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />}
-              label="Card Generated" size="small"
-              sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 11, fontWeight: 700 }}
-            />
+            /* Card exists — show toggle button */
+            <Button
+              onClick={() => setExpanded(e => !e)}
+              size="small"
+              startIcon={<CheckCircle sx={{ fontSize: '14px !important', color: '#10b981 !important' }} />}
+              endIcon={expanded
+                ? <ExpandLess sx={{ fontSize: 14 }} />
+                : <ExpandMore sx={{ fontSize: 14 }} />}
+              sx={{
+                background: expanded ? '#10b98118' : 'rgba(16,185,129,0.08)',
+                border: '1px solid #10b98130',
+                color: '#10b981', textTransform: 'none', fontWeight: 700, fontSize: 12,
+                borderRadius: 2, px: 1.8, py: 0.7,
+                '&:hover': { background: '#10b98122', borderColor: '#10b98150' },
+              }}
+            >
+              {expanded ? 'Hide Card' : 'View ID Card'}
+            </Button>
           ) : canGenerate ? (
             <Button
               onClick={generate} disabled={loading} size="small"
@@ -436,26 +448,24 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
             >
               {loading ? 'Generating…' : 'Generate ID Card'}
             </Button>
-          ) : !isLeader ? (
-            /* Member needs family info first */
-            null
-          ) : (
+          ) : !isLeader ? null : (
             <Chip label="Complete profile first" size="small"
               sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }} />
           )}
 
           {/* Family info form for non-leader members (only if no card yet) */}
           {!isLeader && !card && (
-            <MemberProfileForm
-              paymentId={reg.reg_id}
-              slot={member.slot}
-              onSaved={handleProfileSaved}
-            />
+            <MemberProfileForm paymentId={reg.reg_id} slot={member.slot} onSaved={handleProfileSaved} />
           )}
         </Box>
       </Box>
 
-      {card && <IDCardVisual member={member} reg={reg} card={card} />}
+      {/* Collapsible card visual */}
+      <Collapse in={!!(card && expanded)} timeout={300}>
+        <Box sx={{ mt: 2.5 }}>
+          <IDCardVisual member={member} reg={reg} card={card} />
+        </Box>
+      </Collapse>
     </Box>
   );
 };

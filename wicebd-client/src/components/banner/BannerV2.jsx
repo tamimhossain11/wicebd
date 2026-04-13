@@ -13,12 +13,6 @@ const YoutubeBg = () => {
     const END = 20;
 
     useEffect(() => {
-        if (!window.YT) {
-            const tag = document.createElement('script');
-            tag.src = 'https://www.youtube.com/iframe_api';
-            document.head.appendChild(tag);
-        }
-
         const initPlayer = () => {
             playerRef.current = new window.YT.Player(containerRef.current, {
                 videoId: VIDEO_ID,
@@ -47,11 +41,25 @@ const YoutubeBg = () => {
             });
         };
 
-        if (window.YT && window.YT.Player) {
-            initPlayer();
+        // Defer YT API load until browser is idle — never blocks first paint
+        const loadYT = () => {
+            if (window.YT && window.YT.Player) {
+                initPlayer();
+            } else {
+                if (!window.YT) {
+                    const tag = document.createElement('script');
+                    tag.src = 'https://www.youtube.com/iframe_api';
+                    document.head.appendChild(tag);
+                }
+                const prev = window.onYouTubeIframeAPIReady;
+                window.onYouTubeIframeAPIReady = () => { if (prev) prev(); initPlayer(); };
+            }
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadYT, { timeout: 3000 });
         } else {
-            const prev = window.onYouTubeIframeAPIReady;
-            window.onYouTubeIframeAPIReady = () => { if (prev) prev(); initPlayer(); };
+            setTimeout(loadYT, 500);
         }
 
         return () => { clearInterval(intervalRef.current); playerRef.current?.destroy?.(); };

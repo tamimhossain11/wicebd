@@ -1,148 +1,113 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import Home2 from './pages/homePages/Home2';
-import AboutUs from './pages/innerPages/AboutUs';
-import Pricing from './pages/innerPages/Pricing';
-import Faq from './pages/innerPages/Faq';
-import Gallery from './pages/innerPages/Gallery';
-import ComingSoon from './pages/innerPages/ComingSoon';
-import Speakers from './pages/innerPages/Speakers';
-import SpeakersDetail from './pages/innerPages/SpeakersDetail';
-import Schedule from './pages/innerPages/Schedule';
-import EventDetails from './pages/innerPages/EventDetails';
-import BuyTicket from './pages/innerPages/BuyTicket';
-import BlogSidebar from './pages/innerPages/BlogSidebar';
-import BlogGrid from './pages/innerPages/BlogGrid';
-import BlogSingle from './pages/innerPages/BlogSingle';
-import Contact from './pages/innerPages/Contact';
-import ErrorPage from './pages/innerPages/ErrorPage';
-import PaymentCallback from './pages/callback/PaymentCallback';
-import CheckoutPage from './pages/checkout/CheckoutPage';
-import ThankYou from './pages/callback/PaymentSuccess';
-import PaymentError from './pages/callback/PaymentError';
-import PaymentCancelled from './pages/callback/PaymentCancelled';
 import AdminRoute from './components/admin/AdminRoute';
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import Olympiad from './pages/innerPages/Olympiad';
-import QrCode from './pages/admin/QrCode'
-import SelectedTeams from './pages/innerPages/SelectedTeams';
-import Announcements from './pages/innerPages/Announcements';
-import BlogDetails from './pages/innerPages/BlogDetails';
-import InternationalTeam from './pages/innerPages/InternationalTeam';
-import OrganizingPanel from './pages/innerPages/OrganizingPanel';
-import RegistrationPage from './pages/innerPages/RegistrationPage';
-import Partners from './pages/innerPages/Partners';
-import SignIn from './pages/userAuth/SignIn';
-import SignUp from './pages/userAuth/SignUp';
-import UserProfile from './pages/userAuth/UserProfile';
-import UserDashboard from './pages/userDashboard/UserDashboard';
-import SurpriseSegment from './pages/innerPages/SurpriseSegment';
-import UserRoute from './components/user/UserRoute';
-import OlympiadExamPortal from './pages/userDashboard/OlympiadExamPortal';
-import PrivacyPolicy from './pages/innerPages/PrivacyPolicy';
-import TermsAndConditions from './pages/innerPages/TermsAndConditions';
-import ReturnRefundPolicy from './pages/innerPages/ReturnRefundPolicy';
-import DeliveryPolicy from './pages/innerPages/DeliveryPolicy';
+import UserRoute  from './components/user/UserRoute';
 
+/* ── Lazy-load every page so Vite splits each into its own chunk ── */
+const Home2              = lazy(() => import('./pages/homePages/Home2'));
+const AboutUs            = lazy(() => import('./pages/innerPages/AboutUs'));
+const Pricing            = lazy(() => import('./pages/innerPages/Pricing'));
+const Faq                = lazy(() => import('./pages/innerPages/Faq'));
+const Gallery            = lazy(() => import('./pages/innerPages/Gallery'));
+const ComingSoon         = lazy(() => import('./pages/innerPages/ComingSoon'));
+const Speakers           = lazy(() => import('./pages/innerPages/Speakers'));
+const SpeakersDetail     = lazy(() => import('./pages/innerPages/SpeakersDetail'));
+const Schedule           = lazy(() => import('./pages/innerPages/Schedule'));
+const EventDetails       = lazy(() => import('./pages/innerPages/EventDetails'));
+const BlogSidebar        = lazy(() => import('./pages/innerPages/BlogSidebar'));
+const BlogGrid           = lazy(() => import('./pages/innerPages/BlogGrid'));
+const BlogSingle         = lazy(() => import('./pages/innerPages/BlogSingle'));
+const Contact            = lazy(() => import('./pages/innerPages/Contact'));
+const ErrorPage          = lazy(() => import('./pages/innerPages/ErrorPage'));
+const PaymentCallback    = lazy(() => import('./pages/callback/PaymentCallback'));
+const CheckoutPage       = lazy(() => import('./pages/checkout/CheckoutPage'));
+const ThankYou           = lazy(() => import('./pages/callback/PaymentSuccess'));
+const PaymentError       = lazy(() => import('./pages/callback/PaymentError'));
+const PaymentCancelled   = lazy(() => import('./pages/callback/PaymentCancelled'));
+const AdminDashboard     = lazy(() => import('./pages/admin/AdminDashboard'));
+const QrCode             = lazy(() => import('./pages/admin/QrCode'));
+const SelectedTeams      = lazy(() => import('./pages/innerPages/SelectedTeams'));
+const Announcements      = lazy(() => import('./pages/innerPages/Announcements'));
+const BlogDetails        = lazy(() => import('./pages/innerPages/BlogDetails'));
+const InternationalTeam  = lazy(() => import('./pages/innerPages/InternationalTeam'));
+const OrganizingPanel    = lazy(() => import('./pages/innerPages/OrganizingPanel'));
+const RegistrationPage   = lazy(() => import('./pages/innerPages/RegistrationPage'));
+const Partners           = lazy(() => import('./pages/innerPages/Partners'));
+const SignIn             = lazy(() => import('./pages/userAuth/SignIn'));
+const SignUp             = lazy(() => import('./pages/userAuth/SignUp'));
+const UserProfile        = lazy(() => import('./pages/userAuth/UserProfile'));
+const UserDashboard      = lazy(() => import('./pages/userDashboard/UserDashboard'));
+const SurpriseSegment    = lazy(() => import('./pages/innerPages/SurpriseSegment'));
+const OlympiadExamPortal = lazy(() => import('./pages/userDashboard/OlympiadExamPortal'));
+const PrivacyPolicy      = lazy(() => import('./pages/innerPages/PrivacyPolicy'));
+const TermsAndConditions = lazy(() => import('./pages/innerPages/TermsAndConditions'));
+const ReturnRefundPolicy = lazy(() => import('./pages/innerPages/ReturnRefundPolicy'));
+const DeliveryPolicy     = lazy(() => import('./pages/innerPages/DeliveryPolicy'));
 
-const Routers = () => {
-    return (
-        <>
-            <Routes>
-                <Route path='/' element={<Home2 />}></Route>
-                <Route path='/about-us' element={<AboutUs />}></Route>
-                <Route path='/pricing' element={<Pricing />}></Route>
-                <Route path='/faqs' element={<Faq />}></Route>
-                <Route path='/gallery' element={<Gallery />}></Route>
-                <Route path='/coming-soon' element={<ComingSoon />}></Route>
-                <Route path='/speakers' element={<Speakers />}></Route>
-                <Route path='/speakers-detail/:id' element={<SpeakersDetail />}></Route>
-                <Route path='/schedule' element={<Schedule />}></Route>
-                <Route path='/event-detail/:parentId/:childId' element={<EventDetails />}></Route>
-                <Route path='/buy-ticket' element={<Navigate to="/registration" replace />} />
-                <Route
-                  path='/registration'
-                  element={
-                    <UserRoute>
-                      <RegistrationPage />
-                    </UserRoute>
-                  }
-                />
-                <Route path='/selected-teams' element={<SelectedTeams />}></Route>
-                <Route path='/announcements' element={<Announcements />}></Route>
-                <Route path='/blog-details' element={<BlogDetails />}></Route>
-                <Route path='/international-team' element={<InternationalTeam />}></Route>
-                <Route path='/organizing-panel' element={<OrganizingPanel />}></Route>
-                <Route path='/blog-sidebar' element={<BlogSidebar />}></Route>
-                <Route path='/blog-grid' element={<BlogGrid />}></Route>
-                <Route path='/blog-single/:id' element={<BlogSingle />}></Route>
-                <Route path='/login' element={<Navigate to="/sign-in" replace />} />
-                {/* User Auth & Dashboard */}
-                <Route path='/sign-in' element={<SignIn />} />
-                <Route path='/sign-up' element={<SignUp />} />
-                <Route
-                  path='/dashboard'
-                  element={
-                    <UserRoute>
-                      <UserDashboard />
-                    </UserRoute>
-                  }
-                />
-                <Route
-                  path='/profile'
-                  element={
-                    <UserRoute>
-                      <UserProfile />
-                    </UserRoute>
-                  }
-                />
-                <Route path='/surprise-segment' element={<SurpriseSegment />} />
-                <Route path='/partners' element={<Partners />} />
-                <Route path='/contact' element={<Contact />}></Route>
-                <Route path='/privacy-policy' element={<PrivacyPolicy />} />
-                <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
-                <Route path='/return-refund-policy' element={<ReturnRefundPolicy />} />
-                <Route path='/delivery-policy' element={<DeliveryPolicy />} />
-                <Route path='/checkout' element={<CheckoutPage />} />
-                <Route path='/callback' element={<PaymentCallback />}></Route>
-                <Route path='/thank-you' element={<ThankYou />}></Route>
-                <Route path="/payment-error" element={<PaymentError />} />
-                <Route path="/payment-cancelled" element={<PaymentCancelled />} />
-                <Route path="/olympiad" element={<Navigate to="/sign-in" replace />} />
-                <Route
-                  path='/olympiad-exam'
-                  element={
-                    <UserRoute>
-                      <OlympiadExamPortal />
-                    </UserRoute>
-                  }
-                />
-                {/*Admin Routes */}
-                <Route path="/admin/login" element={<Navigate to="/sign-in" replace />} />
-                <Route
-                    path="/admin/dashboard"
-                    element={
-                        <AdminRoute>
-                            <AdminDashboard />
+/* ── Minimal spinner shown while a lazy chunk is downloading ── */
+const PageLoader = () => (
+  <div style={{
+    minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: '#0d0006',
+  }}>
+    <div style={{
+      width: 40, height: 40, borderRadius: '50%',
+      border: '3px solid rgba(128,0,32,0.2)',
+      borderTopColor: '#800020',
+      animation: 'spin 0.7s linear infinite',
+    }} />
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
 
-                        </AdminRoute>
-                    }
-                />
-
-                <Route
-                    path="/admin/qr-code"
-                    element={
-                        <AdminRoute>
-                            <QrCode />
-                        </AdminRoute>
-                    }
-                />
-
-                <Route path='*' element={<ErrorPage />}></Route>
-            </Routes>
-        </>
-    );
-};
+const Routers = () => (
+  <Suspense fallback={<PageLoader />}>
+    <Routes>
+      <Route path='/'            element={<Home2 />} />
+      <Route path='/about-us'    element={<AboutUs />} />
+      <Route path='/pricing'     element={<Pricing />} />
+      <Route path='/faqs'        element={<Faq />} />
+      <Route path='/gallery'     element={<Gallery />} />
+      <Route path='/coming-soon' element={<ComingSoon />} />
+      <Route path='/speakers'    element={<Speakers />} />
+      <Route path='/speakers-detail/:id' element={<SpeakersDetail />} />
+      <Route path='/schedule'    element={<Schedule />} />
+      <Route path='/event-detail/:parentId/:childId' element={<EventDetails />} />
+      <Route path='/buy-ticket'  element={<Navigate to="/registration" replace />} />
+      <Route path='/registration' element={<UserRoute><RegistrationPage /></UserRoute>} />
+      <Route path='/selected-teams'     element={<SelectedTeams />} />
+      <Route path='/announcements'      element={<Announcements />} />
+      <Route path='/blog-details'       element={<BlogDetails />} />
+      <Route path='/international-team' element={<InternationalTeam />} />
+      <Route path='/organizing-panel'   element={<OrganizingPanel />} />
+      <Route path='/blog-sidebar'       element={<BlogSidebar />} />
+      <Route path='/blog-grid'          element={<BlogGrid />} />
+      <Route path='/blog-single/:id'    element={<BlogSingle />} />
+      <Route path='/login'    element={<Navigate to="/sign-in" replace />} />
+      <Route path='/sign-in'  element={<SignIn />} />
+      <Route path='/sign-up'  element={<SignUp />} />
+      <Route path='/dashboard' element={<UserRoute><UserDashboard /></UserRoute>} />
+      <Route path='/profile'   element={<UserRoute><UserProfile /></UserRoute>} />
+      <Route path='/surprise-segment' element={<SurpriseSegment />} />
+      <Route path='/partners'         element={<Partners />} />
+      <Route path='/contact'          element={<Contact />} />
+      <Route path='/privacy-policy'        element={<PrivacyPolicy />} />
+      <Route path='/terms-and-conditions'  element={<TermsAndConditions />} />
+      <Route path='/return-refund-policy'  element={<ReturnRefundPolicy />} />
+      <Route path='/delivery-policy'       element={<DeliveryPolicy />} />
+      <Route path='/checkout'          element={<CheckoutPage />} />
+      <Route path='/callback'          element={<PaymentCallback />} />
+      <Route path='/thank-you'         element={<ThankYou />} />
+      <Route path='/payment-error'     element={<PaymentError />} />
+      <Route path='/payment-cancelled' element={<PaymentCancelled />} />
+      <Route path='/olympiad'      element={<Navigate to="/sign-in" replace />} />
+      <Route path='/olympiad-exam' element={<UserRoute><OlympiadExamPortal /></UserRoute>} />
+      <Route path='/admin/login'   element={<Navigate to="/sign-in" replace />} />
+      <Route path='/admin/dashboard' element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path='/admin/qr-code'   element={<AdminRoute><QrCode /></AdminRoute>} />
+      <Route path='*' element={<ErrorPage />} />
+    </Routes>
+  </Suspense>
+);
 
 export default Routers;
