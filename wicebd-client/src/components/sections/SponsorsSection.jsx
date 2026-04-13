@@ -52,13 +52,13 @@ const PARTNERS = [
     {
         name: 'Northern University Bangladesh',
         logo: '/images/partners/nub.webp',
-        cat: 'Host Institution',
+        cat: 'Hosting partner',
     },  
     {
-        name: 'Dhaka Imperial College',
-        logo: '/images/partners/Dhaka_Imperial_College.jpg',
-        cat: 'Partner Institution',
-    },
+        name: 'NUB Computer Club',
+        logo: '/images/partners/nubcc.jpeg',
+        cat: 'Event partner',
+    },  
     {
         name: 'SEGI University',
         logo: '/images/partners/SEGi_University_Logo1.jpg',
@@ -78,6 +78,11 @@ const PARTNERS = [
         name: 'IYSA',
         logo: '/images/partners/iysa.png',
         cat: 'International Partner',
+    },
+     {
+        name: 'Dhaka Imperial College',
+        logo: '/images/partners/Dhaka_Imperial_College.jpg',
+        cat: 'Partner Institution',
     },
     {
         name: 'Jagoron',
