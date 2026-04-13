@@ -7,29 +7,9 @@ export default defineConfig({
     devSourcemap: true,
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          // React core — smallest, loaded first
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
-            return 'react-core';
-          }
-          // MUI — large, keep isolated so it caches independently
-          if (id.includes('node_modules/@mui/')) {
-            return 'mui';
-          }
-          // Framer Motion
-          if (id.includes('node_modules/framer-motion')) {
-            return 'framer-motion';
-          }
-          // Everything else in node_modules → vendor chunk
-          if (id.includes('node_modules/')) {
-            return 'vendor';
-          }
-        },
-      },
-    },
-    // Raise the warning threshold slightly — MUI is legitimately large
+    // Let Vite/Rollup handle vendor chunking automatically — manual splitting
+    // causes React.createContext to be undefined when peer deps load out of order.
+    // The real perf win is already in place via React.lazy route splitting.
     chunkSizeWarningLimit: 700,
   },
 })
