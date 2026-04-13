@@ -260,7 +260,7 @@ const BannerV2 = () => {
                     <div className="content-box content-box-blur wice-banner-content-inner">
                         {/* Left — text */}
                         <div style={{ flex: 1 }}>
-                            <span className="title">8th Edition &nbsp;·&nbsp; Date TBA &nbsp;·&nbsp; Dhaka</span>
+                            <span className="title">8th Edition &nbsp;·&nbsp; 9th may &nbsp;·&nbsp; Northern University</span>
                             <h2 className="wice-banner-title" style={{ margin: '12px 0 0' }}>World Invention<br />Competition &amp; Exhibition<br />Bangladesh</h2>
                         </div>
 
