@@ -43,7 +43,7 @@ const initiatePayment = async (req, res) => {
 
     // 2. Determine amount based on competition category + extra members (300 BDT each beyond member3)
     const cat = registration.competitionCategory.toLowerCase();
-    const baseAmount = cat === 'megazine' ? 399 : cat === 'olympiad' ? 50 : 999;
+    const baseAmount = cat === 'megazine' ? 399 : cat === 'olympiad' ? 50 : 1200;
     const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
     const extraCharge = cat === 'megazine' ? 120 : 300;
     let amount = baseAmount + (extraMembers * extraCharge);
@@ -338,7 +338,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
     const isWallMag = cat === 'megazine';
     const categoryLabel = isWallMag ? 'Wall Magazine' : 'Project';
     const totalAmount = paymentDetails.amount ?? (() => {
-      const base = isWallMag ? 399 : 999;
+      const base = isWallMag ? 399 : 1200;
       const extraCharge = isWallMag ? 120 : 300;
       const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
       return base + extraMembers * extraCharge;
