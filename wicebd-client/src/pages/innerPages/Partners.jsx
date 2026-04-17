@@ -56,6 +56,7 @@ const PARTNER_CATEGORIES = [
         cat: 'Government & Institutional',
         color: '#c0002a',
         partners: [
+            {/*
             {
                 name: 'Ministry of Education',
                 logo: '/images/partners/ministry_of_education.webp',
@@ -75,6 +76,7 @@ const PARTNER_CATEGORIES = [
                 desc: 'National institution supporting youth development and creative talent across Bangladesh.',
                 type: 'Youth Institution',
             },
+            */}
         ],
     },
     {

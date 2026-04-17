@@ -64,6 +64,7 @@ const PARTNERS = [
         logo: '/images/partners/SEGi_University_Logo1.jpg',
         cat: 'Global Host',
     },
+    {/* 
     {
         name: 'Ministry of Education',
         logo: '/images/partners/ministry_of_education.webp',
@@ -74,6 +75,7 @@ const PARTNERS = [
         logo: '/images/partners/Information_and_Communication_Technology_Division.svg.png',
         cat: 'Govt. Partner',
     },
+    */},
     {
         name: 'IYSA',
         logo: '/images/partners/iysa.png',
