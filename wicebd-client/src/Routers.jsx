@@ -3,46 +3,59 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import AdminRoute from './components/admin/AdminRoute';
 import UserRoute  from './components/user/UserRoute';
 
+/* ── After a deploy, old chunk hashes 404. Reload once to pick up the new index.html. ── */
+const lazyWithReload = (importFn) =>
+  lazy(() =>
+    importFn().catch((err) => {
+      const reloadKey = 'chunk_reload_attempted';
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, '1');
+        window.location.reload();
+      }
+      throw err;
+    })
+  );
+
 /* ── Lazy-load every page so Vite splits each into its own chunk ── */
-const Home2              = lazy(() => import('./pages/homePages/Home2'));
-const AboutUs            = lazy(() => import('./pages/innerPages/AboutUs'));
-const Pricing            = lazy(() => import('./pages/innerPages/Pricing'));
-const Faq                = lazy(() => import('./pages/innerPages/Faq'));
-const Gallery            = lazy(() => import('./pages/innerPages/Gallery'));
-const ComingSoon         = lazy(() => import('./pages/innerPages/ComingSoon'));
-const Speakers           = lazy(() => import('./pages/innerPages/Speakers'));
-const SpeakersDetail     = lazy(() => import('./pages/innerPages/SpeakersDetail'));
-const Schedule           = lazy(() => import('./pages/innerPages/Schedule'));
-const EventDetails       = lazy(() => import('./pages/innerPages/EventDetails'));
-const BlogSidebar        = lazy(() => import('./pages/innerPages/BlogSidebar'));
-const BlogGrid           = lazy(() => import('./pages/innerPages/BlogGrid'));
-const BlogSingle         = lazy(() => import('./pages/innerPages/BlogSingle'));
-const Contact            = lazy(() => import('./pages/innerPages/Contact'));
-const ErrorPage          = lazy(() => import('./pages/innerPages/ErrorPage'));
-const PaymentCallback    = lazy(() => import('./pages/callback/PaymentCallback'));
-const CheckoutPage       = lazy(() => import('./pages/checkout/CheckoutPage'));
-const ThankYou           = lazy(() => import('./pages/callback/PaymentSuccess'));
-const PaymentError       = lazy(() => import('./pages/callback/PaymentError'));
-const PaymentCancelled   = lazy(() => import('./pages/callback/PaymentCancelled'));
-const AdminDashboard     = lazy(() => import('./pages/admin/AdminDashboard'));
-const QrCode             = lazy(() => import('./pages/admin/QrCode'));
-const SelectedTeams      = lazy(() => import('./pages/innerPages/SelectedTeams'));
-const Announcements      = lazy(() => import('./pages/innerPages/Announcements'));
-const BlogDetails        = lazy(() => import('./pages/innerPages/BlogDetails'));
-const InternationalTeam  = lazy(() => import('./pages/innerPages/InternationalTeam'));
-const OrganizingPanel    = lazy(() => import('./pages/innerPages/OrganizingPanel'));
-const RegistrationPage   = lazy(() => import('./pages/innerPages/RegistrationPage'));
-const Partners           = lazy(() => import('./pages/innerPages/Partners'));
-const SignIn             = lazy(() => import('./pages/userAuth/SignIn'));
-const SignUp             = lazy(() => import('./pages/userAuth/SignUp'));
-const UserProfile        = lazy(() => import('./pages/userAuth/UserProfile'));
-const UserDashboard      = lazy(() => import('./pages/userDashboard/UserDashboard'));
-const SurpriseSegment    = lazy(() => import('./pages/innerPages/SurpriseSegment'));
-const OlympiadExamPortal = lazy(() => import('./pages/userDashboard/OlympiadExamPortal'));
-const PrivacyPolicy      = lazy(() => import('./pages/innerPages/PrivacyPolicy'));
-const TermsAndConditions = lazy(() => import('./pages/innerPages/TermsAndConditions'));
-const ReturnRefundPolicy = lazy(() => import('./pages/innerPages/ReturnRefundPolicy'));
-const DeliveryPolicy     = lazy(() => import('./pages/innerPages/DeliveryPolicy'));
+const Home2              = lazyWithReload(() => import('./pages/homePages/Home2'));
+const AboutUs            = lazyWithReload(() => import('./pages/innerPages/AboutUs'));
+const Pricing            = lazyWithReload(() => import('./pages/innerPages/Pricing'));
+const Faq                = lazyWithReload(() => import('./pages/innerPages/Faq'));
+const Gallery            = lazyWithReload(() => import('./pages/innerPages/Gallery'));
+const ComingSoon         = lazyWithReload(() => import('./pages/innerPages/ComingSoon'));
+const Speakers           = lazyWithReload(() => import('./pages/innerPages/Speakers'));
+const SpeakersDetail     = lazyWithReload(() => import('./pages/innerPages/SpeakersDetail'));
+const Schedule           = lazyWithReload(() => import('./pages/innerPages/Schedule'));
+const EventDetails       = lazyWithReload(() => import('./pages/innerPages/EventDetails'));
+const BlogSidebar        = lazyWithReload(() => import('./pages/innerPages/BlogSidebar'));
+const BlogGrid           = lazyWithReload(() => import('./pages/innerPages/BlogGrid'));
+const BlogSingle         = lazyWithReload(() => import('./pages/innerPages/BlogSingle'));
+const Contact            = lazyWithReload(() => import('./pages/innerPages/Contact'));
+const ErrorPage          = lazyWithReload(() => import('./pages/innerPages/ErrorPage'));
+const PaymentCallback    = lazyWithReload(() => import('./pages/callback/PaymentCallback'));
+const CheckoutPage       = lazyWithReload(() => import('./pages/checkout/CheckoutPage'));
+const ThankYou           = lazyWithReload(() => import('./pages/callback/PaymentSuccess'));
+const PaymentError       = lazyWithReload(() => import('./pages/callback/PaymentError'));
+const PaymentCancelled   = lazyWithReload(() => import('./pages/callback/PaymentCancelled'));
+const AdminDashboard     = lazyWithReload(() => import('./pages/admin/AdminDashboard'));
+const QrCode             = lazyWithReload(() => import('./pages/admin/QrCode'));
+const SelectedTeams      = lazyWithReload(() => import('./pages/innerPages/SelectedTeams'));
+const Announcements      = lazyWithReload(() => import('./pages/innerPages/Announcements'));
+const BlogDetails        = lazyWithReload(() => import('./pages/innerPages/BlogDetails'));
+const InternationalTeam  = lazyWithReload(() => import('./pages/innerPages/InternationalTeam'));
+const OrganizingPanel    = lazyWithReload(() => import('./pages/innerPages/OrganizingPanel'));
+const RegistrationPage   = lazyWithReload(() => import('./pages/innerPages/RegistrationPage'));
+const Partners           = lazyWithReload(() => import('./pages/innerPages/Partners'));
+const SignIn             = lazyWithReload(() => import('./pages/userAuth/SignIn'));
+const SignUp             = lazyWithReload(() => import('./pages/userAuth/SignUp'));
+const UserProfile        = lazyWithReload(() => import('./pages/userAuth/UserProfile'));
+const UserDashboard      = lazyWithReload(() => import('./pages/userDashboard/UserDashboard'));
+const SurpriseSegment    = lazyWithReload(() => import('./pages/innerPages/SurpriseSegment'));
+const OlympiadExamPortal = lazyWithReload(() => import('./pages/userDashboard/OlympiadExamPortal'));
+const PrivacyPolicy      = lazyWithReload(() => import('./pages/innerPages/PrivacyPolicy'));
+const TermsAndConditions = lazyWithReload(() => import('./pages/innerPages/TermsAndConditions'));
+const ReturnRefundPolicy = lazyWithReload(() => import('./pages/innerPages/ReturnRefundPolicy'));
+const DeliveryPolicy     = lazyWithReload(() => import('./pages/innerPages/DeliveryPolicy'));
 
 /* ── Minimal spinner shown while a lazy chunk is downloading ── */
 const PageLoader = () => (
