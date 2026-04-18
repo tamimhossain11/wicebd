@@ -215,6 +215,8 @@ export default function AdminDashboard() {
   const [editingAdvisor, setEditingAdvisor] = useState(null);
 
   // Campus Ambassadors
+  const [caSearchQuery, setCaSearchQuery]   = useState('');
+  const [clubSearchQuery, setClubSearchQuery] = useState('');
   const [caList, setCaList]           = useState([]);
   const [caStats, setCaStats]         = useState([]);
   const [caDialog, setCaDialog]       = useState(false);
@@ -1269,33 +1271,49 @@ export default function AdminDashboard() {
                 ))}
               </Box>
 
-              {caView === 'list' && (caList.length === 0 ? (
-                <Paper sx={{ p: 8, textAlign: 'center', background: CARD, borderRadius: 3, border: `1px solid ${BORDER}` }}>
-                  <EmojiPeople sx={{ fontSize: 56, color: 'rgba(255,255,255,0.1)', mb: 2 }} />
-                  <Typography color="rgba(255,255,255,0.35)">No campus ambassadors yet</Typography>
-                </Paper>
-              ) : (
-                <Grid container spacing={2}>
-                  {caList.map(ca => (
-                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={ca.id}>
-                      <Paper sx={{ p: 2.5, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, '&:hover': { borderColor: `${RED}40` }, transition: 'border-color 0.2s' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Chip label={ca.code} size="small" sx={{ background: `${RED}18`, color: RED, border: `1px solid ${RED}30`, fontSize: 11, fontWeight: 700, mb: 1 }} />
-                            <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14 }}>{ca.name}</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, mt: 0.5 }}>{ca.institution_name}</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.3 }}>{ca.institution_address}</Typography>
-                          </Box>
-                          <IconButton size="small" onClick={async () => { if (!window.confirm(`Delete ${ca.name}?`)) return; await api.delete(`/api/campus-ambassador/${ca.id}`); fetchCA(); }}
-                            sx={{ color: 'rgba(255,255,255,0.2)', '&:hover': { color: RED } }}>
-                            <Delete sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        </Box>
+              {caView === 'list' && (() => {
+                const caFiltered = caSearchQuery.trim()
+                  ? caList.filter(ca => [ca.name, ca.code, ca.institution_name, ca.institution_address].some(v => v && String(v).toLowerCase().includes(caSearchQuery.toLowerCase())))
+                  : caList;
+                return (
+                  <>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5, background: '#0e0e1c', border: `1.5px solid ${caSearchQuery ? RED : BORDER}`, borderRadius: 2.5, px: 1.5, py: 0.8, transition: 'border-color 0.2s', '&:focus-within': { borderColor: RED } }}>
+                      <Search sx={{ color: caSearchQuery ? RED : 'rgba(255,255,255,0.3)', fontSize: 20, flexShrink: 0 }} />
+                      <input value={caSearchQuery} onChange={e => setCaSearchQuery(e.target.value)}
+                        placeholder="Search by name, code, or institution…"
+                        style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: 14, fontFamily: 'inherit' }} />
+                      {caSearchQuery && <Box onClick={() => setCaSearchQuery('')} sx={{ cursor: 'pointer', display: 'flex', color: 'rgba(255,255,255,0.3)', '&:hover': { color: '#fff' } }}><Clear sx={{ fontSize: 16 }} /></Box>}
+                    </Box>
+                    {caFiltered.length === 0 ? (
+                      <Paper sx={{ p: 8, textAlign: 'center', background: CARD, borderRadius: 3, border: `1px solid ${BORDER}` }}>
+                        <EmojiPeople sx={{ fontSize: 56, color: 'rgba(255,255,255,0.1)', mb: 2 }} />
+                        <Typography color="rgba(255,255,255,0.35)">{caSearchQuery ? 'No matches found' : 'No campus ambassadors yet'}</Typography>
                       </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              ))}
+                    ) : (
+                      <Grid container spacing={2}>
+                        {caFiltered.map(ca => (
+                          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={ca.id}>
+                            <Paper sx={{ p: 2.5, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, '&:hover': { borderColor: `${RED}40` }, transition: 'border-color 0.2s' }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <Chip label={ca.code} size="small" sx={{ background: `${RED}18`, color: RED, border: `1px solid ${RED}30`, fontSize: 11, fontWeight: 700, mb: 1 }} />
+                                  <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14 }}>{ca.name}</Typography>
+                                  <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, mt: 0.5 }}>{ca.institution_name}</Typography>
+                                  <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, mt: 0.3 }}>{ca.institution_address}</Typography>
+                                </Box>
+                                <IconButton size="small" onClick={async () => { if (!window.confirm(`Delete ${ca.name}?`)) return; await api.delete(`/api/campus-ambassador/${ca.id}`); fetchCA(); }}
+                                  sx={{ color: 'rgba(255,255,255,0.2)', '&:hover': { color: RED } }}>
+                                  <Delete sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Box>
+                            </Paper>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    )}
+                  </>
+                );
+              })()}
 
               {caView === 'stats' && (
                 <Paper sx={{ borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>

@@ -336,14 +336,17 @@ export default function UserDashboard() {
   });
   const [saving, setSaving] = useState(false);
   const [profileComplete, setProfileComplete] = useState(false);
+  const [portalOpen, setPortalOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([
       api.get('/api/user-profile'),
       api.get('/api/user-profile/my-registrations'),
       api.get('/api/announcements'),
+      api.get('/api/olympiad-exam/portal/status').catch(() => ({ data: { is_open: false } })),
     ])
-      .then(([p, r, a]) => {
+      .then(([p, r, a, ps]) => {
+        setPortalOpen(ps.data?.is_open === true);
         const u = p.data.user;
         setProfileComplete(!!u?.profile_completed);
         if (u) {
@@ -537,6 +540,40 @@ export default function UserDashboard() {
                   <StatCard label="Edition" value="8th" color="#f59e0b" icon={<EmojiEvents sx={{ fontSize: 20 }} />} />
                 </Grid>
               </Grid>
+
+              {/* Olympiad Exam Portal banner */}
+              {hasOlympiad && portalOpen && (
+                <Paper
+                  onClick={() => navigate('/olympiad-exam')}
+                  sx={{
+                    p: 2.5, mb: 3, borderRadius: 3, cursor: 'pointer',
+                    background: 'linear-gradient(135deg, rgba(15,52,96,0.6), rgba(15,52,96,0.3))',
+                    border: '1px solid rgba(99,179,237,0.4)',
+                    display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap',
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 0 20px rgba(99,179,237,0.15)',
+                    '&:hover': { borderColor: 'rgba(99,179,237,0.7)', boxShadow: '0 0 28px rgba(99,179,237,0.25)' },
+                  }}
+                >
+                  <Box sx={{ fontSize: 28, lineHeight: 1 }}>🏅</Box>
+                  <Box sx={{ flex: 1, minWidth: 180 }}>
+                    <Typography fontWeight={800} sx={{ color: '#fff', fontSize: 14.5 }}>
+                      Olympiad Exam Portal is OPEN
+                    </Typography>
+                    <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 12.5, mt: 0.3 }}>
+                      The exam session is live. Click here to start now — don't miss the timer!
+                    </Typography>
+                  </Box>
+                  <Button size="small" sx={{
+                    background: 'linear-gradient(135deg,#0f3460,#1a5276)',
+                    color: '#fff', fontWeight: 700, fontSize: 12.5, textTransform: 'none',
+                    borderRadius: 2, px: 2.5, border: '1px solid rgba(99,179,237,0.4)',
+                    '&:hover': { background: 'linear-gradient(135deg,#1a5276,#2874a6)' },
+                  }}>
+                    Enter Exam →
+                  </Button>
+                </Paper>
+              )}
 
               {/* Journey + Quick Links */}
               <Grid container spacing={2.5}>

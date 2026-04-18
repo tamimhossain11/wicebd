@@ -23,7 +23,7 @@ import {
   HowToRegOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
-import { signUp, googleLogin, facebookLogin } from '../../api/userAuth';
+import { signUp, googleLogin } from '../../api/userAuth';
 import FooterV2 from '../../components/footer/FooterV2';
 import HeaderV1 from '../../components/header/HeaderV1';
 
@@ -106,26 +106,6 @@ const SignUp = () => {
     } finally { setLoading(false); }
   };
 
-  const handleFacebookSignup = () => {
-    if (typeof window.FB === 'undefined') { toast.error('Facebook SDK not loaded.'); return; }
-    window.FB.login(async (response) => {
-      if (response.authResponse) {
-        setLoading(true);
-        try {
-          const { accessToken, userID } = response.authResponse;
-          const { data } = await facebookLogin(accessToken, userID);
-          if (data.success) {
-            loginAsUser(data.token, data.user);
-            toast.success(`Welcome, ${data.user.name}!`);
-            navigate('/dashboard', { replace: true });
-          }
-        } catch (err) {
-          toast.error(err.response?.data?.message || 'Facebook sign-up failed');
-        } finally { setLoading(false); }
-      }
-    }, { scope: 'public_profile,email' });
-  };
-
   return (
     <>
       <HeaderV1 headerStyle="header-style-two" />
@@ -140,7 +120,7 @@ const SignUp = () => {
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
-          pt: { xs: 10, md: 8 },
+          pt: { xs: 14, md: 10 },
           pb: 4,
         }}
       >
@@ -182,14 +162,14 @@ const SignUp = () => {
             </Box>
 
             {/* ── Social buttons ── */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-              {GOOGLE_ENABLED && (
+            {GOOGLE_ENABLED && (
+              <Box sx={{ mb: 3 }}>
                 <Box
                   sx={{
                     borderRadius: '10px', overflow: 'hidden',
                     border: '1px solid rgba(255,255,255,0.12)',
                     '& > div': { width: '100% !important' },
-                    '& iframe': { width: '100% !important' },
+                    '& iframe': { width: '100% !important', minWidth: '0 !important' },
                   }}
                 >
                   <GoogleLogin
@@ -198,39 +178,15 @@ const SignUp = () => {
                     text="signup_with"
                     shape="rectangular"
                     theme="filled_black"
-                    width="460"
+                    useOneTap={false}
                   />
                 </Box>
-              )}
+              </Box>
+            )}
 
-              <Button
-                fullWidth
-                onClick={handleFacebookSignup}
-                disabled={loading}
-                startIcon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                }
-                sx={{
-                  background: '#1877F2',
-                  color: '#fff',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  fontSize: 14,
-                  py: 1.25,
-                  '&:hover': { background: '#1465d8' },
-                  '&:disabled': { opacity: 0.6 },
-                }}
-              >
-                Continue with Facebook
-              </Button>
-            </Box>
-
-            <Divider sx={{ borderColor: 'rgba(255,255,255,0.10)', mb: 3 }}>
+            <Divider sx={{ borderColor: 'rgba(255,255,255,0.10)', mb: 3, mt: GOOGLE_ENABLED ? 0 : 0 }}>
               <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, px: 1 }}>
-                or create account with email
+                or sign up with email
               </Typography>
             </Divider>
 
