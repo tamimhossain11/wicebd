@@ -644,7 +644,7 @@ export default function UserDashboard() {
                     registered={hasProject}
                     regId={registrations.project[0]?.paymentID}
                     to="/registration" toLabel={hasProject ? 'View Registration' : 'Register Project'}
-                    fee={1200} earlyBirdFee={999}
+                    fee={999}
                     prizePool="2,00,000"
                   />
                 </Grid>
