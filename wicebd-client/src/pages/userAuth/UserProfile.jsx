@@ -70,7 +70,7 @@ export default function UserProfile() {
       await api.post('/api/user-profile', form);
       setProfileComplete(true);
       toast.success('Profile saved successfully!');
-      setTimeout(() => navigate('/dashboard'), 1200);
+      setTimeout(() => navigate('/dashboard'), 999);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save profile');
     } finally { setSaving(false); }

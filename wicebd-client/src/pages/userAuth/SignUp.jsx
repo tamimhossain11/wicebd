@@ -120,7 +120,7 @@ const SignUp = () => {
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
-          pt: { xs: 14, md: 10 },
+          pt: { xs: 18, md: 14 },
           pb: 4,
         }}
       >
@@ -163,24 +163,15 @@ const SignUp = () => {
 
             {/* ── Social buttons ── */}
             {GOOGLE_ENABLED && (
-              <Box sx={{ mb: 3 }}>
-                <Box
-                  sx={{
-                    borderRadius: '10px', overflow: 'hidden',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    '& > div': { width: '100% !important' },
-                    '& iframe': { width: '100% !important', minWidth: '0 !important' },
-                  }}
-                >
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => toast.error('Google sign-up failed')}
-                    text="signup_with"
-                    shape="rectangular"
-                    theme="filled_black"
-                    useOneTap={false}
-                  />
-                </Box>
+              <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => toast.error('Google sign-up failed')}
+                  text="signup_with"
+                  shape="rectangular"
+                  theme="filled_black"
+                  width="400"
+                />
               </Box>
             )}
 
