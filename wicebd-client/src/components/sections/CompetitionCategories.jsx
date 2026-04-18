@@ -11,7 +11,7 @@ const CATEGORIES = [
             'Present original inventions that solve real-world problems. Projects are judged on novelty, feasibility, and societal impact.',
         eligibility: 'All age groups',
         prize: 'Prize Pool: ৳2,00,000',
-        fee: '৳999 Early Bird · ৳1,200 Default',
+        fee: '৳999 Default',
         icon: (
             <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
                 <circle cx="24" cy="20" r="11" stroke="#800020" strokeWidth="2.2" />

@@ -17,9 +17,6 @@ const darkTheme = createTheme({
     components: { MuiOutlinedInput: { styleOverrides: { root: { borderRadius: 10 } } } },
 });
 
-const EARLY_BIRD_DEADLINE = new Date('2026-04-16T23:59:59');
-const isEarlyBird = new Date() <= EARLY_BIRD_DEADLINE;
-
 const TABS = [
     { id: 'project',       label: 'Project',         badge: 'Team' },
     { id: 'wall-magazine', label: 'Wall Magazine',    badge: 'Team' },
@@ -27,12 +24,7 @@ const TABS = [
 ];
 
 const FEE_INFO = {
-    project: {
-        fee: isEarlyBird ? 999 : 1200,
-        label: isEarlyBird ? 'Early Bird Fee' : 'Registration Fee',
-        note: isEarlyBird ? 'Early Bird ends April 16 · Default ৳1,200' : null,
-        prize: '৳2,00,000',
-    },
+    project:         { fee: 999, label: 'Registration Fee', note: null, prize: '৳2,00,000' },
     'wall-magazine': { fee: 399, label: 'Registration Fee', note: null, prize: '৳30,000' },
     olympiad:        { fee: 50,  label: 'Registration Fee', note: null, prize: '৳10,000' },
 };
