@@ -31,7 +31,7 @@ const initiatePayment = async (req, res) => {
   try {
     // 1. Get temp registration data
     const [tempData] = await db.query(
-      'SELECT competitionCategory, leader, leaderPhone, leaderEmail, member4, member5, promo_code FROM temp_registrations WHERE paymentID = ?',
+      'SELECT competitionCategory, leader, leaderPhone, leaderEmail, member4, member5, member6, promo_code FROM temp_registrations WHERE paymentID = ?',
       [paymentID]
     );
 
@@ -44,7 +44,7 @@ const initiatePayment = async (req, res) => {
     // 2. Determine amount based on competition category + extra members (300 BDT each beyond member3)
     const cat = registration.competitionCategory.toLowerCase();
     const baseAmount = cat === 'megazine' ? 399 : cat === 'olympiad' ? 50 : 999;
-    const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
+    const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0) + (registration.member6 ? 1 : 0);
     const extraCharge = cat === 'megazine' ? 120 : 300;
     let amount = baseAmount + (extraMembers * extraCharge);
     console.log(`💰 Amount: ${baseAmount} base + ${extraMembers} extra member(s) × ${extraCharge} = ${amount} BDT`);
@@ -204,10 +204,11 @@ const confirmPayment = async (req, res) => {
           member3, institution3, tshirtSize3,
           member4, institution4, tshirtSize4,
           member5, institution5, tshirtSize5,
+          member6, institution6, tshirtSize6,
           projectTitle, projectCategory, participatedBefore,
           previousCompetition, socialMedia, infoSource,
           paymentID, bkashTrxId, amount, ca_code, club_code, promo_code
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           registration.user_id || null,
           registration.competitionCategory, registration.projectSubcategory,
@@ -218,6 +219,7 @@ const confirmPayment = async (req, res) => {
           registration.member3 || null, registration.institution3 || null, registration.tshirtSize3 || null,
           registration.member4 || null, registration.institution4 || null, registration.tshirtSize4 || null,
           registration.member5 || null, registration.institution5 || null, registration.tshirtSize5 || null,
+          registration.member6 || null, registration.institution6 || null, registration.tshirtSize6 || null,
           registration.projectTitle, registration.projectCategory, registration.participatedBefore,
           registration.previousCompetition, registration.socialMedia,
           registration.infoSource, invoice_number, verifiedTrxId,
@@ -340,7 +342,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
     const totalAmount = paymentDetails.amount ?? (() => {
       const base = isWallMag ? 399 : 999;
       const extraCharge = isWallMag ? 120 : 300;
-      const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0);
+      const extraMembers = (registration.member4 ? 1 : 0) + (registration.member5 ? 1 : 0) + (registration.member6 ? 1 : 0);
       return base + extraMembers * extraCharge;
     })();
 
@@ -350,6 +352,7 @@ const sendConfirmationEmail = async (registration, paymentDetails) => {
       registration.member3    ? memberRow(registration.member3, '3') : '',
       registration.member4    ? memberRow(registration.member4, '4', true) : '',
       registration.member5    ? memberRow(registration.member5, '5', true) : '',
+      registration.member6    ? memberRow(registration.member6, '6', true) : '',
     ].join('');
 
     const body = `

@@ -190,9 +190,12 @@ const welcomeEmail = ({ name, frontendUrl = 'https://www.wicebd.com' }) => {
    ════════════════════════════════════════════════════════════ */
 const projectConfirmationEmail = ({ registration, paymentDetails, amount, frontendUrl = 'https://www.wicebd.com' }) => {
   const members = [
-    registration.leader ? `${registration.leader} (Team Leader)` : null,
+    registration.leader  ? `${registration.leader} (Team Leader)` : null,
     registration.member2 || null,
     registration.member3 || null,
+    registration.member4 ? `${registration.member4} (+৳300)` : null,
+    registration.member5 ? `${registration.member5} (+৳300)` : null,
+    registration.member6 ? `${registration.member6} (+৳300)` : null,
   ].filter(Boolean);
 
   const body = `

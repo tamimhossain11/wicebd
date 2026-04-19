@@ -57,6 +57,7 @@ const getMyCards = async (req, res) => {
               member3, institution3,
               member4, institution4,
               member5, institution5,
+              member6, institution6,
               created_at
        FROM registrations WHERE user_id = ? ORDER BY created_at DESC`,
       [userId]
@@ -107,6 +108,7 @@ const getMyCards = async (req, res) => {
         r.member3 ? { slot: 3, name: r.member3, institution: r.institution3 } : null,
         r.member4 ? { slot: 4, name: r.member4, institution: r.institution4 } : null,
         r.member5 ? { slot: 5, name: r.member5, institution: r.institution5 } : null,
+        r.member6 ? { slot: 6, name: r.member6, institution: r.institution6 } : null,
       ].filter(Boolean);
 
       const memberCards = slots.map(s => {

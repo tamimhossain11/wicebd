@@ -49,7 +49,7 @@ export default function CheckoutPage() {
 
     const baseFee = BASE_FEE[cat] ?? 999;
     const extraCharge = EXTRA_CHARGE[cat] ?? 0;
-    const extraCount = (formData.member4 ? 1 : 0) + (formData.member5 ? 1 : 0);
+    const extraCount = (formData.member4 ? 1 : 0) + (formData.member5 ? 1 : 0) + (formData.member6 ? 1 : 0);
     const extraTotal = extraCount * extraCharge;
 
     const promoDiscount = formData._promoDiscount || 0;
@@ -68,6 +68,7 @@ export default function CheckoutPage() {
             formData.member3  && { name: formData.member3,  institution: formData.institution3 },
             formData.member4  && { name: formData.member4,  institution: formData.institution4, extra: true },
             formData.member5  && { name: formData.member5,  institution: formData.institution5, extra: true },
+            formData.member6  && { name: formData.member6,  institution: formData.institution6, extra: true },
           ].filter(Boolean);
 
     const handleConfirm = async () => {

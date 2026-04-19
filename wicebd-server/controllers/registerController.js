@@ -22,6 +22,7 @@ const startRegistration = async (req, res) => {
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     member4, institution4, tshirtSize4, member5, institution5, tshirtSize5,
+    member6, institution6, tshirtSize6,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
     socialMedia, infoSource, ca_code, club_code, promo_code
   } = data;
@@ -32,9 +33,10 @@ const startRegistration = async (req, res) => {
     leader, institution, leaderPhone, leaderWhatsApp, leaderEmail, tshirtSizeLeader,
     member2, institution2, tshirtSize2, member3, institution3, tshirtSize3,
     member4, institution4, tshirtSize4, member5, institution5, tshirtSize5,
+    member6, institution6, tshirtSize6,
     projectTitle, projectCategory, participatedBefore, previousCompetition,
     socialMedia, infoSource, ca_code, club_code, promo_code
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 const n = v => (v === undefined ? null : v || null);
@@ -46,6 +48,7 @@ const values = [
   n(member3), n(institution3), n(tshirtSize3),
   n(member4), n(institution4), n(tshirtSize4),
   n(member5), n(institution5), n(tshirtSize5),
+  n(member6), n(institution6), n(tshirtSize6),
   n(projectTitle), n(projectCategory), n(participatedBefore), n(previousCompetition),
   n(socialMedia), n(infoSource), n(ca_code), n(club_code), n(promo_code)
 ];

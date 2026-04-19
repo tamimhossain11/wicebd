@@ -100,6 +100,7 @@ export default function ProjectRegistrationForm({ onPromoChange }) {
         member3: '', institution3: '', tshirtSize3: '',
         member4: '', institution4: '', tshirtSize4: '',
         member5: '', institution5: '', tshirtSize5: '',
+        member6: '', institution6: '', tshirtSize6: '',
         projectTitle: '', projectCategory: '', participatedBefore: '',
         previousCompetition: '', socialMedia: '', infoSource: '',
         promo_code: '',
@@ -407,45 +408,48 @@ export default function ProjectRegistrationForm({ onPromoChange }) {
                                 </Box>
                             ))}
 
-                            {/* Members 4 & 5 — optional, +300 BDT each */}
-                            {[4, 5].map(n => (
-                                extraMembers.includes(n) ? (
-                                    <Box key={n} sx={{ mb: 2.5, p: 3, borderRadius: '12px', border: '1px solid rgba(128,0,32,0.3)', background: 'rgba(128,0,32,0.06)' }}>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>
-                                                Member {n} <span style={{ color: '#c0002a', fontSize: '11px' }}>+৳300 extra</span>
-                                            </Typography>
-                                            <button type="button" onClick={() => {
-                                                setExtraMembers(p => p.filter(x => x !== n));
-                                                set(`member${n}`, ''); set(`institution${n}`, ''); set(`tshirtSize${n}`, '');
-                                                // also remove 5 if removing 4
-                                                if (n === 4) { setExtraMembers([]); set('member5', ''); set('institution5', ''); set('tshirtSize5', ''); }
-                                            }} style={{
-                                                padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(255,80,80,0.35)',
-                                                background: 'rgba(255,80,80,0.08)', color: '#ff7070', fontSize: '11px',
-                                                cursor: 'pointer', fontWeight: 600,
-                                            }}>Remove</button>
+                            {/* Members 4, 5 & 6 — optional, +300 BDT each */}
+                            {[4, 5, 6].map(n => {
+                                const prevIncluded = n === 4 || extraMembers.includes(n - 1);
+                                if (extraMembers.includes(n)) {
+                                    return (
+                                        <Box key={n} sx={{ mb: 2.5, p: 3, borderRadius: '12px', border: '1px solid rgba(128,0,32,0.3)', background: 'rgba(128,0,32,0.06)' }}>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                                <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>
+                                                    Member {n} <span style={{ color: '#c0002a', fontSize: '11px' }}>+৳300 extra</span>
+                                                </Typography>
+                                                <button type="button" onClick={() => {
+                                                    // Remove this slot and all higher slots
+                                                    const higher = [4, 5, 6].filter(x => x >= n);
+                                                    setExtraMembers(p => p.filter(x => !higher.includes(x)));
+                                                    higher.forEach(x => { set(`member${x}`, ''); set(`institution${x}`, ''); set(`tshirtSize${x}`, ''); });
+                                                }} style={{
+                                                    padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(255,80,80,0.35)',
+                                                    background: 'rgba(255,80,80,0.08)', color: '#ff7070', fontSize: '11px',
+                                                    cursor: 'pointer', fontWeight: 600,
+                                                }}>Remove</button>
+                                            </Box>
+                                            <Grid container spacing={2.5}>
+                                                <Grid size={{ xs: 12, sm: 5 }}>
+                                                    <TextField fullWidth label="Name" name={`member${n}`} value={form[`member${n}`]} onChange={onChange} sx={f} size="small" />
+                                                </Grid>
+                                                <Grid size={{ xs: 12, sm: 5 }}>
+                                                    <TextField fullWidth label="Institution" name={`institution${n}`} value={form[`institution${n}`]} onChange={onChange} sx={f} size="small" />
+                                                </Grid>
+                                                <Grid size={{ xs: 12, sm: 2 }}>
+                                                    <FormControl fullWidth sx={f} size="small">
+                                                        <InputLabel>Size</InputLabel>
+                                                        <Select name={`tshirtSize${n}`} value={form[`tshirtSize${n}`]} onChange={onChange} label="Size" MenuProps={MP}>
+                                                            {['S','M','L','XL','XXL'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                            </Grid>
                                         </Box>
-                                        <Grid container spacing={2.5}>
-                                            <Grid size={{ xs: 12, sm: 5 }}>
-                                                <TextField fullWidth label="Name" name={`member${n}`} value={form[`member${n}`]} onChange={onChange} sx={f} size="small" />
-                                            </Grid>
-                                            <Grid size={{ xs: 12, sm: 5 }}>
-                                                <TextField fullWidth label="Institution" name={`institution${n}`} value={form[`institution${n}`]} onChange={onChange} sx={f} size="small" />
-                                            </Grid>
-                                            <Grid size={{ xs: 12, sm: 2 }}>
-                                                <FormControl fullWidth sx={f} size="small">
-                                                    <InputLabel>Size</InputLabel>
-                                                    <Select name={`tshirtSize${n}`} value={form[`tshirtSize${n}`]} onChange={onChange} label="Size" MenuProps={MP}>
-                                                        {['S','M','L','XL','XXL'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                                                    </Select>
-                                                </FormControl>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                ) : (
-                                    // Only show "Add Member 4" button, or "Add Member 5" if 4 is already added
-                                    (n === 4 || extraMembers.includes(4)) && !extraMembers.includes(n) && (
+                                    );
+                                }
+                                if (prevIncluded && !extraMembers.includes(n)) {
+                                    return (
                                         <Box key={n} sx={{ mb: 2 }}>
                                             <button type="button" onClick={() => setExtraMembers(p => [...p, n])} style={{
                                                 width: '100%', padding: '12px', borderRadius: '12px',
@@ -456,9 +460,10 @@ export default function ProjectRegistrationForm({ onPromoChange }) {
                                                 <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Add Member {n} <span style={{ color: '#c0002a', fontSize: '12px' }}>(+৳300 per member)</span>
                                             </button>
                                         </Box>
-                                    )
-                                )
-                            ))}
+                                    );
+                                }
+                                return null;
+                            })}
                         </Box>
                     )}
 
