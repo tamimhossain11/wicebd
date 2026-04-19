@@ -435,11 +435,18 @@ export default function AdminDashboard() {
     { field: 'leaderPhone', headerName: 'Leader Phone', width: 130 },
     { field: 'leaderEmail', headerName: 'Leader Email', width: 200 },
     { field: 'tshirtSizeLeader', headerName: 'Leader T-Shirt', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
-    // Members 2–5
+    // Members 2–6
     ...memberCols(2, 'Member 2'),
     ...memberCols(3, 'Member 3'),
     ...memberCols(4, 'Member 4', true),
     ...memberCols(5, 'Member 5', true),
+    ...memberCols(6, 'Member 6', true),
+    // Project details
+    { field: 'projectCategory', headerName: 'Proj. Type', width: 120, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${AMBER}15`, color: AMBER, fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'participatedBefore', headerName: 'Participated Before', width: 150, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: p.value === 'Yes' ? `${GREEN}18` : 'rgba(255,255,255,0.06)', color: p.value === 'Yes' ? GREEN : 'rgba(255,255,255,0.5)', fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'previousCompetition', headerName: 'Previous Competition', width: 200, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'socialMedia', headerName: 'Social Media', width: 160, renderCell: p => p.value ? <a href={p.value} target="_blank" rel="noopener noreferrer" style={{ color: CYAN, fontSize: 12, textDecoration: 'none' }}>🔗 Link</a> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'infoSource', headerName: 'Info Source', width: 160, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
     { field: 'ca_code', headerName: 'CA Ref', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${ACCENT}20`, color: ACCENT, fontSize: 11, fontWeight: 700 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
     { field: 'club_code', headerName: 'Club Ref', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontSize: 11, fontWeight: 700 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
     { field: 'promo_code', headerName: 'Promo', width: 100, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: `${GREEN}20`, color: GREEN, fontSize: 11, fontWeight: 700 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
