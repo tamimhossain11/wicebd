@@ -6,7 +6,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
-import { QrCodeScanner, CheckCircle, LunchDining, PersonOff, Refresh, LocalCafe, CardMembership } from '@mui/icons-material';
+import { QrCodeScanner, CheckCircle, LunchDining, PersonOff, Refresh, LocalCafe, CardMembership, FileDownload } from '@mui/icons-material';
 import QrScanner from 'react-qr-scanner';
 import api from '../../api/index';
 
@@ -499,9 +499,23 @@ export default function QRScannerPanel() {
 
             {guestResult && !guestResult.error && (
               <Box sx={{ p: 2.5, borderRadius: 2, background: `${C.green}10`, border: `1px solid ${C.green}30` }}>
-                <Typography sx={{ color: C.green, fontWeight: 700, fontSize: 13, mb: 1.5 }}>
+                <Typography sx={{ color: C.green, fontWeight: 700, fontSize: 13, mb: 2 }}>
                   ✅ Guest ID Card generated!
                 </Typography>
+
+                {/* QR code preview */}
+                {(guestResult.card?.image_url || guestResult.card?.qrImage) && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <Box sx={{ p: 1.5, background: '#fff', borderRadius: 2, display: 'inline-block' }}>
+                      <img
+                        src={guestResult.card.image_url || guestResult.card.qrImage}
+                        alt="Guest QR Code"
+                        style={{ width: 160, height: 160, display: 'block' }}
+                      />
+                    </Box>
+                  </Box>
+                )}
+
                 {[
                   ['Card UID',  guestResult.card?.card_uid],
                   ['Name',      guestResult.card?.guest_name],
@@ -512,6 +526,21 @@ export default function QRScannerPanel() {
                     <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600, fontFamily: label === 'Card UID' ? 'monospace' : 'inherit' }}>{val}</Typography>
                   </Box>
                 ))}
+
+                {/* Download button */}
+                <Button
+                  component="a"
+                  href={guestResult.card?.image_url || guestResult.card?.qrImage}
+                  download={`${guestResult.card?.card_uid || 'guest-qr'}.png`}
+                  target="_blank"
+                  rel="noreferrer"
+                  size="small"
+                  startIcon={<FileDownload sx={{ fontSize: 15 }} />}
+                  variant="outlined"
+                  sx={{ mt: 2, color: C.green, borderColor: `${C.green}50`, textTransform: 'none', borderRadius: 2, fontSize: 12, fontWeight: 700 }}
+                >
+                  Download QR Code
+                </Button>
               </Box>
             )}
             {guestResult?.error && (
