@@ -489,7 +489,7 @@ export default function QRScannerPanel() {
                   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#a855f7' },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#a855f7' },
                 }}
-                slotProps={{ paper: { sx: { background: C.surface, color: '#fff', '& .MuiMenuItem-root:hover': { background: 'rgba(168,85,247,0.12)' } } } }}
+                MenuProps={{ PaperProps: { sx: { background: C.surface, border: `1px solid ${C.border}`, '& .MuiMenuItem-root': { color: '#fff' }, '& .MuiMenuItem-root:hover': { background: 'rgba(168,85,247,0.15)' }, '& .MuiMenuItem-root.Mui-selected': { background: 'rgba(168,85,247,0.25)' } } } }}
               >
                 {POSITIONS.map(p => (
                   <MenuItem key={p} value={p} sx={{ color: '#fff' }}>{p}</MenuItem>
