@@ -175,25 +175,39 @@ router.post('/attendance/:cardUid/checkin', authenticateAdmin, async (req, res) 
   }
 });
 
-/* Mark lunch claimed */
+/* Helper: resolve participant name from card */
+async function resolveParticipantName(card) {
+  if (card.registration_type === 'guest') return card.guest_name || '';
+  if (card.registration_type === 'olympiad') {
+    const [[reg]] = await db.query('SELECT full_name FROM olympiad_registrations WHERE registration_id = ?', [card.registration_id]);
+    return reg?.full_name || '';
+  }
+  const [[reg]] = await db.query('SELECT leader FROM registrations WHERE paymentID = ?', [card.registration_id]);
+  return reg?.leader || '';
+}
+
+/* Mark lunch claimed — no check-in required, upserts attendance row */
 router.post('/attendance/:cardUid/lunch', authenticateAdmin, async (req, res) => {
   const { cardUid } = req.params;
   try {
-    // Olympiad participants are not eligible for lunch
-    const [[card]] = await db.query('SELECT registration_type FROM id_cards WHERE card_uid = ?', [cardUid]);
-    if (card?.registration_type === 'olympiad') {
+    const [[card]] = await db.query('SELECT * FROM id_cards WHERE card_uid = ?', [cardUid]);
+    if (!card) return res.status(404).json({ success: false, message: 'Card not found' });
+    if (card.registration_type === 'olympiad') {
       return res.status(400).json({ success: false, message: 'Olympiad participants are not eligible for lunch' });
     }
 
     const [existing] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
-    if (!existing.length) return res.status(400).json({ success: false, message: 'Not checked in yet' });
-    if (existing[0].lunch_claimed_at) {
+    if (existing.length && existing[0].lunch_claimed_at) {
       return res.json({ success: true, already: true, attendance: existing[0] });
     }
-    await db.query(
-      'UPDATE attendance SET lunch_claimed_at = NOW(), lunch_claimed_by = ? WHERE card_uid = ?',
-      [req.admin.id, cardUid]
-    );
+
+    const participant_name = await resolveParticipantName(card);
+    await db.query(`
+      INSERT INTO attendance (card_uid, user_id, registration_type, registration_id, participant_name, lunch_claimed_at, lunch_claimed_by)
+      VALUES (?, ?, ?, ?, ?, NOW(), ?)
+      ON DUPLICATE KEY UPDATE lunch_claimed_at = COALESCE(lunch_claimed_at, NOW()), lunch_claimed_by = COALESCE(lunch_claimed_by, ?)
+    `, [cardUid, card.user_id, card.registration_type, card.registration_id, participant_name, req.admin.id, req.admin.id]);
+
     const [[att]] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
     res.json({ success: true, already: false, attendance: att });
   } catch (e) {
@@ -201,19 +215,25 @@ router.post('/attendance/:cardUid/lunch', authenticateAdmin, async (req, res) =>
   }
 });
 
-/* Mark coffee claimed (all registration types eligible) */
+/* Mark coffee claimed — no check-in required, upserts attendance row */
 router.post('/attendance/:cardUid/coffee', authenticateAdmin, async (req, res) => {
   const { cardUid } = req.params;
   try {
+    const [[card]] = await db.query('SELECT * FROM id_cards WHERE card_uid = ?', [cardUid]);
+    if (!card) return res.status(404).json({ success: false, message: 'Card not found' });
+
     const [existing] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
-    if (!existing.length) return res.status(400).json({ success: false, message: 'Not checked in yet' });
-    if (existing[0].coffee_claimed_at) {
+    if (existing.length && existing[0].coffee_claimed_at) {
       return res.json({ success: true, already: true, attendance: existing[0] });
     }
-    await db.query(
-      'UPDATE attendance SET coffee_claimed_at = NOW(), coffee_claimed_by = ? WHERE card_uid = ?',
-      [req.admin.id, cardUid]
-    );
+
+    const participant_name = await resolveParticipantName(card);
+    await db.query(`
+      INSERT INTO attendance (card_uid, user_id, registration_type, registration_id, participant_name, coffee_claimed_at, coffee_claimed_by)
+      VALUES (?, ?, ?, ?, ?, NOW(), ?)
+      ON DUPLICATE KEY UPDATE coffee_claimed_at = COALESCE(coffee_claimed_at, NOW()), coffee_claimed_by = COALESCE(coffee_claimed_by, ?)
+    `, [cardUid, card.user_id, card.registration_type, card.registration_id, participant_name, req.admin.id, req.admin.id]);
+
     const [[att]] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
     res.json({ success: true, already: false, attendance: att });
   } catch (e) {

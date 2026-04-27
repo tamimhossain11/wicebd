@@ -397,18 +397,18 @@ export default function QRScannerPanel() {
                   </Button>
                   {foodEligible && (
                     <Button variant="contained" sx={{ flex: 1, minWidth: 90,
-                      background: att?.lunch_claimed_at ? 'rgba(255,255,255,0.08)' : !att?.checked_in_at ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg,${C.amber},#d97706)`,
+                      background: att?.lunch_claimed_at ? 'rgba(255,255,255,0.08)' : `linear-gradient(135deg,${C.amber},#d97706)`,
                       textTransform: 'none', borderRadius: 2, fontWeight: 700, fontSize: 13, py: 1.2 }}
                       startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <LunchDining sx={{ fontSize: 16 }} />}
-                      onClick={markLunch} disabled={loading || !att?.checked_in_at || !!att?.lunch_claimed_at}>
+                      onClick={markLunch} disabled={loading || !!att?.lunch_claimed_at}>
                       {att?.lunch_claimed_at ? 'Lunch ✓' : 'Lunch'}
                     </Button>
                   )}
                   <Button variant="contained" sx={{ flex: 1, minWidth: 90,
-                    background: att?.coffee_claimed_at ? 'rgba(255,255,255,0.08)' : !att?.checked_in_at ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg,${C.coffee},#92400e)`,
+                    background: att?.coffee_claimed_at ? 'rgba(255,255,255,0.08)' : `linear-gradient(135deg,${C.coffee},#92400e)`,
                     textTransform: 'none', borderRadius: 2, fontWeight: 700, fontSize: 13, py: 1.2 }}
                     startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <LocalCafe sx={{ fontSize: 16 }} />}
-                    onClick={markCoffee} disabled={loading || !att?.checked_in_at || !!att?.coffee_claimed_at}>
+                    onClick={markCoffee} disabled={loading || !!att?.coffee_claimed_at}>
                     {att?.coffee_claimed_at ? 'Coffee ✓' : 'Coffee'}
                   </Button>
                 </Box>
