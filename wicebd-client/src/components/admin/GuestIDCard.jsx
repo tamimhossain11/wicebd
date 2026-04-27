@@ -1,221 +1,219 @@
 import { forwardRef } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
 
-/* All styles are intentionally inline — required for html2canvas capture */
+/* All styles intentionally inline — required for accurate html2canvas capture */
 const GuestIDCard = forwardRef(function GuestIDCard({ card }, ref) {
-  const hasQR = !!(card?.image_url);
+  const initial = (card?.guest_name || 'G').charAt(0).toUpperCase();
+  const verifyUrl = card?.qr_data || 'https://wicebd.com';
 
   return (
     <div
       ref={ref}
       style={{
-        width: 520,
-        height: 300,
-        background: 'linear-gradient(140deg, #060c20 0%, #0b1535 45%, #050d22 100%)',
-        borderRadius: 18,
-        position: 'relative',
-        overflow: 'hidden',
+        width: 300,
         fontFamily: '"Segoe UI", "Inter", system-ui, -apple-system, sans-serif',
+        borderRadius: 16,
+        overflow: 'hidden',
+        background: '#ffffff',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
+        position: 'relative',
         flexShrink: 0,
       }}
     >
-      {/* ── Left accent bar ── */}
+      {/* ── Top accent bar ── */}
       <div style={{
-        position: 'absolute', left: 0, top: 0,
-        width: 5, height: '100%',
-        background: 'linear-gradient(180deg, #d62828 0%, #1a4f8a 50%, #f4a825 100%)',
+        height: 5,
+        background: 'linear-gradient(90deg, #d62828 0%, #1a4f8a 50%, #f4a825 100%)',
       }} />
 
-      {/* ── Decorative background circles ── */}
+      {/* ── Header (dark) ── */}
       <div style={{
-        position: 'absolute', right: -60, top: -60,
-        width: 260, height: 260, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(26,79,138,0.12) 0%, transparent 70%)',
-        border: '1px solid rgba(255,255,255,0.04)',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', right: 30, bottom: -70,
-        width: 180, height: 180, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(214,40,40,0.08) 0%, transparent 70%)',
-        border: '1px solid rgba(255,255,255,0.03)',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', left: 80, bottom: -30,
-        width: 120, height: 120, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(244,168,37,0.05) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-
-      {/* ── Diagonal shimmer ── */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.018) 0%, transparent 45%, rgba(255,255,255,0.012) 100%)',
-        pointerEvents: 'none',
-      }} />
-
-      {/* ── Header row: logo + GUEST badge ── */}
-      <div style={{
-        position: 'absolute', top: 0, left: 5, right: 0, height: 82,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 22px 0 18px',
+        background: 'linear-gradient(150deg, #060f1e 0%, #0d2244 60%, #091b38 100%)',
+        padding: '22px 22px 26px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        {/* White pill for logo so white PNG bg blends */}
+        {/* Decorative circles */}
+        <div style={{
+          position: 'absolute', right: -35, top: -35,
+          width: 140, height: 140, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(26,79,138,0.18) 0%, transparent 70%)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', left: -25, bottom: -25,
+          width: 100, height: 100, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(214,40,40,0.12) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', right: 30, bottom: 10,
+          width: 60, height: 60, borderRadius: '50%',
+          border: '1px solid rgba(244,168,37,0.08)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* WICE logo in white pill */}
         <div style={{
           background: '#ffffff',
           borderRadius: 10,
-          padding: '5px 14px 5px 10px',
+          padding: '7px 18px',
           display: 'inline-flex',
           alignItems: 'center',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.35)',
+          marginBottom: 16,
+          boxShadow: '0 2px 14px rgba(0,0,0,0.35)',
+          position: 'relative',
         }}>
           <img
             src="/images/logo-normal.PNG"
             alt="WICE Bangladesh"
             crossOrigin="anonymous"
-            style={{ height: 40, width: 'auto', display: 'block', objectFit: 'contain' }}
+            style={{ height: 38, width: 'auto', display: 'block', objectFit: 'contain' }}
           />
         </div>
 
-        {/* GUEST badge */}
+        {/* Event subtitle */}
         <div style={{
-          padding: '6px 18px',
-          background: 'linear-gradient(135deg, rgba(214,40,40,0.18) 0%, rgba(244,168,37,0.18) 100%)',
-          border: '1px solid rgba(244,168,37,0.55)',
-          borderRadius: 100,
-          color: '#f4c55a',
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.28em',
+          color: 'rgba(255,255,255,0.42)',
+          fontSize: 7.5,
+          letterSpacing: '0.2em',
           textTransform: 'uppercase',
-          boxShadow: '0 0 16px rgba(244,168,37,0.15)',
+          lineHeight: 1.8,
         }}>
-          ✦ GUEST ✦
+          World Invention Competition<br />
+          &amp; Exhibition • Bangladesh
         </div>
       </div>
 
-      {/* ── Gradient divider ── */}
+      {/* ── Header bottom gradient bar ── */}
       <div style={{
-        position: 'absolute', top: 82, left: 23, right: 22, height: 1,
-        background: 'linear-gradient(90deg, #d62828 0%, #1a4f8a 40%, #f4a825 80%, transparent 100%)',
-        opacity: 0.75,
+        height: 3,
+        background: 'linear-gradient(90deg, #d62828 0%, #1a4f8a 50%, #f4a825 100%)',
       }} />
 
-      {/* ── Main body ── */}
+      {/* ── White body ── */}
       <div style={{
-        position: 'absolute',
-        top: 96,
-        left: 23,
-        right: hasQR ? 148 : 23,
-        bottom: 54,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        gap: 11,
+        background: '#ffffff',
+        padding: '22px 20px 18px',
+        textAlign: 'center',
       }}>
-        {/* Name */}
-        <div>
-          <div style={{
-            fontSize: 26,
-            fontWeight: 800,
-            color: '#ffffff',
-            letterSpacing: '0.01em',
-            lineHeight: 1.15,
-            marginBottom: 7,
-            textShadow: '0 2px 12px rgba(0,0,0,0.5)',
-          }}>
-            {card?.guest_name}
-          </div>
-          {/* Coloured underline */}
-          <div style={{
-            width: 44,
-            height: 3,
-            borderRadius: 2,
-            background: 'linear-gradient(90deg, #f4a825, #d62828)',
-          }} />
+
+        {/* Avatar circle */}
+        <div style={{
+          width: 72, height: 72, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #d62828 0%, #1a4f8a 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 14px',
+          border: '3px solid #f4a825',
+          boxShadow: '0 4px 18px rgba(0,0,0,0.18)',
+          fontSize: 28, fontWeight: 800, color: '#ffffff',
+          lineHeight: 1,
+          flexShrink: 0,
+        }}>
+          {initial}
         </div>
 
-        {/* Position chip */}
+        {/* Guest name */}
         <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          padding: '5px 14px',
-          background: 'rgba(26,79,138,0.32)',
-          border: '1px solid rgba(100,170,240,0.4)',
+          fontSize: 19,
+          fontWeight: 800,
+          color: '#060f1e',
+          letterSpacing: '0.015em',
+          lineHeight: 1.2,
+          marginBottom: 10,
+        }}>
+          {card?.guest_name}
+        </div>
+
+        {/* Position badge */}
+        <div style={{
+          display: 'inline-block',
+          padding: '5px 16px',
+          background: 'rgba(26,79,138,0.08)',
+          border: '1px solid rgba(26,79,138,0.28)',
           borderRadius: 100,
-          color: '#93c5fd',
-          fontSize: 11,
+          fontSize: 10.5,
           fontWeight: 700,
+          color: '#1a4f8a',
           letterSpacing: '0.04em',
-          alignSelf: 'flex-start',
-          boxShadow: '0 0 10px rgba(26,79,138,0.25)',
+          marginBottom: 18,
         }}>
           {card?.guest_position}
         </div>
-      </div>
 
-      {/* ── QR code ── */}
-      {hasQR && (
+        {/* Divider */}
         <div style={{
-          position: 'absolute',
-          right: 22,
-          top: 104,
-          bottom: 58,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+          height: 1,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(26,79,138,0.15) 30%, rgba(26,79,138,0.15) 70%, transparent 100%)',
+          marginBottom: 18,
+        }} />
+
+        {/* QR code — rendered as native canvas via qrcode.react, zero CORS issues */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
           <div style={{
-            background: '#ffffff',
-            borderRadius: 12,
             padding: 9,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
+            background: '#f4f7ff',
+            border: '1px solid rgba(26,79,138,0.1)',
+            borderRadius: 12,
             lineHeight: 0,
+            boxShadow: '0 2px 12px rgba(26,79,138,0.08)',
           }}>
-            <img
-              src={card.image_url}
-              alt="QR Code"
-              crossOrigin="anonymous"
-              style={{ width: 86, height: 86, display: 'block' }}
+            <QRCodeCanvas
+              value={verifyUrl}
+              size={118}
+              level="H"
+              bgColor="#f4f7ff"
+              fgColor="#060f1e"
+              style={{ display: 'block' }}
             />
           </div>
         </div>
-      )}
 
-      {/* ── Footer ── */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 50,
-        background: 'rgba(0,0,0,0.38)',
-        borderTop: '1px solid rgba(255,255,255,0.055)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 22px',
-      }}>
+        {/* Scan label */}
         <div style={{
-          color: 'rgba(255,255,255,0.38)',
-          fontSize: 9,
-          fontFamily: 'monospace',
-          letterSpacing: '0.14em',
+          fontSize: 8.5,
+          color: 'rgba(0,0,0,0.28)',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          marginBottom: 14,
+        }}>
+          Scan to Verify
+        </div>
+
+        {/* Card UID */}
+        <div style={{
+          fontSize: 8,
+          fontFamily: 'Courier New, monospace',
+          color: 'rgba(0,0,0,0.3)',
+          letterSpacing: '0.1em',
           textTransform: 'uppercase',
         }}>
           {card?.card_uid}
         </div>
+      </div>
+
+      {/* ── Footer ── */}
+      <div style={{
+        background: '#060f1e',
+        padding: '11px 20px',
+        textAlign: 'center',
+      }}>
         <div style={{
-          color: 'rgba(255,255,255,0.28)',
-          fontSize: 8,
-          letterSpacing: '0.1em',
+          fontSize: 9.5,
+          fontWeight: 800,
+          color: '#f4a825',
+          letterSpacing: '0.3em',
           textTransform: 'uppercase',
-          textAlign: 'right',
-          lineHeight: 1.5,
         }}>
-          World Invention Competition<br />&amp; Exhibition • Bangladesh
+          ✦ OFFICIAL GUEST ✦
         </div>
       </div>
 
-      {/* ── Bottom gradient bar ── */}
+      {/* ── Bottom accent bar ── */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
+        height: 5,
         background: 'linear-gradient(90deg, #d62828 0%, #1a4f8a 50%, #f4a825 100%)',
       }} />
     </div>

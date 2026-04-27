@@ -204,6 +204,14 @@ export default function QRScannerPanel() {
     try {
       const r = await api.post('/api/id-card/admin/generate-guest', guestForm);
       setGuestResult(r.data);
+      // Optimistically add to list so hidden card is renderable immediately for download
+      if (r.data?.card) {
+        const newCard = r.data.card;
+        setGuestList(prev => {
+          if (prev.some(g => g.card_uid === newCard.card_uid)) return prev;
+          return [{ ...newCard, generated_at: newCard.generated_at || new Date().toISOString() }, ...prev];
+        });
+      }
       fetchGuestList();
     } catch (err) {
       setGuestResult({ error: err.response?.data?.message || 'Failed to generate card' });
@@ -599,8 +607,8 @@ export default function QRScannerPanel() {
       </Paper>
 
       {/* ── View Guest Card Dialog ── */}
-      <Dialog open={!!viewCard} onClose={() => setViewCard(null)} maxWidth="md"
-        slotProps={{ paper: { sx: { background: '#080d1e', border: '1px solid rgba(168,85,247,0.25)', borderRadius: 3, overflow: 'visible' } } }}>
+      <Dialog open={!!viewCard} onClose={() => setViewCard(null)} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { background: '#080d1e', border: '1px solid rgba(168,85,247,0.25)', borderRadius: 3 } } }}>
         <DialogTitle sx={{ color: '#fff', fontWeight: 700, borderBottom: `1px solid ${C.border}`, pb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -680,53 +688,56 @@ export default function QRScannerPanel() {
             Generate Guest ID Card
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mt: 1 }}>
-            <Box sx={{ p: 2, borderRadius: 2, background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)' }}>
-              <Typography sx={{ color: '#c084fc', fontSize: 13, lineHeight: 1.7 }}>
-                Fill in the guest's name and position to generate an ID card. This is for CAs, volunteers, leaders, and other non-participant guests.
-              </Typography>
-            </Box>
+        <DialogContent sx={{ pt: 3, overflowX: 'hidden' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mt: 1, alignItems: 'center' }}>
+            {/* Form fields — always full width */}
+            <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <Box sx={{ p: 2, borderRadius: 2, background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)' }}>
+                <Typography sx={{ color: '#c084fc', fontSize: 13, lineHeight: 1.7 }}>
+                  Fill in the guest's name and position to generate an ID card. This is for CAs, volunteers, leaders, and other non-participant guests.
+                </Typography>
+              </Box>
 
-            <TextField
-              label="Guest Full Name *"
-              placeholder="e.g. Tamim Hossain"
-              value={guestForm.guest_name}
-              onChange={e => setGuestForm(f => ({ ...f, guest_name: e.target.value }))}
-              fullWidth
-              sx={{
-                '& .MuiOutlinedInput-root': { color: '#fff', '& fieldset': { borderColor: C.border }, '&:hover fieldset': { borderColor: '#a855f7' }, '&.Mui-focused fieldset': { borderColor: '#a855f7' } },
-                '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.4)' },
-                '& .MuiInputLabel-root.Mui-focused': { color: '#a855f7' },
-              }}
-            />
-
-            <FormControl fullWidth sx={{ '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
-              <InputLabel sx={{ color: 'rgba(255,255,255,0.4)', '&.Mui-focused': { color: '#a855f7' } }}>Position *</InputLabel>
-              <Select
-                value={guestForm.guest_position}
-                label="Position *"
-                onChange={e => setGuestForm(f => ({ ...f, guest_position: e.target.value }))}
+              <TextField
+                label="Guest Full Name *"
+                placeholder="e.g. Tamim Hossain"
+                value={guestForm.guest_name}
+                onChange={e => setGuestForm(f => ({ ...f, guest_name: e.target.value }))}
+                fullWidth
                 sx={{
-                  color: '#fff',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: C.border },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#a855f7' },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#a855f7' },
+                  '& .MuiOutlinedInput-root': { color: '#fff', '& fieldset': { borderColor: C.border }, '&:hover fieldset': { borderColor: '#a855f7' }, '&.Mui-focused fieldset': { borderColor: '#a855f7' } },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.4)' },
+                  '& .MuiInputLabel-root.Mui-focused': { color: '#a855f7' },
                 }}
-                MenuProps={{ PaperProps: { sx: { background: C.surface, border: `1px solid ${C.border}`, '& .MuiMenuItem-root': { color: '#fff' }, '& .MuiMenuItem-root:hover': { background: 'rgba(168,85,247,0.15)' }, '& .MuiMenuItem-root.Mui-selected': { background: 'rgba(168,85,247,0.25)' } } } }}
-              >
-                {POSITIONS.map(p => (
-                  <MenuItem key={p} value={p} sx={{ color: '#fff' }}>{p}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              />
+
+              <FormControl fullWidth sx={{ '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
+                <InputLabel sx={{ color: 'rgba(255,255,255,0.4)', '&.Mui-focused': { color: '#a855f7' } }}>Position *</InputLabel>
+                <Select
+                  value={guestForm.guest_position}
+                  label="Position *"
+                  onChange={e => setGuestForm(f => ({ ...f, guest_position: e.target.value }))}
+                  sx={{
+                    color: '#fff',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: C.border },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#a855f7' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#a855f7' },
+                  }}
+                  MenuProps={{ PaperProps: { sx: { background: C.surface, border: `1px solid ${C.border}`, '& .MuiMenuItem-root': { color: '#fff' }, '& .MuiMenuItem-root:hover': { background: 'rgba(168,85,247,0.15)' }, '& .MuiMenuItem-root.Mui-selected': { background: 'rgba(168,85,247,0.25)' } } } }}
+                >
+                  {POSITIONS.map(p => (
+                    <MenuItem key={p} value={p} sx={{ color: '#fff' }}>{p}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
 
             {guestResult && !guestResult.error && (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                 <Typography sx={{ color: C.green, fontWeight: 700, fontSize: 13, alignSelf: 'flex-start' }}>
                   ✅ Guest ID Card generated!
                 </Typography>
-                <Box sx={{ filter: 'drop-shadow(0 6px 24px rgba(0,0,0,0.6))', transform: 'scale(0.88)', transformOrigin: 'top center' }}>
+                <Box sx={{ filter: 'drop-shadow(0 6px 24px rgba(0,0,0,0.6))' }}>
                   <GuestIDCard card={guestResult.card} />
                 </Box>
                 <Button size="small" variant="outlined"
