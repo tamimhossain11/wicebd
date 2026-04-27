@@ -161,11 +161,13 @@ const getSubmissions = async (req, res) => {
         s.submitted_at,
         s.total_marks,
         s.max_marks,
+        TIMESTAMPDIFF(SECOND, ses.started_at, s.submitted_at) AS time_taken_seconds,
         u.id as user_id,
         u.name as user_name,
         u.email as user_email,
         ses.title as session_title,
-        ses.id as session_id
+        ses.id as session_id,
+        ses.started_at as session_started_at
       FROM olympiad_submissions s
       JOIN users u ON s.user_id = u.id
       JOIN olympiad_exam_sessions ses ON s.session_id = ses.id
@@ -175,7 +177,7 @@ const getSubmissions = async (req, res) => {
       query += ' WHERE s.session_id = ?';
       params.push(session_id);
     }
-    query += ' ORDER BY s.total_marks DESC, s.submitted_at ASC';
+    query += ' ORDER BY s.total_marks DESC, time_taken_seconds ASC';
 
     const [rows] = await db.query(query, params);
     res.json({ success: true, submissions: rows });

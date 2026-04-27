@@ -48,14 +48,14 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
     const [rows] = await db.query(`
       SELECT
         cp.id, cp.code, cp.club_name, cp.institution_name,
-        COALESCE(SUM(CASE WHEN r.competitionCategory = 'Project' THEN 1 ELSE 0 END), 0)   AS project_count,
-        COALESCE(SUM(CASE WHEN r.competitionCategory = 'Megazine' THEN 1 ELSE 0 END), 0)  AS magazine_count,
-        COALESCE(COUNT(DISTINCT o.id), 0)                                                  AS olympiad_count,
-        COALESCE(COUNT(DISTINCT r.id), 0) + COALESCE(COUNT(DISTINCT o.id), 0)             AS total
+        COALESCE(proj.cnt, 0)                                         AS project_count,
+        COALESCE(mag.cnt,  0)                                         AS magazine_count,
+        COALESCE(oly.cnt,  0)                                         AS olympiad_count,
+        COALESCE(proj.cnt, 0) + COALESCE(mag.cnt, 0) + COALESCE(oly.cnt, 0) AS total
       FROM club_partners cp
-      LEFT JOIN registrations          r ON r.club_code = cp.code
-      LEFT JOIN olympiad_registrations o ON o.club_code = cp.code
-      GROUP BY cp.id, cp.code, cp.club_name, cp.institution_name
+      LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Project'  AND club_code IS NOT NULL GROUP BY club_code) proj ON proj.club_code = cp.code
+      LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Megazine' AND club_code IS NOT NULL GROUP BY club_code) mag  ON mag.club_code  = cp.code
+      LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM olympiad_registrations WHERE club_code IS NOT NULL GROUP BY club_code)                                       oly  ON oly.club_code  = cp.code
       ORDER BY total DESC
     `);
     res.json(rows);

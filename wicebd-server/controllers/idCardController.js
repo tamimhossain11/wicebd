@@ -8,10 +8,11 @@ const VERIFY_BASE = `${process.env.BACKEND_API_URL || 'https://api.wicebd.com'}/
 /* ─────────────────────────────────────────────────────────────
    Helper — generate a card_uid, create QR, persist to id_cards
    ───────────────────────────────────────────────────────────── */
-async function issueCard ({ userId, registrationType, registrationId, memberSlot, name, email, title }) {
-  const prefix  = registrationType === 'olympiad'
-    ? 'OLY' : registrationType === 'wall-magazine'
-    ? 'MAG' : 'PRJ';
+async function issueCard ({ userId, registrationType, registrationId, memberSlot, name, email, title, guestName = null, guestPosition = null }) {
+  const prefix  = registrationType === 'olympiad'     ? 'OLY'
+                : registrationType === 'wall-magazine' ? 'MAG'
+                : registrationType === 'guest'         ? 'GST'
+                : 'PRJ';
   const slotTag = memberSlot ? `-M${memberSlot}` : '';
   const cardUid = `WICE-${prefix}-${uuidv4().slice(0, 8).toUpperCase()}${slotTag}`;
   const verifyUrl = `${VERIFY_BASE}/${cardUid}`;
@@ -28,9 +29,9 @@ async function issueCard ({ userId, registrationType, registrationId, memberSlot
 
   await db.query(
     `INSERT INTO id_cards
-       (user_id, registration_type, registration_id, member_slot, card_uid, qr_data, image_url)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [userId, registrationType, registrationId, memberSlot ?? null, cardUid, verifyUrl, imageUrl]
+       (user_id, registration_type, registration_id, member_slot, card_uid, qr_data, image_url, guest_name, guest_position)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [userId, registrationType, registrationId, memberSlot ?? null, cardUid, verifyUrl, imageUrl, guestName, guestPosition]
   );
 
   const qrImage = imageUrl || await QRCode.toDataURL(verifyUrl);
@@ -38,7 +39,7 @@ async function issueCard ({ userId, registrationType, registrationId, memberSlot
     card_uid: cardUid, qr_data: verifyUrl, image_url: imageUrl,
     qrImage, registration_type: registrationType, registration_id: registrationId,
     member_slot: memberSlot ?? null, generated_at: new Date(),
-    name, title, email,
+    name, title, email, guest_name: guestName, guest_position: guestPosition,
   };
 }
 
@@ -331,8 +332,10 @@ const verifyCard = async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT ic.card_uid, ic.registration_type, ic.registration_id,
-             ic.member_slot, ic.generated_at,
-             u.id AS user_id, u.name AS user_name, u.email AS user_email
+             ic.member_slot, ic.generated_at, ic.guest_name, ic.guest_position,
+             u.id AS user_id,
+             COALESCE(u.name, ic.guest_name) AS user_name,
+             u.email AS user_email
       FROM id_cards ic
       LEFT JOIN users u ON ic.user_id = u.id
       WHERE ic.card_uid = ?
@@ -343,7 +346,14 @@ const verifyCard = async (req, res) => {
     const card = rows[0];
     let detail = {};
 
-    if (card.registration_type === 'olympiad') {
+    if (card.registration_type === 'guest') {
+      detail = {
+        full_name:      card.guest_name,
+        guest_position: card.guest_position,
+        registration_id: card.card_uid,
+      };
+
+    } else if (card.registration_type === 'olympiad') {
       const [[reg]] = await db.query(
         `SELECT full_name, institution, class_grade, phone, email, registration_id
          FROM olympiad_registrations WHERE registration_id = ?`,
@@ -424,4 +434,83 @@ const deleteCard = async (req, res) => {
   }
 };
 
-module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile };
+/* ─────────────────────────────────────────────────────────────
+   POST /api/id-card/admin/generate-guest
+   Admin generates a guest ID card (CA, volunteer, district leader, etc.)
+   Body: { guest_name, guest_position }
+   ───────────────────────────────────────────────────────────── */
+const adminGenerateGuestCard = async (req, res) => {
+  const { guest_name, guest_position } = req.body;
+  if (!guest_name || !guest_position) {
+    return res.status(400).json({ success: false, message: 'guest_name and guest_position are required' });
+  }
+
+  try {
+    const guestRegId = `GST-${uuidv4().slice(0, 8).toUpperCase()}`;
+
+    const card = await issueCard({
+      userId: null,
+      registrationType: 'guest',
+      registrationId: guestRegId,
+      memberSlot: null,
+      name: guest_name,
+      email: '',
+      title: guest_position,
+      guestName: guest_name,
+      guestPosition: guest_position,
+    });
+
+    res.json({ success: true, card });
+  } catch (err) {
+    console.error('adminGenerateGuestCard error:', err);
+    res.status(500).json({ success: false, message: 'Failed to generate guest ID card' });
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────
+   POST /api/id-card/admin/generate-olympiad
+   Admin generates an olympiad ID card on behalf of a participant.
+   Body: { registration_id }
+   ───────────────────────────────────────────────────────────── */
+const adminGenerateOlympiadCard = async (req, res) => {
+  const { registration_id } = req.body;
+  if (!registration_id) {
+    return res.status(400).json({ success: false, message: 'registration_id is required' });
+  }
+
+  try {
+    const [[reg]] = await db.query(
+      'SELECT registration_id, user_id, full_name, email, institution FROM olympiad_registrations WHERE registration_id = ?',
+      [registration_id]
+    );
+    if (!reg) return res.status(404).json({ success: false, message: 'Olympiad registration not found' });
+
+    // Return existing card if already generated
+    const [existing] = await db.query(
+      `SELECT * FROM id_cards WHERE registration_type = 'olympiad' AND registration_id = ? AND member_slot IS NULL`,
+      [registration_id]
+    );
+    if (existing.length > 0) {
+      const card = existing[0];
+      const qrImage = card.image_url || await QRCode.toDataURL(`${VERIFY_BASE}/${card.card_uid}`);
+      return res.json({ success: true, already_existed: true, card: { ...card, qrImage, name: reg.full_name, email: reg.email } });
+    }
+
+    const card = await issueCard({
+      userId: reg.user_id || null,
+      registrationType: 'olympiad',
+      registrationId: registration_id,
+      memberSlot: null,
+      name: reg.full_name,
+      email: reg.email,
+      title: reg.institution,
+    });
+
+    res.json({ success: true, already_existed: false, card });
+  } catch (err) {
+    console.error('adminGenerateOlympiadCard error:', err);
+    res.status(500).json({ success: false, message: 'Failed to generate guest ID card' });
+  }
+};
+
+module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard };

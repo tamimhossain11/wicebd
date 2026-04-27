@@ -115,8 +115,9 @@ router.get('/attendance/:cardUid', authenticateAdmin, async (req, res) => {
     /* Get ID card + user + registration detail */
     const [cardRows] = await db.query(`
       SELECT ic.card_uid, ic.registration_type, ic.registration_id,
-             ic.user_id, ic.generated_at,
-             u.name AS user_name, u.email AS user_email
+             ic.user_id, ic.generated_at, ic.guest_name, ic.guest_position,
+             COALESCE(u.name, ic.guest_name) AS user_name,
+             u.email AS user_email
       FROM id_cards ic
       LEFT JOIN users u ON ic.user_id = u.id
       WHERE ic.card_uid = ?
@@ -145,7 +146,9 @@ router.post('/attendance/:cardUid/checkin', authenticateAdmin, async (req, res) 
 
     /* Get name for display */
     let participant_name = '';
-    if (card.registration_type === 'olympiad') {
+    if (card.registration_type === 'guest') {
+      participant_name = card.guest_name || '';
+    } else if (card.registration_type === 'olympiad') {
       const [[reg]] = await db.query('SELECT full_name FROM olympiad_registrations WHERE registration_id = ?', [card.registration_id]);
       participant_name = reg?.full_name || '';
     } else {
@@ -198,16 +201,38 @@ router.post('/attendance/:cardUid/lunch', authenticateAdmin, async (req, res) =>
   }
 });
 
+/* Mark coffee claimed (all registration types eligible) */
+router.post('/attendance/:cardUid/coffee', authenticateAdmin, async (req, res) => {
+  const { cardUid } = req.params;
+  try {
+    const [existing] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
+    if (!existing.length) return res.status(400).json({ success: false, message: 'Not checked in yet' });
+    if (existing[0].coffee_claimed_at) {
+      return res.json({ success: true, already: true, attendance: existing[0] });
+    }
+    await db.query(
+      'UPDATE attendance SET coffee_claimed_at = NOW(), coffee_claimed_by = ? WHERE card_uid = ?',
+      [req.admin.id, cardUid]
+    );
+    const [[att]] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
+    res.json({ success: true, already: false, attendance: att });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error: ' + e.message });
+  }
+});
+
 /* List all attendance records */
 router.get('/attendance', authenticateAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT a.*,
              ci.username AS checked_in_by_name,
-             lc.username AS lunch_by_name
+             lc.username AS lunch_by_name,
+             cc.username AS coffee_by_name
       FROM attendance a
-      LEFT JOIN admins ci ON a.checked_in_by  = ci.id
+      LEFT JOIN admins ci ON a.checked_in_by   = ci.id
       LEFT JOIN admins lc ON a.lunch_claimed_by = lc.id
+      LEFT JOIN admins cc ON a.coffee_claimed_by = cc.id
       ORDER BY a.checked_in_at DESC
     `);
     res.json({ success: true, attendance: rows });

@@ -48,14 +48,14 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
     const [rows] = await db.query(`
       SELECT
         ca.id, ca.code, ca.name, ca.institution_name,
-        COALESCE(SUM(CASE WHEN r.competitionCategory = 'Project' THEN 1 ELSE 0 END), 0)   AS project_count,
-        COALESCE(SUM(CASE WHEN r.competitionCategory = 'Megazine' THEN 1 ELSE 0 END), 0)  AS magazine_count,
-        COALESCE(COUNT(DISTINCT o.id), 0)                                                  AS olympiad_count,
-        COALESCE(COUNT(DISTINCT r.id), 0) + COALESCE(COUNT(DISTINCT o.id), 0)             AS total
+        COALESCE(proj.cnt, 0)                                         AS project_count,
+        COALESCE(mag.cnt,  0)                                         AS magazine_count,
+        COALESCE(oly.cnt,  0)                                         AS olympiad_count,
+        COALESCE(proj.cnt, 0) + COALESCE(mag.cnt, 0) + COALESCE(oly.cnt, 0) AS total
       FROM campus_ambassadors ca
-      LEFT JOIN registrations          r ON r.ca_code   = ca.code
-      LEFT JOIN olympiad_registrations o ON o.ca_code   = ca.code
-      GROUP BY ca.id, ca.code, ca.name, ca.institution_name
+      LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Project'  AND ca_code IS NOT NULL GROUP BY ca_code) proj ON proj.ca_code = ca.code
+      LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Megazine' AND ca_code IS NOT NULL GROUP BY ca_code) mag  ON mag.ca_code  = ca.code
+      LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM olympiad_registrations WHERE ca_code IS NOT NULL GROUP BY ca_code)                                       oly  ON oly.ca_code  = ca.code
       ORDER BY total DESC
     `);
     res.json(rows);

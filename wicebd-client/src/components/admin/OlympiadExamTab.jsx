@@ -8,11 +8,11 @@ import {
 import { DataGrid } from '@mui/x-data-grid';
 import {
   Add, Edit as EditIcon, Delete, PlayArrow, Stop, Refresh,
-  EmojiEvents, Quiz, Leaderboard, CheckCircle, Schedule,
+  EmojiEvents, Quiz, Leaderboard, CheckCircle, Schedule, FileDownload,
 } from '@mui/icons-material';
 import api from '../../api/index';
 
-/* ── Design tokens (mirrors AdminDashboard) ── */
+/* ── Design tokens ── */
 const CARD    = '#12122a';
 const SURFACE = '#0e0e1c';
 const BORDER  = 'rgba(255,255,255,0.07)';
@@ -21,6 +21,9 @@ const GREEN   = '#10b981';
 const AMBER   = '#f59e0b';
 const ACCENT  = '#6c63ff';
 const CYAN    = '#06b6d4';
+const GOLD    = '#f59e0b';
+const SILVER  = '#94a3b8';
+const BRONZE  = '#b45309';
 
 const inputSx = {
   '& .MuiOutlinedInput-root': {
@@ -48,7 +51,6 @@ const gridSx = {
   color: 'rgba(255,255,255,0.8)',
   '& .MuiDataGrid-main':            { background: CARD },
   '& .MuiDataGrid-virtualScroller': { background: CARD },
-  /* v8 header — solid dark bg, white text */
   '& .MuiDataGrid-columnHeaders':                  { background: '#1a0a12 !important', borderBottom: '1px solid rgba(128,0,32,0.5) !important' },
   '& .MuiDataGrid-columnHeadersInner':             { background: '#1a0a12 !important' },
   '& .MuiDataGrid-filler':                         { background: '#1a0a12 !important' },
@@ -73,7 +75,19 @@ const gridSx = {
 };
 
 const BLANK_Q = { question_text: '', option_a: '', option_b: '', option_c: '', option_d: '', correct_answer: 'A', marks: 1, question_order: 0 };
-const TABS = ['Questions', 'Session Control', 'Results'];
+const TABS = ['Questions', 'Session Control', 'Leaderboard'];
+
+/* Format seconds as mm:ss */
+const fmtTime = (secs) => {
+  if (secs == null || secs < 0) return '—';
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+};
+
+/* Rank medal color */
+const rankColor = (rank) => rank === 1 ? GOLD : rank === 2 ? SILVER : rank === 3 ? BRONZE : 'rgba(255,255,255,0.4)';
+const rankLabel = (rank) => rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
 
 export default function OlympiadExamTab() {
   const [activeTab, setActiveTab] = useState(0);
@@ -84,13 +98,14 @@ export default function OlympiadExamTab() {
   const [error, setError]           = useState('');
   const [success, setSuccess]       = useState('');
 
-  const [qDialog, setQDialog]         = useState(false);
-  const [editingQ, setEditingQ]       = useState(null);
-  const [qForm, setQForm]             = useState(BLANK_Q);
+  const [qDialog, setQDialog]             = useState(false);
+  const [editingQ, setEditingQ]           = useState(null);
+  const [qForm, setQForm]                 = useState(BLANK_Q);
   const [sessionDialog, setSessionDialog] = useState(false);
-  const [sessionForm, setSessionForm] = useState({ title: 'Olympiad Exam', duration_minutes: 60 });
-  const [detailDialog, setDetailDialog] = useState(false);
+  const [sessionForm, setSessionForm]     = useState({ title: 'Olympiad Exam', duration_minutes: 60 });
+  const [detailDialog, setDetailDialog]   = useState(false);
   const [submissionDetail, setSubmissionDetail] = useState(null);
+
 
   const notify = (msg, type = 'success') => {
     if (type === 'error') setError(msg); else setSuccess(msg);
@@ -162,6 +177,25 @@ export default function OlympiadExamTab() {
     catch { notify('Failed to load detail', 'error'); }
   };
 
+  /* ── Download leaderboard as CSV ── */
+  const downloadLeaderboard = () => {
+    const rows = submissions.map((s, i) => ({
+      Rank: i + 1,
+      Name: s.user_name,
+      Email: s.user_email,
+      Score: `${s.total_marks}/${s.max_marks}`,
+      'Time (mm:ss)': fmtTime(s.time_taken_seconds),
+      'Submitted At': s.submitted_at ? new Date(s.submitted_at).toLocaleString() : '',
+    }));
+    const header = Object.keys(rows[0]).join(',');
+    const body   = rows.map(r => Object.values(r).map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob   = new Blob([header + '\n' + body], { type: 'text/csv' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href = url; a.download = 'olympiad_leaderboard.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   /* ── DataGrid columns ── */
   const questionCols = [
     { field: 'question_order', headerName: '#', width: 55 },
@@ -188,26 +222,6 @@ export default function OlympiadExamTab() {
     },
   ];
 
-  const submissionCols = [
-    { field: 'submission_id', headerName: 'ID', width: 65 },
-    { field: 'user_name', headerName: 'Name', width: 160 },
-    { field: 'user_email', headerName: 'Email', width: 220 },
-    { field: 'score', headerName: 'Score', width: 120,
-      valueGetter: (_, row) => `${row.total_marks} / ${row.max_marks}`,
-      renderCell: p => <Chip label={p.value} size="small" sx={{ background: `${CYAN}20`, color: CYAN, fontWeight: 700 }} />,
-    },
-    { field: 'submitted_at', headerName: 'Submitted', width: 170, valueFormatter: v => v ? new Date(v).toLocaleString() : '' },
-    { field: 'detail', headerName: '', width: 90, sortable: false,
-      renderCell: p => (
-        <Button size="small" variant="outlined"
-          sx={{ color: RED, borderColor: `${RED}50`, fontSize: 11, textTransform: 'none', '&:hover': { background: `${RED}10`, borderColor: RED } }}
-          onClick={() => openSubmissionDetail(p.row.submission_id)}>
-          View
-        </Button>
-      ),
-    },
-  ];
-
   const totalMarks = questions.reduce((s, q) => s + (q.marks || 1), 0);
 
   if (loading) return (
@@ -228,7 +242,9 @@ export default function OlympiadExamTab() {
         </Box>
         {session && (
           <Chip
-            icon={session.status === 'open' ? <CheckCircle sx={{ fontSize: '14px !important', color: `${GREEN} !important` }} /> : <Schedule sx={{ fontSize: '14px !important' }} />}
+            icon={session.status === 'open'
+              ? <CheckCircle sx={{ fontSize: '14px !important', color: `${GREEN} !important` }} />
+              : <Schedule sx={{ fontSize: '14px !important' }} />}
             label={session.status === 'open' ? 'LIVE' : session.status === 'closed' ? 'Closed' : 'Draft'}
             sx={{
               background: session.status === 'open' ? `${GREEN}18` : session.status === 'closed' ? `${RED}18` : `${AMBER}18`,
@@ -246,9 +262,7 @@ export default function OlympiadExamTab() {
       {/* Sub-tabs */}
       <Box sx={{ display: 'flex', gap: 1, mb: 3, p: 0.5, background: 'rgba(255,255,255,0.03)', borderRadius: 2, width: 'fit-content', border: `1px solid ${BORDER}` }}>
         {TABS.map((t, i) => (
-          <Button
-            key={t}
-            size="small"
+          <Button key={t} size="small"
             startIcon={i === 0 ? <Quiz sx={{ fontSize: '16px !important' }} /> : i === 1 ? <PlayArrow sx={{ fontSize: '16px !important' }} /> : <Leaderboard sx={{ fontSize: '16px !important' }} />}
             onClick={() => setActiveTab(i)}
             sx={{
@@ -284,14 +298,11 @@ export default function OlympiadExamTab() {
             </Box>
           </Box>
           <Paper sx={{ background: CARD, borderRadius: 3, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
-            <DataGrid
-              rows={questions}
-              columns={questionCols}
+            <DataGrid rows={questions} columns={questionCols}
               pageSizeOptions={[10, 25, 50]}
               initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
               disableRowSelectionOnClick
-              sx={{ ...gridSx, '--DataGrid-overlayHeight': '200px' }}
-            />
+              sx={{ ...gridSx, '--DataGrid-overlayHeight': '200px' }} />
           </Paper>
         </Box>
       )}
@@ -299,7 +310,6 @@ export default function OlympiadExamTab() {
       {/* ── TAB 1: Session Control ── */}
       {activeTab === 1 && (
         <Grid container spacing={3}>
-          {/* Status Card */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 3, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
@@ -327,22 +337,15 @@ export default function OlympiadExamTab() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 0.5 }}>
                     <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>Status</Typography>
                     <Chip label={session.status.toUpperCase()} size="small"
-                      sx={{
-                        background: session.status === 'open' ? `${GREEN}18` : `${RED}18`,
-                        color: session.status === 'open' ? GREEN : RED,
-                        fontWeight: 700, fontSize: 11,
-                      }} />
+                      sx={{ background: session.status === 'open' ? `${GREEN}18` : `${RED}18`, color: session.status === 'open' ? GREEN : RED, fontWeight: 700, fontSize: 11 }} />
                   </Box>
                 </Box>
               )}
               <Button size="small" startIcon={<Refresh sx={{ fontSize: 14 }} />} onClick={fetchSession}
-                sx={{ mt: 2, color: 'rgba(255,255,255,0.35)', textTransform: 'none', fontSize: 12 }}>
-                Refresh
-              </Button>
+                sx={{ mt: 2, color: 'rgba(255,255,255,0.35)', textTransform: 'none', fontSize: 12 }}>Refresh</Button>
             </Paper>
           </Grid>
 
-          {/* Controls */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 3, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
@@ -353,31 +356,16 @@ export default function OlympiadExamTab() {
                 <Box sx={{ p: 2, borderRadius: 2, background: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}`, fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>
                   Opening the portal makes all questions visible to olympiad-registered users. A countdown timer starts immediately.
                 </Box>
-                <Button
-                  variant="contained"
-                  startIcon={<PlayArrow />}
+                <Button variant="contained" startIcon={<PlayArrow />}
                   disabled={session?.status === 'open'}
                   onClick={() => setSessionDialog(true)}
-                  sx={{
-                    background: `linear-gradient(135deg, ${GREEN}, #059669)`,
-                    textTransform: 'none', borderRadius: 2, fontWeight: 700,
-                    boxShadow: `0 4px 14px ${GREEN}40`,
-                    '&:disabled': { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.2)' },
-                  }}
-                >
+                  sx={{ background: `linear-gradient(135deg, ${GREEN}, #059669)`, textTransform: 'none', borderRadius: 2, fontWeight: 700, boxShadow: `0 4px 14px ${GREEN}40`, '&:disabled': { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.2)' } }}>
                   {session?.status === 'open' ? 'Portal Already Open' : 'Open Exam Portal'}
                 </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<Stop />}
+                <Button variant="outlined" startIcon={<Stop />}
                   disabled={session?.status !== 'open'}
                   onClick={handleCloseSession}
-                  sx={{
-                    color: RED, borderColor: `${RED}50`, textTransform: 'none', borderRadius: 2, fontWeight: 700,
-                    '&:hover': { background: `${RED}10`, borderColor: RED },
-                    '&:disabled': { color: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.1)' },
-                  }}
-                >
+                  sx={{ color: RED, borderColor: `${RED}50`, textTransform: 'none', borderRadius: 2, fontWeight: 700, '&:hover': { background: `${RED}10`, borderColor: RED }, '&:disabled': { color: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.1)' } }}>
                   Close Exam Portal
                 </Button>
                 {questions.length === 0 && (
@@ -391,16 +379,34 @@ export default function OlympiadExamTab() {
         </Grid>
       )}
 
-      {/* ── TAB 2: Results ── */}
+      {/* ── TAB 2: Leaderboard ── */}
       {activeTab === 2 && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2.5, alignItems: 'center' }}>
-            <Box sx={{ px: 2, py: 0.8, borderRadius: 2, background: `${CYAN}15`, border: `1px solid ${CYAN}25` }}>
-              <Typography sx={{ color: CYAN, fontSize: 12, fontWeight: 700 }}>{submissions.length} Submissions</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2.5, alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+              <Box sx={{ px: 2, py: 0.8, borderRadius: 2, background: `${CYAN}15`, border: `1px solid ${CYAN}25` }}>
+                <Typography sx={{ color: CYAN, fontSize: 12, fontWeight: 700 }}>{submissions.length} Submissions</Typography>
+              </Box>
+              {submissions.length > 0 && (
+                <Box sx={{ px: 2, py: 0.8, borderRadius: 2, background: `${GREEN}15`, border: `1px solid ${GREEN}25` }}>
+                  <Typography sx={{ color: GREEN, fontSize: 12, fontWeight: 700 }}>
+                    Top: {submissions[0]?.user_name} — {submissions[0]?.total_marks}/{submissions[0]?.max_marks} in {fmtTime(submissions[0]?.time_taken_seconds)}
+                  </Typography>
+                </Box>
+              )}
             </Box>
-            <Button size="small" startIcon={<Refresh sx={{ fontSize: 16 }} />} onClick={fetchSubmissions}
-              variant="outlined" sx={{ color: 'rgba(255,255,255,0.5)', borderColor: BORDER, textTransform: 'none', borderRadius: 2 }}>Refresh</Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button size="small" startIcon={<Refresh sx={{ fontSize: 16 }} />} onClick={fetchSubmissions}
+                variant="outlined" sx={{ color: 'rgba(255,255,255,0.5)', borderColor: BORDER, textTransform: 'none', borderRadius: 2 }}>Refresh</Button>
+              {submissions.length > 0 && (
+                <Button size="small" startIcon={<FileDownload sx={{ fontSize: 16 }} />} onClick={downloadLeaderboard}
+                  variant="contained" sx={{ background: `linear-gradient(135deg, ${GREEN}, #059669)`, textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
+                  Download CSV
+                </Button>
+              )}
+            </Box>
           </Box>
+
           {submissions.length === 0 ? (
             <Paper sx={{ p: 8, textAlign: 'center', background: CARD, borderRadius: 3, border: `1px solid ${BORDER}` }}>
               <Leaderboard sx={{ fontSize: 56, color: 'rgba(255,255,255,0.1)', mb: 2 }} />
@@ -408,15 +414,71 @@ export default function OlympiadExamTab() {
             </Paper>
           ) : (
             <Paper sx={{ background: CARD, borderRadius: 3, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
-              <DataGrid
-                rows={submissions}
-                getRowId={r => r.submission_id}
-                columns={submissionCols}
-                pageSizeOptions={[10, 25, 50]}
-                initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                disableRowSelectionOnClick
-                sx={{ ...gridSx, '--DataGrid-overlayHeight': '200px' }}
-              />
+              <Box sx={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${BORDER}` }}>
+                      {['Rank', 'Participant', 'Email', 'Score', '% Correct', 'Time Taken', 'Submitted At', ''].map(h => (
+                        <th key={h} style={{ padding: '13px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {submissions.map((s, i) => {
+                      const rank = i + 1;
+                      const pct  = s.max_marks > 0 ? Math.round((s.total_marks / s.max_marks) * 100) : 0;
+                      const rc   = rankColor(rank);
+                      return (
+                        <tr key={s.submission_id}
+                          style={{ borderBottom: `1px solid ${BORDER}`, background: rank <= 3 ? `${rc}08` : i % 2 ? 'rgba(255,255,255,0.012)' : 'transparent' }}>
+                          <td style={{ padding: '12px 16px' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 30, height: 30, borderRadius: '50%', background: rank <= 3 ? `${rc}22` : 'rgba(255,255,255,0.06)', border: `1px solid ${rank <= 3 ? rc : 'rgba(255,255,255,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: rank <= 3 ? 16 : 12, fontWeight: 800, color: rc, flexShrink: 0 }}>
+                                {rankLabel(rank)}
+                              </Box>
+                            </Box>
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Avatar sx={{ width: 30, height: 30, fontSize: 13, fontWeight: 800, background: `linear-gradient(135deg, ${RED}, ${ACCENT})` }}>
+                                {s.user_name?.charAt(0)}
+                              </Avatar>
+                              <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>{s.user_name}</Typography>
+                            </Box>
+                          </td>
+                          <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>{s.user_email}</td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <Chip label={`${s.total_marks} / ${s.max_marks}`} size="small"
+                              sx={{ background: pct >= 80 ? `${GREEN}22` : pct >= 50 ? `${AMBER}22` : `${RED}22`, color: pct >= 80 ? GREEN : pct >= 50 ? AMBER : RED, fontWeight: 800, fontSize: 12 }} />
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 80, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                                <Box sx={{ height: '100%', width: `${pct}%`, background: pct >= 80 ? GREEN : pct >= 50 ? AMBER : RED, borderRadius: 3, transition: 'width 0.3s' }} />
+                              </Box>
+                              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, minWidth: 32 }}>{pct}%</Typography>
+                            </Box>
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <Chip label={fmtTime(s.time_taken_seconds)} size="small"
+                              sx={{ background: `${CYAN}18`, color: CYAN, fontWeight: 700, fontSize: 11, fontFamily: 'monospace' }} />
+                          </td>
+                          <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>
+                            {s.submitted_at ? new Date(s.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <Button size="small" variant="outlined"
+                              sx={{ color: RED, borderColor: `${RED}50`, fontSize: 11, textTransform: 'none', '&:hover': { background: `${RED}10`, borderColor: RED } }}
+                              onClick={() => openSubmissionDetail(s.submission_id)}>
+                              Detail
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </Box>
             </Paper>
           )}
         </Box>
@@ -545,12 +607,10 @@ export default function OlympiadExamTab() {
               <Divider sx={{ borderColor: BORDER, mb: 2 }} />
               {submissionDetail.answers?.map((a, i) => (
                 <Box key={a.id} sx={{ mb: 2, p: 2, borderRadius: 2, background: a.is_correct ? `${GREEN}08` : `${RED}08`, border: `1px solid ${a.is_correct ? GREEN : RED}20` }}>
-                  <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: 13, mb: 1.5 }}>
-                    Q{i + 1}. {a.question_text}
-                  </Typography>
+                  <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: 13, mb: 1.5 }}>Q{i + 1}. {a.question_text}</Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
                     {['A', 'B', 'C', 'D'].map(opt => {
-                      const optText = a[`option_${opt.toLowerCase()}`];
+                      const optText   = a[`option_${opt.toLowerCase()}`];
                       const isSelected = a.selected_answer === opt;
                       const isCorrect  = a.correct_answer === opt;
                       return (
