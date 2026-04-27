@@ -1,14 +1,17 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Box, Typography, Paper, Button, Chip, CircularProgress,
   Divider, Avatar, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow,
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, FormControl, InputLabel, Select, MenuItem,
+  IconButton, Tooltip,
 } from '@mui/material';
-import { QrCodeScanner, CheckCircle, LunchDining, PersonOff, Refresh, LocalCafe, CardMembership, FileDownload } from '@mui/icons-material';
+import { QrCodeScanner, CheckCircle, LunchDining, PersonOff, Refresh, LocalCafe, CardMembership, FileDownload, DeleteOutline, VisibilityOutlined, WarningAmberRounded } from '@mui/icons-material';
 import QrScanner from 'react-qr-scanner';
+import html2canvas from 'html2canvas';
 import api from '../../api/index';
+import GuestIDCard from './GuestIDCard';
 
 const C = {
   bg: '#07070f', surface: '#0e0e1c', card: '#12122a',
@@ -67,7 +70,11 @@ export default function QRScannerPanel() {
   /* Guest ID card — list */
   const [guestList, setGuestList]           = useState([]);
   const [guestListLoading, setGuestListLoading] = useState(true);
-  const [viewCard, setViewCard]             = useState(null); // card being previewed
+  const [viewCard, setViewCard]             = useState(null);
+  const [deleteUid, setDeleteUid]           = useState(null); // uid awaiting confirm
+  const [deleteLoading, setDeleteLoading]   = useState(false);
+  const [downloadingUid, setDownloadingUid] = useState(null);
+  const cardRef = useRef(null);
 
   const fetchGuestList = useCallback(async () => {
     setGuestListLoading(true);
@@ -77,6 +84,40 @@ export default function QRScannerPanel() {
     } catch { /* silently ignore */ }
     finally { setGuestListLoading(false); }
   }, []);
+
+  const downloadCard = async (card) => {
+    setDownloadingUid(card.card_uid);
+    // Small delay so the hidden card renders fully before capture
+    await new Promise(r => setTimeout(r, 120));
+    try {
+      const el = document.getElementById(`guestcard-${card.card_uid}`);
+      if (!el) return;
+      const canvas = await html2canvas(el, {
+        scale: 2, useCORS: true, backgroundColor: null, logging: false,
+      });
+      canvas.toBlob(blob => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${card.card_uid}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    } finally {
+      setDownloadingUid(null);
+    }
+  };
+
+  const confirmDelete = async (uid) => {
+    setDeleteLoading(true);
+    try {
+      await api.delete(`/api/id-card/admin/guests/${uid}`);
+      setGuestList(prev => prev.filter(g => g.card_uid !== uid));
+      if (viewCard?.card_uid === uid) setViewCard(null);
+    } catch { /* silently ignore */ }
+    finally { setDeleteLoading(false); setDeleteUid(null); }
+  };
 
   const fetchAll = useCallback(async () => {
     setLogLoading(true);
@@ -513,19 +554,40 @@ export default function QRScannerPanel() {
                       {new Date(g.generated_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </TableCell>
                     <TableCell sx={{ borderColor: C.border }}>
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Button size="small" onClick={() => setViewCard(g)}
-                          sx={{ color: '#a855f7', textTransform: 'none', fontSize: 11, minWidth: 0, px: 1.2, py: 0.4,
-                            border: '1px solid rgba(168,85,247,0.3)', borderRadius: 1.5, fontWeight: 700 }}>
-                          View
-                        </Button>
-                        <Button size="small" component="a"
-                          href={g.image_url || g.qr_data} download={`${g.card_uid}.png`} target="_blank" rel="noreferrer"
-                          startIcon={<FileDownload sx={{ fontSize: 13 }} />}
-                          sx={{ color: C.green, textTransform: 'none', fontSize: 11, minWidth: 0, px: 1.2, py: 0.4,
-                            border: `1px solid ${C.green}40`, borderRadius: 1.5, fontWeight: 700 }}>
-                          Download
-                        </Button>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Tooltip title="View card">
+                          <IconButton size="small" onClick={() => setViewCard(g)}
+                            sx={{ color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 1.5, p: 0.6 }}>
+                            <VisibilityOutlined sx={{ fontSize: 15 }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Download card as PNG">
+                          <IconButton size="small" onClick={() => downloadCard(g)} disabled={downloadingUid === g.card_uid}
+                            sx={{ color: C.green, border: `1px solid ${C.green}40`, borderRadius: 1.5, p: 0.6 }}>
+                            {downloadingUid === g.card_uid
+                              ? <CircularProgress size={13} sx={{ color: C.green }} />
+                              : <FileDownload sx={{ fontSize: 15 }} />}
+                          </IconButton>
+                        </Tooltip>
+                        {deleteUid === g.card_uid ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Button size="small" onClick={() => confirmDelete(g.card_uid)} disabled={deleteLoading}
+                              sx={{ color: C.red, border: `1px solid ${C.red}50`, borderRadius: 1.5, textTransform: 'none', fontSize: 10, fontWeight: 700, px: 1, py: 0.4, minWidth: 0 }}>
+                              {deleteLoading ? <CircularProgress size={11} sx={{ color: C.red }} /> : 'Confirm'}
+                            </Button>
+                            <Button size="small" onClick={() => setDeleteUid(null)}
+                              sx={{ color: 'rgba(255,255,255,0.35)', textTransform: 'none', fontSize: 10, px: 0.8, py: 0.4, minWidth: 0 }}>
+                              Cancel
+                            </Button>
+                          </Box>
+                        ) : (
+                          <Tooltip title="Delete card">
+                            <IconButton size="small" onClick={() => setDeleteUid(g.card_uid)}
+                              sx={{ color: C.red, border: `1px solid ${C.red}30`, borderRadius: 1.5, p: 0.6 }}>
+                              <DeleteOutline sx={{ fontSize: 15 }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -537,49 +599,77 @@ export default function QRScannerPanel() {
       </Paper>
 
       {/* ── View Guest Card Dialog ── */}
-      <Dialog open={!!viewCard} onClose={() => setViewCard(null)} maxWidth="xs" fullWidth
-        slotProps={{ paper: { sx: { background: C.surface, border: `1px solid rgba(168,85,247,0.3)`, borderRadius: 3 } } }}>
+      <Dialog open={!!viewCard} onClose={() => setViewCard(null)} maxWidth="md"
+        slotProps={{ paper: { sx: { background: '#080d1e', border: '1px solid rgba(168,85,247,0.25)', borderRadius: 3, overflow: 'visible' } } }}>
         <DialogTitle sx={{ color: '#fff', fontWeight: 700, borderBottom: `1px solid ${C.border}`, pb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CardMembership sx={{ color: '#a855f7', fontSize: 20 }} />
-            Guest ID Card
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CardMembership sx={{ color: '#a855f7', fontSize: 20 }} />
+              Guest ID Card Preview
+            </Box>
+            <Chip label={`Issued ${viewCard ? new Date(viewCard.generated_at).toLocaleDateString() : ''}`} size="small"
+              sx={{ background: 'rgba(168,85,247,0.15)', color: '#c084fc', fontSize: 11 }} />
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
+        <DialogContent sx={{ pt: 3, pb: 2 }}>
           {viewCard && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 2, background: '#fff', borderRadius: 2 }}>
-                <img src={viewCard.image_url || viewCard.qr_data} alt="QR Code"
-                  style={{ width: 200, height: 200, display: 'block' }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              {/* The actual designed card — also used for html2canvas capture */}
+              <Box sx={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.7))' }}>
+                <GuestIDCard
+                  card={viewCard}
+                  ref={cardRef}
+                  id={`guestcard-${viewCard.card_uid}`}
+                />
               </Box>
-              <Box sx={{ width: '100%' }}>
-                {[
-                  ['Name',      viewCard.guest_name],
-                  ['Position',  viewCard.guest_position],
-                  ['Card UID',  viewCard.card_uid],
-                  ['Issued',    new Date(viewCard.generated_at).toLocaleString()],
-                ].map(([label, val]) => (
-                  <Box key={label} sx={{ display: 'flex', gap: 1.5, mb: 0.8, alignItems: 'baseline' }}>
-                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 72 }}>{label}:</Typography>
-                    <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600, fontFamily: label === 'Card UID' ? 'monospace' : 'inherit' }}>{val}</Typography>
-                  </Box>
-                ))}
-              </Box>
+              <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, textAlign: 'center' }}>
+                Click Download to save this card as a high-resolution PNG
+              </Typography>
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3, gap: 1, borderTop: `1px solid ${C.border}` }}>
-          <Button onClick={() => setViewCard(null)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Close</Button>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1.5, borderTop: `1px solid ${C.border}` }}>
+          <Button onClick={() => setViewCard(null)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>
+            Close
+          </Button>
+          {viewCard && deleteUid === viewCard.card_uid ? (
+            <>
+              <Button onClick={() => setDeleteUid(null)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+              <Button variant="outlined" onClick={() => confirmDelete(viewCard.card_uid)} disabled={deleteLoading}
+                startIcon={deleteLoading ? <CircularProgress size={14} sx={{ color: C.red }} /> : <WarningAmberRounded sx={{ fontSize: 16 }} />}
+                sx={{ color: C.red, borderColor: `${C.red}60`, textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
+                Confirm Delete
+              </Button>
+            </>
+          ) : (
+            <Button variant="outlined" onClick={() => setDeleteUid(viewCard?.card_uid)}
+              startIcon={<DeleteOutline sx={{ fontSize: 16 }} />}
+              sx={{ color: C.red, borderColor: `${C.red}40`, textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
+              Delete
+            </Button>
+          )}
           {viewCard && (
-            <Button variant="contained" component="a"
-              href={viewCard.image_url || viewCard.qr_data} download={`${viewCard.card_uid}.png`} target="_blank" rel="noreferrer"
-              startIcon={<FileDownload sx={{ fontSize: 15 }} />}
-              sx={{ background: 'linear-gradient(135deg,#a855f7,#6c63ff)', textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
-              Download QR
+            <Button variant="contained"
+              onClick={() => downloadCard(viewCard)}
+              disabled={downloadingUid === viewCard?.card_uid}
+              startIcon={downloadingUid === viewCard?.card_uid
+                ? <CircularProgress size={14} sx={{ color: '#fff' }} />
+                : <FileDownload sx={{ fontSize: 16 }} />}
+              sx={{ background: 'linear-gradient(135deg, #a855f7, #6c63ff)', textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3 }}>
+              Download Card
             </Button>
           )}
         </DialogActions>
       </Dialog>
+
+      {/* Hidden cards for html2canvas capture (one per guest, off-screen) */}
+      <Box sx={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }}>
+        {guestList.map(g => (
+          <div key={g.card_uid} id={`guestcard-${g.card_uid}`}>
+            <GuestIDCard card={g} />
+          </div>
+        ))}
+      </Box>
 
       {/* ── Guest ID Card Generate Dialog ── */}
       <Dialog open={guestDialog} onClose={() => setGuestDialog(false)} maxWidth="sm" fullWidth
@@ -632,48 +722,21 @@ export default function QRScannerPanel() {
             </FormControl>
 
             {guestResult && !guestResult.error && (
-              <Box sx={{ p: 2.5, borderRadius: 2, background: `${C.green}10`, border: `1px solid ${C.green}30` }}>
-                <Typography sx={{ color: C.green, fontWeight: 700, fontSize: 13, mb: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <Typography sx={{ color: C.green, fontWeight: 700, fontSize: 13, alignSelf: 'flex-start' }}>
                   ✅ Guest ID Card generated!
                 </Typography>
-
-                {/* QR code preview */}
-                {(guestResult.card?.image_url || guestResult.card?.qrImage) && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                    <Box sx={{ p: 1.5, background: '#fff', borderRadius: 2, display: 'inline-block' }}>
-                      <img
-                        src={guestResult.card.image_url || guestResult.card.qrImage}
-                        alt="Guest QR Code"
-                        style={{ width: 160, height: 160, display: 'block' }}
-                      />
-                    </Box>
-                  </Box>
-                )}
-
-                {[
-                  ['Card UID',  guestResult.card?.card_uid],
-                  ['Name',      guestResult.card?.guest_name],
-                  ['Position',  guestResult.card?.guest_position],
-                ].map(([label, val]) => (
-                  <Box key={label} sx={{ display: 'flex', gap: 1.5, mb: 0.5, alignItems: 'baseline' }}>
-                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 64 }}>{label}:</Typography>
-                    <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600, fontFamily: label === 'Card UID' ? 'monospace' : 'inherit' }}>{val}</Typography>
-                  </Box>
-                ))}
-
-                {/* Download button */}
-                <Button
-                  component="a"
-                  href={guestResult.card?.image_url || guestResult.card?.qrImage}
-                  download={`${guestResult.card?.card_uid || 'guest-qr'}.png`}
-                  target="_blank"
-                  rel="noreferrer"
-                  size="small"
-                  startIcon={<FileDownload sx={{ fontSize: 15 }} />}
-                  variant="outlined"
-                  sx={{ mt: 2, color: C.green, borderColor: `${C.green}50`, textTransform: 'none', borderRadius: 2, fontSize: 12, fontWeight: 700 }}
-                >
-                  Download QR Code
+                <Box sx={{ filter: 'drop-shadow(0 6px 24px rgba(0,0,0,0.6))', transform: 'scale(0.88)', transformOrigin: 'top center' }}>
+                  <GuestIDCard card={guestResult.card} />
+                </Box>
+                <Button size="small" variant="outlined"
+                  onClick={() => guestResult.card && downloadCard(guestResult.card)}
+                  disabled={downloadingUid === guestResult.card?.card_uid}
+                  startIcon={downloadingUid === guestResult.card?.card_uid
+                    ? <CircularProgress size={13} sx={{ color: C.green }} />
+                    : <FileDownload sx={{ fontSize: 15 }} />}
+                  sx={{ color: C.green, borderColor: `${C.green}50`, textTransform: 'none', borderRadius: 2, fontSize: 12, fontWeight: 700 }}>
+                  Download Card
                 </Button>
               </Box>
             )}

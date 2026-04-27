@@ -533,4 +533,29 @@ const adminListGuestCards = async (req, res) => {
   }
 };
 
-module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard, adminListGuestCards };
+/* ─────────────────────────────────────────────────────────────
+   DELETE /api/id-card/admin/guests/:cardUid
+   Admin deletes a guest card by card_uid; cleans up GCS image.
+   ───────────────────────────────────────────────────────────── */
+const adminDeleteGuestCard = async (req, res) => {
+  const { cardUid } = req.params;
+  try {
+    const [[card]] = await db.query(
+      `SELECT id, image_url FROM id_cards WHERE card_uid = ? AND registration_type = 'guest'`,
+      [cardUid]
+    );
+    if (!card) return res.status(404).json({ success: false, message: 'Guest card not found' });
+
+    if (card.image_url) {
+      const { deleteFile } = require('../utils/gcsStorage');
+      await deleteFile(card.image_url).catch(() => {});
+    }
+    await db.query('DELETE FROM id_cards WHERE id = ?', [card.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('adminDeleteGuestCard error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete guest card' });
+  }
+};
+
+module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard, adminListGuestCards, adminDeleteGuestCard };
