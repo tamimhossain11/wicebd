@@ -513,4 +513,24 @@ const adminGenerateOlympiadCard = async (req, res) => {
   }
 };
 
-module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard };
+/* ─────────────────────────────────────────────────────────────
+   GET /api/id-card/admin/guests
+   Returns all guest ID cards ordered newest first.
+   ───────────────────────────────────────────────────────────── */
+const adminListGuestCards = async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT card_uid, registration_id, guest_name, guest_position,
+              image_url, qr_data, generated_at
+       FROM id_cards
+       WHERE registration_type = 'guest'
+       ORDER BY generated_at DESC`
+    );
+    res.json({ success: true, guests: rows });
+  } catch (err) {
+    console.error('adminListGuestCards error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch guest cards' });
+  }
+};
+
+module.exports = { getMyCards, generateCard, verifyCard, deleteCard, getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard, adminListGuestCards };

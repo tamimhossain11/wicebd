@@ -58,11 +58,25 @@ export default function QRScannerPanel() {
   const [allAttendance, setAllAttendance] = useState([]);
   const [logLoading, setLogLoading]       = useState(true);
 
-  /* Guest ID card */
+  /* Guest ID card — generate dialog */
   const [guestDialog, setGuestDialog]       = useState(false);
   const [guestForm, setGuestForm]           = useState({ guest_name: '', guest_position: '' });
   const [guestResult, setGuestResult]       = useState(null);
   const [guestLoading, setGuestLoading]     = useState(false);
+
+  /* Guest ID card — list */
+  const [guestList, setGuestList]           = useState([]);
+  const [guestListLoading, setGuestListLoading] = useState(true);
+  const [viewCard, setViewCard]             = useState(null); // card being previewed
+
+  const fetchGuestList = useCallback(async () => {
+    setGuestListLoading(true);
+    try {
+      const res = await api.get('/api/id-card/admin/guests');
+      setGuestList(res.data.guests || []);
+    } catch { /* silently ignore */ }
+    finally { setGuestListLoading(false); }
+  }, []);
 
   const fetchAll = useCallback(async () => {
     setLogLoading(true);
@@ -74,6 +88,7 @@ export default function QRScannerPanel() {
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => { fetchGuestList(); }, [fetchGuestList]);
 
   const stopScanner = () => setScannerActive(false);
 
@@ -148,6 +163,7 @@ export default function QRScannerPanel() {
     try {
       const r = await api.post('/api/id-card/admin/generate-guest', guestForm);
       setGuestResult(r.data);
+      fetchGuestList();
     } catch (err) {
       setGuestResult({ error: err.response?.data?.message || 'Failed to generate card' });
     } finally { setGuestLoading(false); }
@@ -447,7 +463,125 @@ export default function QRScannerPanel() {
         )}
       </Paper>
 
-      {/* ── Guest ID Card Dialog ── */}
+      {/* ── Guest ID Cards List ── */}
+      <Paper sx={{ mt: 4, borderRadius: 3, background: C.card, border: '1px solid rgba(168,85,247,0.2)', overflow: 'hidden' }}>
+        <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <CardMembership sx={{ color: '#a855f7', fontSize: 18 }} />
+            <Typography fontWeight={700} sx={{ color: '#fff', fontSize: 14 }}>Guest ID Cards</Typography>
+            {!guestListLoading && (
+              <Chip label={`${guestList.length} issued`} size="small"
+                sx={{ background: 'rgba(168,85,247,0.18)', color: '#c084fc', fontSize: 11, fontWeight: 700 }} />
+            )}
+          </Box>
+          <Button size="small"
+            startIcon={guestListLoading ? <CircularProgress size={12} sx={{ color: '#a855f7' }} /> : <Refresh sx={{ fontSize: 14 }} />}
+            onClick={fetchGuestList} disabled={guestListLoading}
+            sx={{ color: '#a855f7', textTransform: 'none', fontSize: 12, border: '1px solid rgba(168,85,247,0.3)', borderRadius: 2, px: 1.5 }}>
+            Refresh
+          </Button>
+        </Box>
+
+        {guestListLoading ? (
+          <Box sx={{ py: 5, textAlign: 'center' }}><CircularProgress size={28} sx={{ color: '#a855f7' }} /></Box>
+        ) : guestList.length === 0 ? (
+          <Box sx={{ py: 6, textAlign: 'center' }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>No guest cards issued yet.</Typography>
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {['Name', 'Position', 'Card UID', 'Issued At', 'Actions'].map(h => (
+                    <TableCell key={h} sx={{ color: 'rgba(255,255,255,0.4)', borderColor: C.border, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      {h}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {guestList.map(g => (
+                  <TableRow key={g.card_uid} sx={{ '&:hover': { background: 'rgba(168,85,247,0.05)' } }}>
+                    <TableCell sx={{ color: '#fff', borderColor: C.border, fontSize: 13, fontWeight: 600 }}>{g.guest_name}</TableCell>
+                    <TableCell sx={{ borderColor: C.border }}>
+                      <Chip label={g.guest_position} size="small"
+                        sx={{ background: 'rgba(168,85,247,0.18)', color: '#c084fc', fontSize: 10, fontWeight: 700 }} />
+                    </TableCell>
+                    <TableCell sx={{ color: 'rgba(255,255,255,0.5)', borderColor: C.border, fontSize: 11, fontFamily: 'monospace' }}>{g.card_uid}</TableCell>
+                    <TableCell sx={{ color: 'rgba(255,255,255,0.45)', borderColor: C.border, fontSize: 12 }}>
+                      {new Date(g.generated_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </TableCell>
+                    <TableCell sx={{ borderColor: C.border }}>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Button size="small" onClick={() => setViewCard(g)}
+                          sx={{ color: '#a855f7', textTransform: 'none', fontSize: 11, minWidth: 0, px: 1.2, py: 0.4,
+                            border: '1px solid rgba(168,85,247,0.3)', borderRadius: 1.5, fontWeight: 700 }}>
+                          View
+                        </Button>
+                        <Button size="small" component="a"
+                          href={g.image_url || g.qr_data} download={`${g.card_uid}.png`} target="_blank" rel="noreferrer"
+                          startIcon={<FileDownload sx={{ fontSize: 13 }} />}
+                          sx={{ color: C.green, textTransform: 'none', fontSize: 11, minWidth: 0, px: 1.2, py: 0.4,
+                            border: `1px solid ${C.green}40`, borderRadius: 1.5, fontWeight: 700 }}>
+                          Download
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Paper>
+
+      {/* ── View Guest Card Dialog ── */}
+      <Dialog open={!!viewCard} onClose={() => setViewCard(null)} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { background: C.surface, border: `1px solid rgba(168,85,247,0.3)`, borderRadius: 3 } } }}>
+        <DialogTitle sx={{ color: '#fff', fontWeight: 700, borderBottom: `1px solid ${C.border}`, pb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CardMembership sx={{ color: '#a855f7', fontSize: 20 }} />
+            Guest ID Card
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          {viewCard && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 2, background: '#fff', borderRadius: 2 }}>
+                <img src={viewCard.image_url || viewCard.qr_data} alt="QR Code"
+                  style={{ width: 200, height: 200, display: 'block' }} />
+              </Box>
+              <Box sx={{ width: '100%' }}>
+                {[
+                  ['Name',      viewCard.guest_name],
+                  ['Position',  viewCard.guest_position],
+                  ['Card UID',  viewCard.card_uid],
+                  ['Issued',    new Date(viewCard.generated_at).toLocaleString()],
+                ].map(([label, val]) => (
+                  <Box key={label} sx={{ display: 'flex', gap: 1.5, mb: 0.8, alignItems: 'baseline' }}>
+                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 72 }}>{label}:</Typography>
+                    <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600, fontFamily: label === 'Card UID' ? 'monospace' : 'inherit' }}>{val}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1, borderTop: `1px solid ${C.border}` }}>
+          <Button onClick={() => setViewCard(null)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Close</Button>
+          {viewCard && (
+            <Button variant="contained" component="a"
+              href={viewCard.image_url || viewCard.qr_data} download={`${viewCard.card_uid}.png`} target="_blank" rel="noreferrer"
+              startIcon={<FileDownload sx={{ fontSize: 15 }} />}
+              sx={{ background: 'linear-gradient(135deg,#a855f7,#6c63ff)', textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
+              Download QR
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Guest ID Card Generate Dialog ── */}
       <Dialog open={guestDialog} onClose={() => setGuestDialog(false)} maxWidth="sm" fullWidth
         slotProps={{ paper: { sx: { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 3 } } }}>
         <DialogTitle sx={{ color: '#fff', fontWeight: 700, borderBottom: `1px solid ${C.border}`, pb: 2 }}>

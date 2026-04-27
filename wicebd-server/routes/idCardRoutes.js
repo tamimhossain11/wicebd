@@ -5,7 +5,7 @@ const authenticateAdmin = require('../middleware/auth');
 const requireRole       = require('../middleware/requireRole');
 const {
   getMyCards, generateCard, verifyCard, deleteCard,
-  getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard,
+  getMemberProfile, saveMemberProfile, adminGenerateOlympiadCard, adminGenerateGuestCard, adminListGuestCards,
 } = require('../controllers/idCardController');
 
 // User: list all registrations + card status (includes team members)
@@ -17,6 +17,9 @@ router.post('/generate', authenticateUser, generateCard);
 // User: get / save family info for a specific team member slot
 router.get('/member-profile/:paymentId/:slot', authenticateUser, getMemberProfile);
 router.post('/member-profile', authenticateUser, saveMemberProfile);
+
+// Admin: list all generated guest ID cards
+router.get('/admin/guests', authenticateAdmin, requireRole('super_admin'), adminListGuestCards);
 
 // Admin: generate guest ID card (CA, volunteer, district leader, general guest)
 router.post('/admin/generate-guest', authenticateAdmin, requireRole('super_admin'), adminGenerateGuestCard);
