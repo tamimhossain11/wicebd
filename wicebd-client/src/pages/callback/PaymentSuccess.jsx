@@ -70,7 +70,7 @@ export default function ThankYou() {
                                 You're In! 🎉
                             </h1>
                             <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, maxWidth: 440, margin: '0 auto', lineHeight: 1.7 }}>
-                                Your payment was successful and your spot at <strong style={{ color: 'rgba(255,255,255,0.7)' }}>WICEBD 2025</strong> is confirmed.
+                                Your payment was successful and your spot at <strong style={{ color: 'rgba(255,255,255,0.7)' }}>WICEBD 2026</strong> is confirmed.
                             </p>
                         </motion.div>
                     </div>
@@ -139,7 +139,7 @@ export default function ThankYou() {
                                         borderRadius: 50, padding: '7px 20px',
                                     }}>
                                         <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981' }} />
-                                        <span style={{ color: '#10b981', fontSize: 13, fontWeight: 700 }}>Welcome to WICEBD 2025</span>
+                                        <span style={{ color: '#10b981', fontSize: 13, fontWeight: 700 }}>Welcome to WICEBD 2026</span>
                                     </div>
                                 </motion.div>
                             </motion.div>
