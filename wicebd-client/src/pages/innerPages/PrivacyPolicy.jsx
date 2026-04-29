@@ -95,15 +95,25 @@ export default function PrivacyPolicy() {
                             <p style={{ marginTop: 10 }}>To exercise these rights, contact us at <a href="mailto:contact@wicebd.com" style={{ color: '#c0002a' }}>contact@wicebd.com</a>.</p>
                         </Section>
 
-                        <Section title="8. Cookies">
+                        <Section title="8. Participant Data Change Policy">
+                            <p>If a registered participant requires any changes to their registration data (including but not limited to name, institution, T-shirt size, or team member details) after a successful registration, the following conditions apply:</p>
+                            <ul style={{ paddingLeft: 20, marginTop: 10 }}>
+                                <li style={{ marginBottom: 8 }}>A <strong style={{ color: '#fff' }}>data change fee of ৳100 (BDT)</strong> is applicable per request.</li>
+                                <li style={{ marginBottom: 8 }}>An official request must be submitted by email to <a href="mailto:contact@wicebd.com" style={{ color: '#c0002a' }}>contact@wicebd.com</a> with all necessary details including your registration ID, payment transaction ID, the specific data to be changed, and the corrected information.</li>
+                                <li style={{ marginBottom: 8 }}>Requests are subject to review and will be processed at the discretion of the WICEBD organising team.</li>
+                                <li style={{ marginBottom: 8 }}>Data changes are not guaranteed and may not be accommodated after certain deadlines set by the organisers.</li>
+                            </ul>
+                        </Section>
+
+                        <Section title="9. Cookies">
                             <p>Our website may use cookies to enhance your browsing experience. You may choose to set your browser to refuse cookies, though this may affect the functionality of some parts of the website.</p>
                         </Section>
 
-                        <Section title="9. Changes to This Policy">
+                        <Section title="10. Changes to This Policy">
                             <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated revision date. Continued use of our services after any changes constitutes your acceptance of the new policy.</p>
                         </Section>
 
-                        <Section title="10. Contact Us">
+                        <Section title="11. Contact Us">
                             <p>For any questions regarding this Privacy Policy, please contact:</p>
                             <div style={{ marginTop: 12, padding: '20px 24px', background: 'rgba(128,0,32,0.1)', borderRadius: 12, border: '1px solid rgba(128,0,32,0.25)' }}>
                                 <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Dreams of Bangladesh</strong><br />
