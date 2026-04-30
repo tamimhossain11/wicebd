@@ -53,7 +53,7 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
         COALESCE(oly.cnt,  0)                                         AS olympiad_count,
         COALESCE(proj.cnt, 0) + COALESCE(mag.cnt, 0) + COALESCE(oly.cnt, 0) AS total
       FROM campus_ambassadors ca
-      LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Project'  AND ca_code IS NOT NULL GROUP BY ca_code) proj ON proj.ca_code = ca.code
+      LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory != 'Megazine' AND ca_code IS NOT NULL GROUP BY ca_code) proj ON proj.ca_code = ca.code
       LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Megazine' AND ca_code IS NOT NULL GROUP BY ca_code) mag  ON mag.ca_code  = ca.code
       LEFT JOIN (SELECT ca_code, COUNT(*) AS cnt FROM olympiad_registrations WHERE ca_code IS NOT NULL GROUP BY ca_code)                                       oly  ON oly.ca_code  = ca.code
       ORDER BY total DESC

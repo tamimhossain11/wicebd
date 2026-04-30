@@ -95,6 +95,9 @@ const TeamCard = ({ team, rank, onMarkSave }) => {
           </Avatar>
           <Box>
             <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15, lineHeight: 1.2 }}>{team.team_name}</Typography>
+            {team.leader_name && team.leader_name !== team.team_name && (
+              <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, lineHeight: 1.2 }}>Leader: {team.leader_name}</Typography>
+            )}
             <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{team.institution}</Typography>
           </Box>
         </Box>

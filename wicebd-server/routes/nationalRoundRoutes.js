@@ -12,7 +12,8 @@ router.get('/', async (req, res) => {
     const [rows] = await db.query(`
       SELECT nrs.registration_id, nrs.competition_type, nrs.subcategory,
              nrs.education_category, nrs.position, nrs.total_marks, nrs.selected_at,
-             r.leader AS team_name, r.institution, r.projectTitle AS project_title,
+             COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
+             r.leader AS leader_name, r.institution, r.projectTitle AS project_title,
              r.projectSubcategory, r.categories
       FROM national_round_selections nrs
       LEFT JOIN registrations r ON r.paymentID = nrs.registration_id
@@ -32,14 +33,16 @@ router.get('/', async (req, res) => {
 router.get('/marks-summary', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
   try {
     const [projectRows] = await db.query(`
-      SELECT r.paymentID AS registration_id, r.leader AS team_name, r.institution,
+      SELECT r.paymentID AS registration_id,
+             COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
+             r.leader AS leader_name, r.institution,
              r.projectSubcategory AS subcategory, r.categories AS education_category,
              r.projectTitle AS project_title, 'project' AS competition_type,
              COALESCE(SUM(jm.marks), 0) AS total_marks,
              COUNT(jm.id) AS judge_count
       FROM registrations r
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'project'
-      WHERE r.competitionCategory = 'Project'
+      WHERE r.competitionCategory != 'Megazine'
       GROUP BY r.paymentID
       ORDER BY r.projectSubcategory, r.categories, total_marks DESC
     `);
@@ -69,16 +72,30 @@ router.get('/marks-summary', authenticateAdmin, requireRole('super_admin'), asyn
    Pass { confirm: true } to persist; default is dry-run preview.
 */
 router.post('/compute', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
-  const { confirm = false } = req.body;
+  const { confirm = false, teams_per_group = 3 } = req.body;
+  const N = Math.max(1, Math.min(20, parseInt(teams_per_group, 10) || 3));
+
+  // Position labels: 1=gold, 2=silver, 3=bronze, 4+=ordinal string
+  const positionLabel = (idx) => {
+    if (idx === 0) return 'gold';
+    if (idx === 1) return 'silver';
+    if (idx === 2) return 'bronze';
+    const n = idx + 1;
+    const suffix = ['th','st','nd','rd'][Math.min(n % 10 > 3 || (n % 100 >= 11 && n % 100 <= 13) ? 0 : n % 10, 3)];
+    return `${n}${suffix}`;
+  };
+
   try {
     const [projectRows] = await db.query(`
-      SELECT r.paymentID AS registration_id, r.leader AS team_name, r.institution,
+      SELECT r.paymentID AS registration_id,
+             COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
+             r.leader AS leader_name, r.institution,
              r.projectSubcategory AS subcategory, r.categories AS education_category,
              r.projectTitle AS project_title, 'project' AS competition_type,
              COALESCE(SUM(jm.marks), 0) AS total_marks
       FROM registrations r
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'project'
-      WHERE r.competitionCategory = 'Project'
+      WHERE r.competitionCategory != 'Megazine'
       GROUP BY r.paymentID
       ORDER BY r.projectSubcategory, r.categories, total_marks DESC
     `);
@@ -95,10 +112,9 @@ router.post('/compute', authenticateAdmin, requireRole('super_admin'), async (re
       ORDER BY r.categories, total_marks DESC
     `);
 
-    const POSITIONS = ['gold', 'silver', 'bronze'];
     const winners = [];
 
-    const pickTop3 = (rows) => {
+    const pickTopN = (rows) => {
       const groups = {};
       rows.forEach(row => {
         const key = `${row.subcategory}||${row.education_category}`;
@@ -106,14 +122,14 @@ router.post('/compute', authenticateAdmin, requireRole('super_admin'), async (re
         groups[key].push(row);
       });
       Object.values(groups).forEach(group => {
-        group.slice(0, 3).forEach((team, idx) => {
-          winners.push({ ...team, position: POSITIONS[idx] });
+        group.slice(0, N).forEach((team, idx) => {
+          winners.push({ ...team, position: positionLabel(idx) });
         });
       });
     };
 
-    pickTop3(projectRows);
-    pickTop3(wallRows);
+    pickTopN(projectRows);
+    pickTopN(wallRows);
 
     if (!confirm) {
       return res.json({ success: true, preview: true, winners });

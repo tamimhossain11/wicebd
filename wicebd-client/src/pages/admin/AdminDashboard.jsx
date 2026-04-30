@@ -262,6 +262,7 @@ export default function AdminDashboard() {
   const [nrSelections, setNrSelections] = useState([]);
   const [nrPreview, setNrPreview] = useState([]);
   const [nrComputing, setNrComputing] = useState(false);
+  const [nrTeamsPerGroup, setNrTeamsPerGroup] = useState(3);
 
   // Reset password dialog
   const [resetPwdDialog, setResetPwdDialog] = useState({ open: false, type: '', id: null, name: '' });
@@ -1873,21 +1874,54 @@ export default function AdminDashboard() {
           )}
 
           {/* ══════════════ NATIONAL ROUND ══════════════ */}
-          {activeNav === 14 && adminRole === 'super_admin' && (
+          {activeNav === 14 && adminRole === 'super_admin' && (() => {
+            // Group marks by subcategory → education_group, sorted by marks desc within each group
+            const groupMarks = (rows) => {
+              const subs = {};
+              rows.forEach(r => {
+                if (!subs[r.subcategory]) subs[r.subcategory] = {};
+                if (!subs[r.subcategory][r.education_category]) subs[r.subcategory][r.education_category] = [];
+                subs[r.subcategory][r.education_category].push(r);
+              });
+              Object.values(subs).forEach(sub =>
+                Object.values(sub).forEach(grp => grp.sort((a, b) => b.total_marks - a.total_marks))
+              );
+              return subs;
+            };
+            const CAT_ORDER = ['Primary School', 'High School', 'college', 'University'];
+            const posColor = (pos) => pos === 'gold' ? '#FFD700' : pos === 'silver' ? '#C0C0C0' : pos === 'bronze' ? '#CD7F32' : CYAN;
+
+            const projectGrouped = groupMarks(nrSummary.project);
+            const wallGrouped    = groupMarks(nrSummary.wall_magazine);
+
+            return (
             <Box>
               <SectionHeader
                 icon={<EmojiFlags sx={{ fontSize: 18 }} />}
                 title="National Round Management"
                 action={
-                  <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                    {/* Teams-per-group control */}
+                    <Paper sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, background: 'rgba(255,255,255,0.04)', border: `1px solid ${BORDER}`, borderRadius: 2 }}>
+                      <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600, mr: 0.5 }}>Teams / Group</Typography>
+                      <IconButton size="small" onClick={() => setNrTeamsPerGroup(n => Math.max(1, n - 1))}
+                        sx={{ color: 'rgba(255,255,255,0.6)', width: 26, height: 26, '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.08)' } }}>
+                        <ArrowDownward sx={{ fontSize: 14 }} />
+                      </IconButton>
+                      <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 18, minWidth: 24, textAlign: 'center' }}>{nrTeamsPerGroup}</Typography>
+                      <IconButton size="small" onClick={() => setNrTeamsPerGroup(n => Math.min(20, n + 1))}
+                        sx={{ color: 'rgba(255,255,255,0.6)', width: 26, height: 26, '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.08)' } }}>
+                        <ArrowUpward sx={{ fontSize: 14 }} />
+                      </IconButton>
+                    </Paper>
                     <Button startIcon={<Preview />} variant="outlined" size="small"
                       disabled={nrComputing}
                       onClick={async () => {
                         setNrComputing(true);
                         try {
-                          const { data } = await api.post('/api/national-round/compute', { confirm: false });
+                          const { data } = await api.post('/api/national-round/compute', { confirm: false, teams_per_group: nrTeamsPerGroup });
                           setNrPreview(data.winners || []);
-                          toast.info(`Preview: ${data.winners?.length || 0} winners computed`);
+                          toast.info(`Preview: ${data.winners?.length || 0} winners (top ${nrTeamsPerGroup} per group)`);
                         } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
                         finally { setNrComputing(false); }
                       }}
@@ -1897,11 +1931,11 @@ export default function AdminDashboard() {
                     <Button startIcon={<EmojiEvents />} variant="contained" size="small"
                       disabled={nrComputing}
                       onClick={async () => {
-                        if (!window.confirm('This will overwrite all existing national round selections. Continue?')) return;
+                        if (!window.confirm(`This will select top ${nrTeamsPerGroup} teams per group and overwrite existing selections. Continue?`)) return;
                         setNrComputing(true);
                         try {
-                          const { data } = await api.post('/api/national-round/compute', { confirm: true });
-                          toast.success(`${data.count} winners published to national round`);
+                          const { data } = await api.post('/api/national-round/compute', { confirm: true, teams_per_group: nrTeamsPerGroup });
+                          toast.success(`${data.count} winners published (top ${nrTeamsPerGroup} per group)`);
                           fetchNationalRound();
                           setNrPreview([]);
                         } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
@@ -1914,77 +1948,181 @@ export default function AdminDashboard() {
                 }
               />
 
-              {nrPreview.length > 0 && (
-                <Paper sx={{ p: 2.5, mb: 3, background: `${CYAN}08`, border: `1px solid ${CYAN}30`, borderRadius: 3 }}>
-                  <Typography sx={{ color: CYAN, fontWeight: 700, fontSize: 14, mb: 2 }}>Preview — {nrPreview.length} computed winners (not published yet)</Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {nrPreview.map((w, i) => (
-                      <Chip key={i}
-                        icon={<Star sx={{ fontSize: '14px !important', color: w.position === 'gold' ? '#FFD700' : w.position === 'silver' ? '#C0C0C0' : '#CD7F32' }} />}
-                        label={`${w.team_name} (${w.position}) — ${w.education_category}`}
-                        size="small"
-                        sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', fontSize: 11 }}
-                      />
-                    ))}
-                  </Box>
+              {/* Preview banner */}
+              {nrPreview.length > 0 && (() => {
+                const pvGrouped = {};
+                nrPreview.forEach(w => {
+                  const key = `${w.subcategory} — ${w.education_category}`;
+                  if (!pvGrouped[key]) pvGrouped[key] = [];
+                  pvGrouped[key].push(w);
+                });
+                return (
+                  <Paper sx={{ p: 2.5, mb: 3, background: `${CYAN}08`, border: `1px solid ${CYAN}30`, borderRadius: 3 }}>
+                    <Typography sx={{ color: CYAN, fontWeight: 700, fontSize: 14, mb: 2 }}>
+                      Preview — {nrPreview.length} winners · top {nrTeamsPerGroup} per group (not published)
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      {Object.entries(pvGrouped).map(([grpLabel, teams]) => (
+                        <Box key={grpLabel}>
+                          <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.75 }}>{grpLabel}</Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                            {teams.map((w, i) => (
+                              <Chip key={i}
+                                icon={<Star sx={{ fontSize: '13px !important', color: `${posColor(w.position)} !important` }} />}
+                                label={`${w.position.toUpperCase()} · ${w.team_name}`}
+                                size="small"
+                                sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', fontSize: 11, border: `1px solid ${posColor(w.position)}40` }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Paper>
+                );
+              })()}
+
+              {/* ── Project Marks — grouped by subcategory → education group ── */}
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                Marks Summary — Project Competition
+              </Typography>
+              {nrSummary.project.length === 0 ? (
+                <Paper sx={{ p: 4, mb: 3, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, textAlign: 'center' }}>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>No judge marks submitted yet</Typography>
                 </Paper>
+              ) : (
+                <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  {Object.entries(projectGrouped).map(([sub, groups]) => (
+                    <Paper key={sub} sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                      {/* Subcategory header */}
+                      <Box sx={{ px: 2.5, py: 1.5, background: `${ACCENT}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${RED}, ${ACCENT})` }} />
+                        <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>{sub}</Typography>
+                        <Chip label={`${Object.values(groups).flat().length} teams`} size="small"
+                          sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
+                      </Box>
+                      {/* Education groups */}
+                      {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
+                        <Box key={cat}>
+                          <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{cat}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · top {nrTeamsPerGroup} selected</Typography>
+                          </Box>
+                          <Box sx={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.015)' }}>
+                                  {['Rank', 'Project / Team', 'Institution', 'Leader', 'Total Marks', 'Judges'].map(h => (
+                                    <th key={h} style={{ padding: '8px 14px', textAlign: h === 'Total Marks' || h === 'Rank' ? 'center' : 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {groups[cat].map((r, ri) => {
+                                  const isSelected = ri < nrTeamsPerGroup;
+                                  const posLbl = ri === 0 ? 'gold' : ri === 1 ? 'silver' : ri === 2 ? 'bronze' : null;
+                                  return (
+                                    <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${posColor(posLbl || 'selected')}08` : 'transparent', opacity: isSelected ? 1 : 0.55 }}>
+                                      <td style={{ padding: '9px 14px', textAlign: 'center' }}>
+                                        {isSelected ? (
+                                          <Box sx={{ width: 26, height: 26, borderRadius: '50%', background: posLbl ? `${posColor(posLbl)}22` : `${CYAN}22`, border: `1px solid ${posLbl ? posColor(posLbl) : CYAN}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
+                                            <Typography sx={{ fontSize: 10, fontWeight: 800, color: posLbl ? posColor(posLbl) : CYAN }}>{ri + 1}</Typography>
+                                          </Box>
+                                        ) : (
+                                          <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>{ri + 1}</Typography>
+                                        )}
+                                      </td>
+                                      <td style={{ padding: '9px 14px' }}>
+                                        <Typography sx={{ color: isSelected ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: isSelected ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
+                                      </td>
+                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.institution}</td>
+                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{r.leader_name || '—'}</td>
+                                      <td style={{ padding: '9px 14px', textAlign: 'center' }}>
+                                        <Typography sx={{ color: isSelected ? GREEN : 'rgba(255,255,255,0.3)', fontWeight: isSelected ? 800 : 400, fontSize: isSelected ? 15 : 13 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography>
+                                      </td>
+                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center' }}>{r.judge_count}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Paper>
+                  ))}
+                </Box>
               )}
 
-              {/* Marks Summary */}
-              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>Marks Summary — Project</Typography>
-              <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
-                <Box sx={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
-                        {['Team', 'Institution', 'Subcategory', 'Group', 'Total Marks', 'Judges'].map(h => (
-                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {nrSummary.project.length === 0 && <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No marks yet</td></tr>}
-                      {nrSummary.project.map((r, i) => (
-                        <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
-                          <td style={{ padding: '10px 14px', color: '#fff', fontSize: 13, fontWeight: 600 }}>{r.team_name}</td>
-                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>{r.institution}</td>
-                          <td style={{ padding: '10px 14px' }}><Chip label={r.subcategory} size="small" sx={{ background: `${ACCENT}15`, color: 'rgba(255,255,255,0.7)', fontSize: 11 }} /></td>
-                          <td style={{ padding: '10px 14px' }}><Chip label={r.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
-                          <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 800, fontSize: 15 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography></td>
-                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.judge_count}</td>
-                        </tr>
+              {/* ── Wall Magazine Marks — grouped by education group ── */}
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                Marks Summary — Wall Magazine
+              </Typography>
+              {nrSummary.wall_magazine.length === 0 ? (
+                <Paper sx={{ p: 4, mb: 3, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, textAlign: 'center' }}>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>No judge marks submitted yet</Typography>
+                </Paper>
+              ) : (
+                <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  {Object.entries(wallGrouped).map(([sub, groups]) => (
+                    <Paper key={sub} sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                      <Box sx={{ px: 2.5, py: 1.5, background: `${AMBER}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${AMBER}, #d97706)` }} />
+                        <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>{sub}</Typography>
+                        <Chip label={`${Object.values(groups).flat().length} teams`} size="small"
+                          sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
+                      </Box>
+                      {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
+                        <Box key={cat}>
+                          <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{cat}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · top {nrTeamsPerGroup} selected</Typography>
+                          </Box>
+                          <Box sx={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.015)' }}>
+                                  {['Rank', 'Project / Team', 'Institution', 'Leader', 'Total Marks', 'Judges'].map(h => (
+                                    <th key={h} style={{ padding: '8px 14px', textAlign: h === 'Total Marks' || h === 'Rank' ? 'center' : 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {groups[cat].map((r, ri) => {
+                                  const isSelected = ri < nrTeamsPerGroup;
+                                  const posLbl = ri === 0 ? 'gold' : ri === 1 ? 'silver' : ri === 2 ? 'bronze' : null;
+                                  return (
+                                    <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${posColor(posLbl || 'selected')}08` : 'transparent', opacity: isSelected ? 1 : 0.55 }}>
+                                      <td style={{ padding: '9px 14px', textAlign: 'center' }}>
+                                        {isSelected ? (
+                                          <Box sx={{ width: 26, height: 26, borderRadius: '50%', background: posLbl ? `${posColor(posLbl)}22` : `${CYAN}22`, border: `1px solid ${posLbl ? posColor(posLbl) : CYAN}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
+                                            <Typography sx={{ fontSize: 10, fontWeight: 800, color: posLbl ? posColor(posLbl) : CYAN }}>{ri + 1}</Typography>
+                                          </Box>
+                                        ) : (
+                                          <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>{ri + 1}</Typography>
+                                        )}
+                                      </td>
+                                      <td style={{ padding: '9px 14px' }}>
+                                        <Typography sx={{ color: isSelected ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: isSelected ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
+                                      </td>
+                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.institution}</td>
+                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{r.leader_name || '—'}</td>
+                                      <td style={{ padding: '9px 14px', textAlign: 'center' }}>
+                                        <Typography sx={{ color: isSelected ? GREEN : 'rgba(255,255,255,0.3)', fontWeight: isSelected ? 800 : 400, fontSize: isSelected ? 15 : 13 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography>
+                                      </td>
+                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center' }}>{r.judge_count}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </Box>
+                        </Box>
                       ))}
-                    </tbody>
-                  </table>
+                    </Paper>
+                  ))}
                 </Box>
-              </Paper>
-
-              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>Marks Summary — Wall Magazine</Typography>
-              <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
-                <Box sx={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
-                        {['Team', 'Institution', 'Group', 'Total Marks', 'Judges'].map(h => (
-                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {nrSummary.wall_magazine.length === 0 && <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No marks yet</td></tr>}
-                      {nrSummary.wall_magazine.map((r, i) => (
-                        <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
-                          <td style={{ padding: '10px 14px', color: '#fff', fontSize: 13, fontWeight: 600 }}>{r.team_name}</td>
-                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>{r.institution}</td>
-                          <td style={{ padding: '10px 14px' }}><Chip label={r.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
-                          <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 800, fontSize: 15 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography></td>
-                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.judge_count}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </Box>
-              </Paper>
+              )}
 
               {/* Published Selections */}
               {nrSelections.length > 0 && (
@@ -2030,7 +2168,8 @@ export default function AdminDashboard() {
                 </>
               )}
             </Box>
-          )}
+          );
+          })()}
 
         </Box>
       </Box>

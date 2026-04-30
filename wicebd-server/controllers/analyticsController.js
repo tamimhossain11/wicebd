@@ -103,7 +103,7 @@ const getParticipantStats = async (req, res) => {
         COUNT(*) AS teams,
         SUM(${MEMBER_SUM}) AS individuals
       FROM registrations
-      WHERE competitionCategory = 'Project'
+      WHERE competitionCategory != 'Megazine'
     `);
 
     // ── Project: breakdown by subcategory × education group ─────────
@@ -114,7 +114,7 @@ const getParticipantStats = async (req, res) => {
         COUNT(*)            AS teams,
         SUM(${MEMBER_SUM})  AS individuals
       FROM registrations
-      WHERE competitionCategory = 'Project'
+      WHERE competitionCategory != 'Megazine'
       GROUP BY projectSubcategory, categories
       ORDER BY projectSubcategory, categories
     `);
@@ -126,7 +126,7 @@ const getParticipantStats = async (req, res) => {
         COUNT(*)            AS teams,
         SUM(${MEMBER_SUM})  AS individuals
       FROM registrations
-      WHERE competitionCategory = 'Project'
+      WHERE competitionCategory != 'Megazine'
       GROUP BY projectSubcategory
       ORDER BY projectSubcategory
     `);
@@ -138,7 +138,7 @@ const getParticipantStats = async (req, res) => {
         COUNT(*)           AS teams,
         SUM(${MEMBER_SUM}) AS individuals
       FROM registrations
-      WHERE competitionCategory = 'Project'
+      WHERE competitionCategory != 'Megazine'
       GROUP BY categories
       ORDER BY categories
     `);

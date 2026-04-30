@@ -148,9 +148,11 @@ const SelectedTeams = () => {
                               <div style={{ position: 'absolute', top: -30, right: -30, width: 100, height: 100, borderRadius: '50%', background: `radial-gradient(circle, ${m.color}20, transparent 70%)`, pointerEvents: 'none' }} />
                               <div style={{ fontSize: 36, marginBottom: 12 }}>{m.emoji}</div>
                               <div style={{ color: m.color, fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>{m.label}</div>
-                              <div style={{ color: '#fff', fontWeight: 800, fontSize: 17, marginBottom: 4, lineHeight: 1.3 }}>{s.team_name}</div>
+                              <div style={{ color: '#fff', fontWeight: 800, fontSize: 17, marginBottom: 2, lineHeight: 1.3 }}>{s.team_name}</div>
+                              {s.leader_name && s.leader_name !== s.team_name && (
+                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginBottom: 4 }}>Leader: {s.leader_name}</div>
+                              )}
                               <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>{s.institution}</div>
-                              {s.project_title && <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, marginTop: 8, fontStyle: 'italic' }}>"{s.project_title}"</div>}
                             </motion.div>
                           );
                         })}

@@ -68,7 +68,9 @@ router.get('/teams', authenticateJudge, async (req, res) => {
 
     if (judge_type === 'wall_magazine') {
       [rows] = await db.query(`
-        SELECT paymentID AS registration_id, leader AS team_name, institution,
+        SELECT paymentID AS registration_id,
+               COALESCE(NULLIF(projectTitle,''), leader) AS team_name,
+               leader AS leader_name, institution,
                categories AS education_category, projectTitle AS project_title,
                leaderEmail AS email, leaderPhone AS phone,
                'wall_magazine' AS competition_type,
@@ -79,13 +81,15 @@ router.get('/teams', authenticateJudge, async (req, res) => {
       `);
     } else {
       [rows] = await db.query(`
-        SELECT paymentID AS registration_id, leader AS team_name, institution,
+        SELECT paymentID AS registration_id,
+               COALESCE(NULLIF(projectTitle,''), leader) AS team_name,
+               leader AS leader_name, institution,
                categories AS education_category, projectSubcategory AS subcategory,
                projectTitle AS project_title, leaderEmail AS email, leaderPhone AS phone,
                'project' AS competition_type,
                member2, member3, member4, member5, member6
         FROM registrations
-        WHERE competitionCategory = 'Project' AND projectSubcategory = ?
+        WHERE competitionCategory != 'Megazine' AND projectSubcategory = ?
         ORDER BY categories, leader
       `, [subcategory]);
     }

@@ -53,7 +53,7 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
         COALESCE(oly.cnt,  0)                                         AS olympiad_count,
         COALESCE(proj.cnt, 0) + COALESCE(mag.cnt, 0) + COALESCE(oly.cnt, 0) AS total
       FROM club_partners cp
-      LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Project'  AND club_code IS NOT NULL GROUP BY club_code) proj ON proj.club_code = cp.code
+      LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory != 'Megazine' AND club_code IS NOT NULL GROUP BY club_code) proj ON proj.club_code = cp.code
       LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM registrations        WHERE competitionCategory = 'Megazine' AND club_code IS NOT NULL GROUP BY club_code) mag  ON mag.club_code  = cp.code
       LEFT JOIN (SELECT club_code, COUNT(*) AS cnt FROM olympiad_registrations WHERE club_code IS NOT NULL GROUP BY club_code)                                       oly  ON oly.club_code  = cp.code
       ORDER BY total DESC
