@@ -116,6 +116,7 @@ router.get('/attendance/:cardUid', authenticateAdmin, async (req, res) => {
     const [cardRows] = await db.query(`
       SELECT ic.card_uid, ic.registration_type, ic.registration_id,
              ic.user_id, ic.generated_at, ic.guest_name, ic.guest_position,
+             ic.certificate_collected, ic.certificate_collected_at,
              COALESCE(u.name, ic.guest_name) AS user_name,
              u.email AS user_email
       FROM id_cards ic
@@ -236,6 +237,29 @@ router.post('/attendance/:cardUid/coffee', authenticateAdmin, async (req, res) =
 
     const [[att]] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
     res.json({ success: true, already: false, attendance: att });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error: ' + e.message });
+  }
+});
+
+/* Mark certificate collected — project and wall-magazine only */
+router.post('/attendance/:cardUid/certificate', authenticateAdmin, async (req, res) => {
+  const { cardUid } = req.params;
+  try {
+    const [[card]] = await db.query('SELECT * FROM id_cards WHERE card_uid = ?', [cardUid]);
+    if (!card) return res.status(404).json({ success: false, message: 'Card not found' });
+    if (card.registration_type === 'olympiad' || card.registration_type === 'guest') {
+      return res.status(400).json({ success: false, message: 'Certificate collection is only for project and wall magazine participants' });
+    }
+    if (card.certificate_collected) {
+      return res.json({ success: true, already: true, certificate_collected: true, certificate_collected_at: card.certificate_collected_at });
+    }
+    await db.query(
+      'UPDATE id_cards SET certificate_collected = 1, certificate_collected_at = NOW(), certificate_collected_by = ? WHERE card_uid = ?',
+      [req.admin.id, cardUid]
+    );
+    const [[updated]] = await db.query('SELECT certificate_collected, certificate_collected_at FROM id_cards WHERE card_uid = ?', [cardUid]);
+    res.json({ success: true, already: false, certificate_collected: true, certificate_collected_at: updated.certificate_collected_at });
   } catch (e) {
     res.status(500).json({ success: false, message: 'DB error: ' + e.message });
   }

@@ -7,7 +7,7 @@ import {
   TextField, FormControl, InputLabel, Select, MenuItem,
   IconButton, Tooltip,
 } from '@mui/material';
-import { QrCodeScanner, CheckCircle, LunchDining, PersonOff, Refresh, LocalCafe, CardMembership, FileDownload, DeleteOutline, VisibilityOutlined, WarningAmberRounded } from '@mui/icons-material';
+import { QrCodeScanner, CheckCircle, LunchDining, PersonOff, Refresh, LocalCafe, CardMembership, FileDownload, DeleteOutline, VisibilityOutlined, WarningAmberRounded, WorkspacePremium } from '@mui/icons-material';
 import QrScanner from 'react-qr-scanner';
 import html2canvas from 'html2canvas';
 import api from '../../api/index';
@@ -44,6 +44,8 @@ const POSITIONS = [
 
 /* Olympiad participants do NOT get lunch but DO get coffee. Guests get both. */
 const hasFood = (registrationType) => registrationType !== 'olympiad';
+/* Only project and wall-magazine participants get certificates */
+const hasCert = (registrationType) => registrationType === 'project' || registrationType === 'wall-magazine';
 
 /* Parse card_uid from a verify URL or raw uid */
 const extractUid = (raw) => {
@@ -197,6 +199,18 @@ export default function QRScannerPanel() {
     } finally { setLoading(false); }
   };
 
+  const markCertificate = async () => {
+    if (!result?.card?.card_uid) return;
+    setLoading(true);
+    try {
+      const res = await api.post(`/api/admin-manage/attendance/${result.card.card_uid}/certificate`);
+      setResult({ ...result, card: { ...result.card, certificate_collected: res.data.certificate_collected, certificate_collected_at: res.data.certificate_collected_at } });
+      setActionMsg(res.data.already ? 'Certificate already collected.' : '🏆 Certificate marked as collected!');
+    } catch (err) {
+      setActionMsg(err.response?.data?.message || 'Failed to mark certificate');
+    } finally { setLoading(false); }
+  };
+
   const handleGenerateGuestCard = async () => {
     if (!guestForm.guest_name.trim() || !guestForm.guest_position) return;
     setGuestLoading(true);
@@ -222,8 +236,9 @@ export default function QRScannerPanel() {
   const card      = result?.card;
   const regColor  = ROLE_COLORS[card?.registration_type] || C.red;
   const foodEligible = hasFood(card?.registration_type);
+  const certEligible = hasCert(card?.registration_type);
 
-  const isPositive = (msg) => msg.startsWith('✅') || msg.startsWith('🍱') || msg.startsWith('☕');
+  const isPositive = (msg) => msg.startsWith('✅') || msg.startsWith('🍱') || msg.startsWith('☕') || msg.startsWith('🏆');
 
   return (
     <Box>
@@ -373,6 +388,19 @@ export default function QRScannerPanel() {
                           sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)', fontSize: 11 }} />
                     }
                   </Box>
+                  {/* Certificate — project and wall-magazine only */}
+                  {certEligible && (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>Certificate</Typography>
+                      {card?.certificate_collected
+                        ? <Chip icon={<WorkspacePremium sx={{ fontSize: '13px !important', color: '#a78bfa !important' }} />}
+                            label={card.certificate_collected_at ? new Date(card.certificate_collected_at).toLocaleTimeString() : 'Collected'} size="small"
+                            sx={{ background: 'rgba(167,139,250,0.18)', color: '#a78bfa', fontWeight: 700, fontSize: 11 }} />
+                        : <Chip label="Not collected" size="small"
+                            sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)', fontSize: 11 }} />
+                      }
+                    </Box>
+                  )}
                 </Box>
 
                 {/* Action message */}
@@ -411,6 +439,15 @@ export default function QRScannerPanel() {
                     onClick={markCoffee} disabled={loading || !!att?.coffee_claimed_at}>
                     {att?.coffee_claimed_at ? 'Coffee ✓' : 'Coffee'}
                   </Button>
+                  {certEligible && (
+                    <Button variant="contained" sx={{ flex: 1, minWidth: 110,
+                      background: card?.certificate_collected ? 'rgba(255,255,255,0.08)' : 'linear-gradient(135deg,#7c3aed,#a78bfa)',
+                      textTransform: 'none', borderRadius: 2, fontWeight: 700, fontSize: 13, py: 1.2 }}
+                      startIcon={loading ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <WorkspacePremium sx={{ fontSize: 16 }} />}
+                      onClick={markCertificate} disabled={loading || !!card?.certificate_collected}>
+                      {card?.certificate_collected ? 'Cert ✓' : 'Certificate'}
+                    </Button>
+                  )}
                 </Box>
               </Box>
             </Paper>

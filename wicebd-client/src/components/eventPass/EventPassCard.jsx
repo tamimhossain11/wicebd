@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import {
   QrCode2, Download, CheckCircle, Lock, ExpandMore, ExpandLess,
-  Person, Group, Edit, Save,
+  Person, Group, Edit, Save, WorkspacePremium,
 } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/index';
@@ -151,6 +151,24 @@ const IDCardVisual = ({ member, reg, card }) => {
                   sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 10, height: 20, fontWeight: 700 }}
                 />
               </Box>
+              {reg.type !== 'olympiad' && (
+                <Box>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
+                    Certificate
+                  </Typography>
+                  <Chip
+                    icon={<WorkspacePremium sx={{ fontSize: '12px !important', color: card.certificate_collected ? '#a78bfa !important' : 'rgba(255,255,255,0.3) !important' }} />}
+                    label={card.certificate_collected ? 'Collected' : 'Pending'}
+                    size="small"
+                    sx={{
+                      background: card.certificate_collected ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.05)',
+                      color: card.certificate_collected ? '#a78bfa' : 'rgba(255,255,255,0.35)',
+                      border: `1px solid ${card.certificate_collected ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                      fontSize: 10, height: 20, fontWeight: 700,
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           </Box>
 

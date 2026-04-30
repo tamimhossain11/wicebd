@@ -72,7 +72,8 @@ const getMyCards = async (req, res) => {
     // Fetch all id_cards for this user (includes member_slot)
     const [cards] = await db.query(
       `SELECT registration_type, registration_id, member_slot,
-              card_uid, qr_data, image_url, generated_at
+              card_uid, qr_data, image_url, generated_at,
+              certificate_collected, certificate_collected_at
        FROM id_cards WHERE user_id = ?`,
       [userId]
     );
