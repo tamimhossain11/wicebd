@@ -23,6 +23,8 @@ const promoCodeRoutes = require('./routes/promoCodeRoutes');
 const uploadRoutes       = require('./routes/uploadRoutes');
 const advisorRoutes      = require('./routes/advisorRoutes');
 const adminManageRoutes  = require('./routes/adminManageRoutes');
+const judgeRoutes        = require('./routes/judgeRoutes');
+const nationalRoundRoutes = require('./routes/nationalRoundRoutes');
 
 
 // ----------------------------
@@ -109,6 +111,8 @@ app.use('/api/promo', promoCodeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/advisors', advisorRoutes);
 app.use('/api/admin-manage', adminManageRoutes);
+app.use('/api/judge', judgeRoutes);
+app.use('/api/national-round', nationalRoundRoutes);
 
 // ----------------------------
 // Server

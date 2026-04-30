@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, EmailOutlined, LockOutlined } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { useJudgeAuth } from '../../context/JudgeAuthContext';
 import { unifiedLogin, googleLogin } from '../../api/userAuth';
 import FooterV2 from '../../components/footer/FooterV2';
 import HeaderV1 from '../../components/header/HeaderV1';
@@ -53,6 +54,7 @@ const SignIn = () => {
   const [googleBtnWidth, setGoogleBtnWidth] = useState(400);
   const googleContainerRef = useRef(null);
   const { loginAsUser, loginAsAdmin } = useAuth();
+  const { loginAsJudge } = useJudgeAuth();
   const navigate = useNavigate();
 
   // Dynamically measure container so GoogleLogin iframe matches its width
@@ -66,8 +68,11 @@ const SignIn = () => {
     return () => ro.disconnect();
   }, []);
 
-  const handleRedirect = (role) =>
-    navigate(role === 'admin' ? '/admin/dashboard' : '/dashboard', { replace: true });
+  const handleRedirect = (role) => {
+    if (role === 'admin') navigate('/admin/dashboard', { replace: true });
+    else if (role === 'judge') navigate('/judge/dashboard', { replace: true });
+    else navigate('/dashboard', { replace: true });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,10 +81,16 @@ const SignIn = () => {
     try {
       const { data } = await unifiedLogin(email, password);
       if (data.success) {
-        data.role === 'admin'
-          ? loginAsAdmin(data.token, data.user)
-          : loginAsUser(data.token, data.user);
-        toast.success(data.role === 'admin' ? 'Welcome back, Admin!' : `Welcome back, ${data.user.name}!`);
+        if (data.role === 'admin') {
+          loginAsAdmin(data.token, data.user);
+          toast.success('Welcome back, Admin!');
+        } else if (data.role === 'judge') {
+          loginAsJudge(data.token, data.user);
+          toast.success(`Welcome, Judge ${data.user.name}!`);
+        } else {
+          loginAsUser(data.token, data.user);
+          toast.success(`Welcome back, ${data.user.name}!`);
+        }
         handleRedirect(data.role);
       }
     } catch (err) {

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import AdminRoute from './components/admin/AdminRoute';
 import UserRoute  from './components/user/UserRoute';
+import JudgeRoute from './components/judge/JudgeRoute';
 
 /* ── After a deploy, old chunk hashes 404. Reload once to pick up the new index.html. ── */
 const lazyWithReload = (importFn) =>
@@ -53,6 +54,7 @@ const UserDashboard      = lazyWithReload(() => import('./pages/userDashboard/Us
 const SurpriseSegment    = lazyWithReload(() => import('./pages/innerPages/SurpriseSegment'));
 const OlympiadExamPortal = lazyWithReload(() => import('./pages/userDashboard/OlympiadExamPortal'));
 const PrivacyPolicy      = lazyWithReload(() => import('./pages/innerPages/PrivacyPolicy'));
+const JudgeDashboard     = lazyWithReload(() => import('./pages/judge/JudgeDashboard'));
 const TermsAndConditions = lazyWithReload(() => import('./pages/innerPages/TermsAndConditions'));
 const ReturnRefundPolicy = lazyWithReload(() => import('./pages/innerPages/ReturnRefundPolicy'));
 const DeliveryPolicy     = lazyWithReload(() => import('./pages/innerPages/DeliveryPolicy'));
@@ -118,6 +120,8 @@ const Routers = () => (
       <Route path='/admin/login'   element={<Navigate to="/sign-in" replace />} />
       <Route path='/admin/dashboard' element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path='/admin/qr-code'   element={<AdminRoute><QrCode /></AdminRoute>} />
+      <Route path='/judge/login'     element={<Navigate to="/sign-in" replace />} />
+      <Route path='/judge/dashboard' element={<JudgeRoute><JudgeDashboard /></JudgeRoute>} />
       <Route path='*' element={<ErrorPage />} />
     </Routes>
   </Suspense>

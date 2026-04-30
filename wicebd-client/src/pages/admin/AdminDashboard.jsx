@@ -24,12 +24,13 @@ import {
   ArrowUpward, ArrowDownward,
   Inbox, Campaign, Notifications,
   QrCodeScanner, ManageAccounts, LockReset, Visibility, VisibilityOff,
-  Search, Clear,
+  Search, Clear, Gavel, EmojiFlags, Preview, Star, BarChart as BarChartIcon, Person,
 } from '@mui/icons-material';
 import OlympiadExamTab from '../../components/admin/OlympiadExamTab';
 import QRScannerPanel from '../../components/admin/QRScannerPanel';
 import api from '../../api/index';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
 
 /* ─── Design tokens ─── */
 const BG      = '#07070f';
@@ -68,6 +69,9 @@ const NAV_ITEMS = [
   { label: 'Promo Codes',        icon: <Inbox />,               section: 'manage',  roles: SA  },
   { label: 'QR Scanner',         icon: <QrCodeScanner />,       section: 'event',   roles: SA  },
   { label: 'Admin Users',        icon: <ManageAccounts />,      section: 'event',   roles: SA  },
+  { label: 'Judges',             icon: <Gavel />,               section: 'event',   roles: SA  },
+  { label: 'National Round',     icon: <EmojiFlags />,          section: 'event',   roles: SA  },
+  { label: 'Statistics',         icon: <BarChartIcon />,        section: 'data',    roles: DE  },
 ];
 
 /* ─── Custom tooltip for charts ─── */
@@ -243,6 +247,22 @@ export default function AdminDashboard() {
   const [adminUserLoading, setAdminUserLoading] = useState(false);
   const [showAdminPwd, setShowAdminPwd]         = useState(false);
 
+  // Statistics (individual participant counts)
+  const [participantStats, setParticipantStats] = useState(null);
+
+  // Judges
+  const [judges, setJudges] = useState([]);
+  const [judgeDialog, setJudgeDialog] = useState(false);
+  const [judgeForm, setJudgeForm] = useState({ name: '', username: '', password: '', email: '', judge_type: 'project', subcategory: '' });
+  const [judgeLoading, setJudgeLoading] = useState(false);
+  const [showJudgePwd, setShowJudgePwd] = useState(false);
+
+  // National Round
+  const [nrSummary, setNrSummary] = useState({ project: [], wall_magazine: [] });
+  const [nrSelections, setNrSelections] = useState([]);
+  const [nrPreview, setNrPreview] = useState([]);
+  const [nrComputing, setNrComputing] = useState(false);
+
   // Reset password dialog
   const [resetPwdDialog, setResetPwdDialog] = useState({ open: false, type: '', id: null, name: '' });
   const [resetPwdValue, setResetPwdValue]   = useState('');
@@ -299,6 +319,31 @@ export default function AdminDashboard() {
     } catch { /* non-critical — only super_admin can reach this */ }
   }, []);
 
+  const fetchParticipantStats = useCallback(async () => {
+    try {
+      const res = await api.get('/api/analytics/participants');
+      if (res.data?.success) setParticipantStats(res.data);
+    } catch { /* non-critical */ }
+  }, []);
+
+  const fetchJudges = useCallback(async () => {
+    try {
+      const res = await api.get('/api/admin-manage/judges');
+      setJudges(res.data?.judges || []);
+    } catch { /* non-critical */ }
+  }, []);
+
+  const fetchNationalRound = useCallback(async () => {
+    try {
+      const [summary, selections] = await Promise.all([
+        api.get('/api/national-round/marks-summary'),
+        api.get('/api/national-round'),
+      ]);
+      setNrSummary({ project: summary.data?.project || [], wall_magazine: summary.data?.wall_magazine || [] });
+      setNrSelections(selections.data?.selections || []);
+    } catch { /* non-critical */ }
+  }, []);
+
   const fetchAdvisors = useCallback(async () => {
     try {
       const res = await api.get('/api/advisors/admin');
@@ -334,8 +379,11 @@ export default function AdminDashboard() {
     fetchPromo();
     fetchAdvisors();
     fetchAdminUsers();
+    fetchJudges();
+    fetchNationalRound();
+    fetchParticipantStats();
     setLoading(false);
-  }, [logout, navigate, fetchCA, fetchClub, fetchPromo, fetchAdvisors, fetchAdminUsers]);
+  }, [logout, navigate, fetchCA, fetchClub, fetchPromo, fetchAdvisors, fetchAdminUsers, fetchJudges, fetchNationalRound, fetchParticipantStats]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -400,7 +448,9 @@ export default function AdminDashboard() {
     try {
       const endpoint = resetPwdDialog.type === 'admin'
         ? `/api/admin-manage/admins/${resetPwdDialog.id}/reset-password`
-        : `/api/admin-manage/users/${resetPwdDialog.id}/reset-password`;
+        : resetPwdDialog.type === 'judge'
+          ? `/api/admin-manage/judges/${resetPwdDialog.id}/reset-password`
+          : `/api/admin-manage/users/${resetPwdDialog.id}/reset-password`;
       await api.patch(endpoint, { password: resetPwdValue });
       setResetPwdDialog({ open: false, type: '', id: null, name: '' });
     } catch (err) {
@@ -1531,6 +1581,457 @@ export default function AdminDashboard() {
               </Paper>
             </Box>
           )}
+          {/* ══════════════ STATISTICS ══════════════ */}
+          {activeNav === 15 && (
+            <Box>
+              {/* Header */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                <Box>
+                  <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800 }}>Participant Statistics</Typography>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, mt: 0.5 }}>
+                    Individual headcount across all competition categories
+                  </Typography>
+                </Box>
+                <Button startIcon={<Refresh />} variant="outlined" size="small" onClick={fetchParticipantStats}
+                  sx={{ borderColor: BORDER, color: 'rgba(255,255,255,0.6)', borderRadius: 2, textTransform: 'none', '&:hover': { borderColor: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.04)' } }}>
+                  Refresh
+                </Button>
+              </Box>
+
+              {!participantStats ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress sx={{ color: ACCENT }} /></Box>
+              ) : (() => {
+                const ps = participantStats;
+                const totalIndividuals = (ps.project?.individuals || 0) + (ps.wall_magazine?.individuals || 0) + (ps.olympiad?.individuals || 0);
+                const totalTeams = (ps.project?.teams || 0) + (ps.wall_magazine?.teams || 0);
+
+                const CAT_ORDER = ['Primary School', 'High School', 'college', 'University'];
+                const CAT_LABEL = { 'Primary School': 'Primary School', 'High School': 'High School', college: 'College', University: 'University' };
+
+                // Group project breakdown into subcategory → rows
+                const subMap = {};
+                (ps.project?.breakdown || []).forEach(r => {
+                  if (!subMap[r.subcategory]) subMap[r.subcategory] = [];
+                  subMap[r.subcategory].push(r);
+                });
+
+                return (
+                  <>
+                    {/* Top summary cards */}
+                    <Grid container spacing={2} sx={{ mb: 4 }}>
+                      {[
+                        { label: 'Total Individuals', value: totalIndividuals, color: ACCENT, sub: 'across all categories' },
+                        { label: 'Project Individuals', value: ps.project?.individuals || 0, color: RED, sub: `${ps.project?.teams || 0} teams` },
+                        { label: 'Wall Magazine Individuals', value: ps.wall_magazine?.individuals || 0, color: AMBER, sub: `${ps.wall_magazine?.teams || 0} teams` },
+                        { label: 'Olympiad Participants', value: ps.olympiad?.individuals || 0, color: CYAN, sub: 'individual registration' },
+                        { label: 'Total Teams', value: totalTeams, color: GREEN, sub: 'project + wall magazine' },
+                      ].map((c, i) => (
+                        <Grid item xs={6} sm={4} md={2.4} key={i}>
+                          <Paper sx={{ p: 2.5, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, textAlign: 'center', position: 'relative', overflow: 'hidden',
+                            '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 12px 32px ${c.color}20` }, transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                            <Box sx={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: `radial-gradient(circle, ${c.color}25, transparent 70%)`, pointerEvents: 'none' }} />
+                            <Typography sx={{ color: c.color, fontWeight: 900, fontSize: 34, lineHeight: 1 }}>{Number(c.value).toLocaleString()}</Typography>
+                            <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 13, mt: 0.75 }}>{c.label}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, mt: 0.25 }}>{c.sub}</Typography>
+                          </Paper>
+                        </Grid>
+                      ))}
+                    </Grid>
+
+                    {/* ── PROJECT ── */}
+                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                      Project Competition — Breakdown by Subcategory &amp; Group
+                    </Typography>
+                    <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 4 }}>
+                      <Box sx={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${BORDER}` }}>
+                              {['Subcategory', 'Education Group', 'Teams', 'Individuals', 'Avg / Team'].map(h => (
+                                <th key={h} style={{ padding: '12px 16px', textAlign: h === 'Teams' || h === 'Individuals' || h === 'Avg / Team' ? 'right' : 'left', color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap' }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(subMap).length === 0 && (
+                              <tr><td colSpan={5} style={{ padding: 28, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No project registrations yet</td></tr>
+                            )}
+                            {Object.entries(subMap).map(([sub, rows]) => {
+                              const subTotal = rows.reduce((s, r) => ({ teams: s.teams + Number(r.teams), ind: s.ind + Number(r.individuals) }), { teams: 0, ind: 0 });
+                              const sorted = [...rows].sort((a, b) => (CAT_ORDER.indexOf(a.education_group) - CAT_ORDER.indexOf(b.education_group)));
+                              return sorted.map((row, ri) => (
+                                <tr key={`${sub}-${ri}`} style={{ borderBottom: `1px solid ${BORDER}`, background: ri % 2 ? 'rgba(255,255,255,0.012)' : 'transparent' }}>
+                                  {ri === 0 && (
+                                    <td rowSpan={sorted.length} style={{ padding: '12px 16px', verticalAlign: 'top' }}>
+                                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                        <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>{sub}</Typography>
+                                        <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>{subTotal.teams} teams · {subTotal.ind} people</Typography>
+                                      </Box>
+                                    </td>
+                                  )}
+                                  <td style={{ padding: '10px 16px' }}>
+                                    <Chip label={CAT_LABEL[row.education_group] || row.education_group} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.65)', fontSize: 11 }} />
+                                  </td>
+                                  <td style={{ padding: '10px 16px', textAlign: 'right', color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{row.teams}</td>
+                                  <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                                    <Typography sx={{ color: RED, fontWeight: 800, fontSize: 15 }}>{Number(row.individuals).toLocaleString()}</Typography>
+                                  </td>
+                                  <td style={{ padding: '10px 16px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                                    {row.teams > 0 ? (Number(row.individuals) / Number(row.teams)).toFixed(1) : '—'}
+                                  </td>
+                                </tr>
+                              ));
+                            })}
+                          </tbody>
+                          {/* Project grand total */}
+                          <tfoot>
+                            <tr style={{ borderTop: `2px solid ${BORDER}`, background: 'rgba(255,255,255,0.04)' }}>
+                              <td colSpan={2} style={{ padding: '12px 16px', color: '#fff', fontWeight: 800, fontSize: 13 }}>Total — Project</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right', color: '#fff', fontWeight: 700 }}>{ps.project?.teams || 0}</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                <Typography sx={{ color: RED, fontWeight: 900, fontSize: 17 }}>{Number(ps.project?.individuals || 0).toLocaleString()}</Typography>
+                              </td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                                {ps.project?.teams > 0 ? (ps.project.individuals / ps.project.teams).toFixed(1) : '—'}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </Box>
+                    </Paper>
+
+                    {/* ── WALL MAGAZINE ── */}
+                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                      Wall Magazine — Breakdown by Education Group
+                    </Typography>
+                    <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 4 }}>
+                      <Box sx={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${BORDER}` }}>
+                              {['Education Group', 'Teams', 'Individuals', 'Avg / Team'].map(h => (
+                                <th key={h} style={{ padding: '12px 16px', textAlign: h === 'Education Group' ? 'left' : 'right', color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap' }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(ps.wall_magazine?.breakdown || []).length === 0 && (
+                              <tr><td colSpan={4} style={{ padding: 28, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No wall magazine registrations yet</td></tr>
+                            )}
+                            {[...((ps.wall_magazine?.breakdown || []))].sort((a, b) => CAT_ORDER.indexOf(a.education_group) - CAT_ORDER.indexOf(b.education_group)).map((row, i) => (
+                              <tr key={i} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.012)' : 'transparent' }}>
+                                <td style={{ padding: '10px 16px' }}>
+                                  <Chip label={CAT_LABEL[row.education_group] || row.education_group} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.65)', fontSize: 11 }} />
+                                </td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right', color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{row.teams}</td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                                  <Typography sx={{ color: AMBER, fontWeight: 800, fontSize: 15 }}>{Number(row.individuals).toLocaleString()}</Typography>
+                                </td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                                  {row.teams > 0 ? (Number(row.individuals) / Number(row.teams)).toFixed(1) : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr style={{ borderTop: `2px solid ${BORDER}`, background: 'rgba(255,255,255,0.04)' }}>
+                              <td style={{ padding: '12px 16px', color: '#fff', fontWeight: 800, fontSize: 13 }}>Total — Wall Magazine</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right', color: '#fff', fontWeight: 700 }}>{ps.wall_magazine?.teams || 0}</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                <Typography sx={{ color: AMBER, fontWeight: 900, fontSize: 17 }}>{Number(ps.wall_magazine?.individuals || 0).toLocaleString()}</Typography>
+                              </td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                                {ps.wall_magazine?.teams > 0 ? (ps.wall_magazine.individuals / ps.wall_magazine.teams).toFixed(1) : '—'}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </Box>
+                    </Paper>
+
+                    {/* ── OLYMPIAD ── */}
+                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                      Olympiad — Individual Participants by Group
+                    </Typography>
+                    <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                      <Box sx={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${BORDER}` }}>
+                              {['Education Group', 'Individuals'].map(h => (
+                                <th key={h} style={{ padding: '12px 16px', textAlign: h === 'Education Group' ? 'left' : 'right', color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(ps.olympiad?.breakdown || []).length === 0 && (
+                              <tr><td colSpan={2} style={{ padding: 28, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No olympiad registrations yet</td></tr>
+                            )}
+                            {(ps.olympiad?.breakdown || []).map((row, i) => (
+                              <tr key={i} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.012)' : 'transparent' }}>
+                                <td style={{ padding: '10px 16px' }}>
+                                  <Chip label={CAT_LABEL[row.education_group] || row.education_group} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.65)', fontSize: 11 }} />
+                                </td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                                  <Typography sx={{ color: CYAN, fontWeight: 800, fontSize: 15 }}>{Number(row.individuals).toLocaleString()}</Typography>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr style={{ borderTop: `2px solid ${BORDER}`, background: 'rgba(255,255,255,0.04)' }}>
+                              <td style={{ padding: '12px 16px', color: '#fff', fontWeight: 800, fontSize: 13 }}>Total — Olympiad</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                <Typography sx={{ color: CYAN, fontWeight: 900, fontSize: 17 }}>{Number(ps.olympiad?.individuals || 0).toLocaleString()}</Typography>
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </Box>
+                    </Paper>
+                  </>
+                );
+              })()}
+            </Box>
+          )}
+
+          {/* ══════════════ JUDGES ══════════════ */}
+          {activeNav === 13 && adminRole === 'super_admin' && (
+            <Box>
+              <SectionHeader
+                icon={<Gavel sx={{ fontSize: 18 }} />}
+                title="Judge Management"
+                action={
+                  <Button startIcon={<Add />}
+                    onClick={() => { setJudgeForm({ name: '', username: '', password: '', email: '', judge_type: 'project', subcategory: '' }); setJudgeDialog(true); }}
+                    variant="contained" size="small"
+                    sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, boxShadow: `0 4px 14px ${RED}40` }}>
+                    Add Judge
+                  </Button>
+                }
+              />
+              <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
+                        {['Name', 'Username', 'Type', 'Subcategory', 'Status', 'Actions'].map(h => (
+                          <th key={h} style={{ padding: '13px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {judges.length === 0 && (
+                        <tr><td colSpan={6} style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>No judges yet. Add one above.</td></tr>
+                      )}
+                      {judges.map((j, i) => (
+                        <tr key={j.id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{j.name}</Typography>
+                            {j.email && <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{j.email}</Typography>}
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Chip label={`@${j.username}`} size="small" sx={{ background: `${ACCENT}18`, color: ACCENT, fontWeight: 700, fontSize: 12 }} />
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Chip
+                              label={j.judge_type === 'wall_magazine' ? 'Wall Magazine' : 'Project'}
+                              size="small"
+                              sx={{ background: j.judge_type === 'wall_magazine' ? `${CYAN}18` : `${AMBER}18`, color: j.judge_type === 'wall_magazine' ? CYAN : AMBER, fontSize: 11 }}
+                            />
+                          </td>
+                          <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>{j.subcategory || '—'}</td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Switch checked={!!j.is_active} size="small"
+                              onChange={async () => { await api.patch(`/api/admin-manage/judges/${j.id}/toggle`); fetchJudges(); }}
+                              sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: GREEN }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { background: GREEN } }}
+                            />
+                          </td>
+                          <td style={{ padding: '11px 16px' }}>
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <Tooltip title="Reset password">
+                                <IconButton size="small"
+                                  onClick={() => setResetPwdDialog({ open: true, type: 'judge', id: j.id, name: j.name })}
+                                  sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: AMBER } }}>
+                                  <LockReset sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Tooltip>
+                              <IconButton size="small"
+                                onClick={async () => { if (window.confirm(`Delete judge ${j.name}?`)) { await api.delete(`/api/admin-manage/judges/${j.id}`); fetchJudges(); } }}
+                                sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
+                                <Delete sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            </Box>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </Paper>
+            </Box>
+          )}
+
+          {/* ══════════════ NATIONAL ROUND ══════════════ */}
+          {activeNav === 14 && adminRole === 'super_admin' && (
+            <Box>
+              <SectionHeader
+                icon={<EmojiFlags sx={{ fontSize: 18 }} />}
+                title="National Round Management"
+                action={
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button startIcon={<Preview />} variant="outlined" size="small"
+                      disabled={nrComputing}
+                      onClick={async () => {
+                        setNrComputing(true);
+                        try {
+                          const { data } = await api.post('/api/national-round/compute', { confirm: false });
+                          setNrPreview(data.winners || []);
+                          toast.info(`Preview: ${data.winners?.length || 0} winners computed`);
+                        } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
+                        finally { setNrComputing(false); }
+                      }}
+                      sx={{ borderColor: CYAN, color: CYAN, borderRadius: 2, textTransform: 'none', '&:hover': { borderColor: CYAN, background: `${CYAN}10` } }}>
+                      {nrComputing ? <CircularProgress size={14} sx={{ color: CYAN }} /> : 'Preview Winners'}
+                    </Button>
+                    <Button startIcon={<EmojiEvents />} variant="contained" size="small"
+                      disabled={nrComputing}
+                      onClick={async () => {
+                        if (!window.confirm('This will overwrite all existing national round selections. Continue?')) return;
+                        setNrComputing(true);
+                        try {
+                          const { data } = await api.post('/api/national-round/compute', { confirm: true });
+                          toast.success(`${data.count} winners published to national round`);
+                          fetchNationalRound();
+                          setNrPreview([]);
+                        } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
+                        finally { setNrComputing(false); }
+                      }}
+                      sx={{ background: `linear-gradient(135deg, ${GREEN}, #059669)`, textTransform: 'none', borderRadius: 2 }}>
+                      Publish Winners
+                    </Button>
+                  </Box>
+                }
+              />
+
+              {nrPreview.length > 0 && (
+                <Paper sx={{ p: 2.5, mb: 3, background: `${CYAN}08`, border: `1px solid ${CYAN}30`, borderRadius: 3 }}>
+                  <Typography sx={{ color: CYAN, fontWeight: 700, fontSize: 14, mb: 2 }}>Preview — {nrPreview.length} computed winners (not published yet)</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {nrPreview.map((w, i) => (
+                      <Chip key={i}
+                        icon={<Star sx={{ fontSize: '14px !important', color: w.position === 'gold' ? '#FFD700' : w.position === 'silver' ? '#C0C0C0' : '#CD7F32' }} />}
+                        label={`${w.team_name} (${w.position}) — ${w.education_category}`}
+                        size="small"
+                        sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', fontSize: 11 }}
+                      />
+                    ))}
+                  </Box>
+                </Paper>
+              )}
+
+              {/* Marks Summary */}
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>Marks Summary — Project</Typography>
+              <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
+                        {['Team', 'Institution', 'Subcategory', 'Group', 'Total Marks', 'Judges'].map(h => (
+                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nrSummary.project.length === 0 && <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No marks yet</td></tr>}
+                      {nrSummary.project.map((r, i) => (
+                        <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                          <td style={{ padding: '10px 14px', color: '#fff', fontSize: 13, fontWeight: 600 }}>{r.team_name}</td>
+                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>{r.institution}</td>
+                          <td style={{ padding: '10px 14px' }}><Chip label={r.subcategory} size="small" sx={{ background: `${ACCENT}15`, color: 'rgba(255,255,255,0.7)', fontSize: 11 }} /></td>
+                          <td style={{ padding: '10px 14px' }}><Chip label={r.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
+                          <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 800, fontSize: 15 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography></td>
+                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.judge_count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </Paper>
+
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>Marks Summary — Wall Magazine</Typography>
+              <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
+                        {['Team', 'Institution', 'Group', 'Total Marks', 'Judges'].map(h => (
+                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nrSummary.wall_magazine.length === 0 && <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.25)' }}>No marks yet</td></tr>}
+                      {nrSummary.wall_magazine.map((r, i) => (
+                        <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                          <td style={{ padding: '10px 14px', color: '#fff', fontSize: 13, fontWeight: 600 }}>{r.team_name}</td>
+                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>{r.institution}</td>
+                          <td style={{ padding: '10px 14px' }}><Chip label={r.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
+                          <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 800, fontSize: 15 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography></td>
+                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.judge_count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </Paper>
+
+              {/* Published Selections */}
+              {nrSelections.length > 0 && (
+                <>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>Published National Round Selections</Typography>
+                  <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                    <Box sx={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
+                            {['Position', 'Team', 'Type', 'Subcategory', 'Group', 'Marks', 'Remove'].map(h => (
+                              <th key={h} style={{ padding: '11px 14px', textAlign: 'left', color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {nrSelections.map((s, i) => {
+                            const medalColor = s.position === 'gold' ? '#FFD700' : s.position === 'silver' ? '#C0C0C0' : '#CD7F32';
+                            return (
+                              <tr key={s.id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <Chip label={s.position.toUpperCase()} size="small" sx={{ background: `${medalColor}18`, color: medalColor, fontWeight: 800, border: `1px solid ${medalColor}40`, fontSize: 11 }} />
+                                </td>
+                                <td style={{ padding: '10px 14px', color: '#fff', fontWeight: 600, fontSize: 13 }}>{s.team_name}</td>
+                                <td style={{ padding: '10px 14px' }}><Chip label={s.competition_type === 'wall_magazine' ? 'Wall Mag' : 'Project'} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
+                                <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{s.subcategory || '—'}</td>
+                                <td style={{ padding: '10px 14px' }}><Chip label={s.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} /></td>
+                                <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 700, fontSize: 13 }}>{parseFloat(s.total_marks).toFixed(1)}</Typography></td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <IconButton size="small"
+                                    onClick={async () => { if (window.confirm('Remove this selection?')) { await api.delete(`/api/national-round/${s.id}`); fetchNationalRound(); } }}
+                                    sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
+                                    <Delete sx={{ fontSize: 16 }} />
+                                  </IconButton>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </Box>
+                  </Paper>
+                </>
+              )}
+            </Box>
+          )}
+
         </Box>
       </Box>
 
@@ -1905,6 +2406,63 @@ export default function AdminDashboard() {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => setClubBulkDialog(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Create Judge Dialog ── */}
+      <Dialog open={judgeDialog} onClose={() => setJudgeDialog(false)} maxWidth="sm" fullWidth
+        slotProps={{ paper: { sx: { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 3 } } }}>
+        <DialogTitle sx={{ color: '#fff', fontWeight: 700 }}>Add Judge</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
+          <TextField label="Full Name *" fullWidth value={judgeForm.name}
+            onChange={e => setJudgeForm(p => ({ ...p, name: e.target.value }))} sx={inputSx} />
+          <TextField label="Username *" fullWidth value={judgeForm.username}
+            onChange={e => setJudgeForm(p => ({ ...p, username: e.target.value.toLowerCase() }))} sx={inputSx}
+            helperText="Lowercase letters and numbers only. Used to log in." />
+          <TextField label="Password *" type={showJudgePwd ? 'text' : 'password'} fullWidth value={judgeForm.password}
+            onChange={e => setJudgeForm(p => ({ ...p, password: e.target.value }))} sx={inputSx}
+            InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowJudgePwd(p => !p)} edge="end" sx={{ color: 'rgba(255,255,255,0.4)' }}>{showJudgePwd ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }}
+          />
+          <TextField label="Email (optional)" fullWidth value={judgeForm.email}
+            onChange={e => setJudgeForm(p => ({ ...p, email: e.target.value }))} sx={inputSx} />
+          <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
+            <InputLabel>Judge Type *</InputLabel>
+            <Select value={judgeForm.judge_type} label="Judge Type *"
+              onChange={e => setJudgeForm(p => ({ ...p, judge_type: e.target.value, subcategory: '' }))}
+              MenuProps={{ PaperProps: { sx: { background: SURFACE, border: `1px solid ${BORDER}` } } }}>
+              <MenuItem value="project" sx={{ color: '#fff' }}>Project Judge</MenuItem>
+              <MenuItem value="wall_magazine" sx={{ color: '#fff' }}>Wall Magazine Judge</MenuItem>
+            </Select>
+          </FormControl>
+          {judgeForm.judge_type === 'project' && (
+            <FormControl fullWidth sx={{ ...inputSx, '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' } }}>
+              <InputLabel>Subcategory *</InputLabel>
+              <Select value={judgeForm.subcategory} label="Subcategory *"
+                onChange={e => setJudgeForm(p => ({ ...p, subcategory: e.target.value }))}
+                MenuProps={{ PaperProps: { sx: { background: SURFACE, border: `1px solid ${BORDER}` } } }}>
+                {['IT and Robotics', 'Environmental Science', 'Innovative Social Science', 'Applied Physics and Engineering', 'Applied Life Science'].map(s => (
+                  <MenuItem key={s} value={s} sx={{ color: '#fff' }}>{s}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button onClick={() => setJudgeDialog(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>Cancel</Button>
+          <Button variant="contained" disabled={judgeLoading || !judgeForm.name || !judgeForm.username || !judgeForm.password || (judgeForm.judge_type === 'project' && !judgeForm.subcategory)}
+            onClick={async () => {
+              setJudgeLoading(true);
+              try {
+                await api.post('/api/admin-manage/judges', judgeForm);
+                setJudgeDialog(false);
+                fetchJudges();
+              } catch (err) {
+                setError(err.response?.data?.message || 'Failed to create judge');
+              } finally { setJudgeLoading(false); }
+            }}
+            sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, fontWeight: 700 }}>
+            {judgeLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Create Judge'}
+          </Button>
         </DialogActions>
       </Dialog>
 

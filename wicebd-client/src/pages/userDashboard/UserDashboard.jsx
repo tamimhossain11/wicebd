@@ -55,6 +55,7 @@ const NAV = [
   { id: 'registrations',  label: 'My Registrations',  icon: <CheckCircle     sx={{ fontSize: 19 }} /> },
   { id: 'event-pass',     label: 'ID Cards',          icon: <Badge           sx={{ fontSize: 19 }} /> },
   { id: 'announcements',  label: 'Announcements',     icon: <Notifications   sx={{ fontSize: 19 }} /> },
+  { id: 'results',        label: 'My Results',        icon: <EmojiEvents     sx={{ fontSize: 19 }} /> },
   { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} />, disabled: true },
   { id: 'profile',        label: 'Profile',           icon: <Person          sx={{ fontSize: 19 }} /> },
 ];
@@ -337,6 +338,7 @@ export default function UserDashboard() {
   const [saving, setSaving] = useState(false);
   const [profileComplete, setProfileComplete] = useState(false);
   const [portalOpen, setPortalOpen] = useState(false);
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -358,12 +360,23 @@ export default function UserDashboard() {
             gender: u.gender || '', institution: u.institution || '', class_grade: u.class_grade || '',
           });
         }
-        setRegistrations({
+        const regs = {
           project:      r.data.project      || [],
           wallMagazine: r.data.wallMagazine  || [],
           olympiad:     r.data.olympiad      || [],
           roboSoccer:   r.data.roboSoccer    || [],
-        });
+        };
+        setRegistrations(regs);
+
+        // Fetch national round results for each project/wall-magazine registration
+        const allProjectIds = [...(regs.project || []).map(x => x.paymentID), ...(regs.wallMagazine || []).map(x => x.paymentID)].filter(Boolean);
+        if (allProjectIds.length > 0) {
+          const resultPromises = allProjectIds.map(id =>
+            api.get(`/api/national-round/result/${id}`).then(res => res.data.result ? { ...res.data.result, paymentID: id } : null).catch(() => null)
+          );
+          Promise.all(resultPromises).then(res => setResults(res.filter(Boolean)));
+        }
+
         setAnnouncements(a.data.announcements || []);
       })
       .catch(() => {})
@@ -812,6 +825,74 @@ export default function UserDashboard() {
           )}
 
           {/* ══ SCHEDULE ══ */}
+          {/* ══ MY RESULTS ══ */}
+          {active === 'results' && (
+            <Box>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>My Results</Typography>
+                <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>National Round selection status for your registrations.</Typography>
+              </Box>
+
+              {results.length === 0 ? (
+                <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 3, background: C.card, border: `1px solid ${C.border}` }}>
+                  <EmojiEvents sx={{ fontSize: 64, color: `${C.primary}40`, mb: 2 }} />
+                  <Typography variant="h6" sx={{ color: '#fff', fontWeight: 800, mb: 1 }}>Results Not Yet Published</Typography>
+                  <Typography sx={{ color: C.muted, fontSize: 13 }}>
+                    The national round selections have not been published yet. Check back after judging is complete.
+                  </Typography>
+                </Paper>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  {results.map((r, i) => {
+                    const medalColor = r.position === 'gold' ? '#FFD700' : r.position === 'silver' ? '#C0C0C0' : '#CD7F32';
+                    const medalEmoji = r.position === 'gold' ? '🥇' : r.position === 'silver' ? '🥈' : '🥉';
+                    const medalLabel = r.position === 'gold' ? 'Gold Medal' : r.position === 'silver' ? 'Silver Medal' : 'Bronze Medal';
+                    return (
+                      <Paper key={i} sx={{
+                        p: 3, borderRadius: 3,
+                        background: `linear-gradient(135deg, ${medalColor}10 0%, rgba(255,255,255,0.03) 100%)`,
+                        border: `1px solid ${medalColor}35`,
+                        boxShadow: `0 8px 32px ${medalColor}15`,
+                        position: 'relative', overflow: 'hidden',
+                      }}>
+                        <Box sx={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, borderRadius: '50%', background: `radial-gradient(circle, ${medalColor}20, transparent 70%)`, pointerEvents: 'none' }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                          <Box sx={{ fontSize: 52, lineHeight: 1 }}>{medalEmoji}</Box>
+                          <Box sx={{ flex: 1, minWidth: 200 }}>
+                            <Typography sx={{ color: medalColor, fontWeight: 800, fontSize: 22, mb: 0.5 }}>{medalLabel}</Typography>
+                            <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>National Round — Selected!</Typography>
+                            <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                              <Chip label={r.subcategory || 'Wall Magazine'} size="small" sx={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
+                              <Chip label={r.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.55)', fontSize: 11 }} />
+                              {r.total_marks > 0 && <Chip label={`Score: ${parseFloat(r.total_marks).toFixed(1)}`} size="small" sx={{ background: `${medalColor}15`, color: medalColor, border: `1px solid ${medalColor}30`, fontSize: 11, fontWeight: 700 }} />}
+                            </Box>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    );
+                  })}
+
+                  {/* Teams without a result in the national round */}
+                  {[...(registrations.project || []), ...(registrations.wallMagazine || [])].filter(reg => !results.find(r => r.paymentID === reg.paymentID)).map((reg, i) => (
+                    <Paper key={`no-${i}`} sx={{ p: 3, borderRadius: 3, background: C.card, border: `1px solid ${C.border}` }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                        <Box sx={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <EmojiEvents sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 26 }} />
+                        </Box>
+                        <Box>
+                          <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>
+                            {reg.competitionCategory === 'Megazine' ? 'Wall Magazine' : reg.projectSubcategory}
+                          </Typography>
+                          <Typography sx={{ color: C.muted, fontSize: 13 }}>Not selected for national round</Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
           {active === 'schedule' && (
             <Box>
               <Box sx={{ mb: 3 }}>

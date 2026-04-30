@@ -261,6 +261,75 @@ router.get('/attendance', authenticateAdmin, async (req, res) => {
   }
 });
 
+/* ══ JUDGE MANAGEMENT ═══════════════════════════════════════════════ */
+
+router.get('/judges', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT id, name, username, email, judge_type, subcategory, is_active, created_at FROM judges ORDER BY id DESC'
+    );
+    res.json({ success: true, judges: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
+});
+
+router.post('/judges', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const { name, username, password, email, judge_type, subcategory } = req.body;
+  const VALID_TYPES = ['project', 'wall_magazine'];
+  if (!name || !username || !password || !judge_type)
+    return res.status(400).json({ success: false, message: 'name, username, password, judge_type required' });
+  if (!VALID_TYPES.includes(judge_type))
+    return res.status(400).json({ success: false, message: 'Invalid judge_type' });
+  if (judge_type === 'project' && !subcategory)
+    return res.status(400).json({ success: false, message: 'subcategory required for project judges' });
+
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await db.query(
+      'INSERT INTO judges (name, username, password, email, judge_type, subcategory, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name.trim(), username.trim().toLowerCase(), hash, email || null, judge_type, subcategory || null, req.admin.id]
+    );
+    res.json({ success: true, message: 'Judge created' });
+  } catch (e) {
+    if (e.code === 'ER_DUP_ENTRY')
+      return res.status(409).json({ success: false, message: 'Username already exists' });
+    res.status(500).json({ success: false, message: 'DB error: ' + e.message });
+  }
+});
+
+router.patch('/judges/:id/reset-password', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 6)
+    return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await db.query('UPDATE judges SET password = ? WHERE id = ?', [hash, req.params.id]);
+    res.json({ success: true, message: 'Password updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
+});
+
+router.patch('/judges/:id/toggle', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  try {
+    await db.query('UPDATE judges SET is_active = NOT is_active WHERE id = ?', [req.params.id]);
+    const [[row]] = await db.query('SELECT is_active FROM judges WHERE id = ?', [req.params.id]);
+    res.json({ success: true, is_active: !!row.is_active });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
+});
+
+router.delete('/judges/:id', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  try {
+    await db.query('DELETE FROM judges WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
+});
+
 /* ══ STUCK PAYMENT RECOVERY ═════════════════════════════════════════
    POST /api/admin-manage/recover-stuck-payments
    Finds temp_registrations with a verified PayStation payment but no

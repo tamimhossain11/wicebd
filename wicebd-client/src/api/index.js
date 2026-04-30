@@ -6,9 +6,12 @@ const api = axios.create({
 
 // Request interceptor for adding auth token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken') || localStorage.getItem('userToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Don't override if the caller already set Authorization explicitly
+  if (!config.headers.Authorization) {
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('userToken') || localStorage.getItem('judgeToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 }, (error) => {
@@ -24,6 +27,9 @@ api.interceptors.response.use(
       if (localStorage.getItem('adminToken')) {
         localStorage.removeItem('adminToken');
         window.location.href = '/admin/login';
+      } else if (localStorage.getItem('judgeToken')) {
+        localStorage.removeItem('judgeToken');
+        window.location.href = '/sign-in';
       } else if (localStorage.getItem('userToken')) {
         localStorage.removeItem('userToken');
         localStorage.removeItem('userData');

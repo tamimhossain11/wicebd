@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import ScrollToTop from './components/others/ScrollToTop.jsx'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { JudgeAuthProvider } from './context/JudgeAuthContext.jsx'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const FACEBOOK_APP_ID  = import.meta.env.VITE_FACEBOOK_APP_ID  || '';
@@ -33,10 +34,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <AuthProvider>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <App />
-          <ScrollToTop />
-        </BrowserRouter>
+        <JudgeAuthProvider>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <App />
+            <ScrollToTop />
+          </BrowserRouter>
+        </JudgeAuthProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   </React.StrictMode>,

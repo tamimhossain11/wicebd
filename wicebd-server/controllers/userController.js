@@ -387,7 +387,33 @@ const unifiedLogin = async (req, res) => {
       });
     }
 
-    // 3. Neither found
+    // 3. Try judge login — match by username
+    const [judgeRows] = await db.query(
+      'SELECT id, name, username, password, judge_type, subcategory, is_active FROM judges WHERE username = ?',
+      [email.trim().toLowerCase()]
+    );
+
+    if (judgeRows.length > 0) {
+      const judge = judgeRows[0];
+      const isMatch = await bcrypt.compare(password, judge.password);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+      if (!judge.is_active) {
+        return res.status(403).json({ success: false, message: 'Judge account is disabled.' });
+      }
+      const token = jwt.sign(
+        { id: judge.id, name: judge.name, username: judge.username, role: 'judge', judge_type: judge.judge_type, subcategory: judge.subcategory },
+        process.env.JWT_SECRET,
+        { expiresIn: '12h' }
+      );
+      return res.json({
+        success: true, role: 'judge', token,
+        user: { id: judge.id, name: judge.name, username: judge.username, judge_type: judge.judge_type, subcategory: judge.subcategory },
+      });
+    }
+
+    // 4. Neither found
     return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
   } catch (error) {
