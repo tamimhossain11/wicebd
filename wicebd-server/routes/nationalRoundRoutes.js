@@ -59,7 +59,7 @@ router.get('/marks-summary', authenticateAdmin, requireRole('super_admin'), asyn
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'wall_magazine'
       WHERE r.competitionCategory = 'Megazine'
       GROUP BY r.paymentID
-      ORDER BY education_category, total_marks DESC
+      ORDER BY total_marks DESC
     `);
 
     res.json({ success: true, project: projectRows, wall_magazine: wallRows });
@@ -113,15 +113,16 @@ router.post('/compute', authenticateAdmin, requireRole('super_admin'), async (re
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'wall_magazine'
       WHERE r.competitionCategory = 'Megazine'
       GROUP BY r.paymentID
-      ORDER BY education_category, total_marks DESC
+      ORDER BY total_marks DESC
     `);
 
     const winners = [];
 
-    const pickTopN = (rows) => {
+    // ignoreEduGroup=true: rank all rows as one pool (used for wall magazine — top 3 overall, no per-category split)
+    const pickTopN = (rows, ignoreEduGroup = false) => {
       const groups = {};
       rows.forEach(row => {
-        const key = `${row.subcategory}||${row.education_category}`;
+        const key = ignoreEduGroup ? row.subcategory : `${row.subcategory}||${row.education_category}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(row);
       });
@@ -133,7 +134,7 @@ router.post('/compute', authenticateAdmin, requireRole('super_admin'), async (re
     };
 
     pickTopN(projectRows);
-    pickTopN(wallRows);
+    pickTopN(wallRows, true);
 
     if (!confirm) {
       return res.json({ success: true, preview: true, winners });
