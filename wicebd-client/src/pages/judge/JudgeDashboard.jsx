@@ -25,8 +25,8 @@ const GREEN = '#10b981';
 const AMBER = '#f59e0b';
 const SIDEBAR_W = 260;
 
-const CATEGORY_ORDER = ['Primary School', 'High School', 'college', 'University'];
-const CATEGORY_LABELS = { 'Primary School': 'Primary School', 'High School': 'High School', college: 'College', University: 'University' };
+const CATEGORY_ORDER = ['Elementary', 'High School', 'college', 'University'];
+const CATEGORY_LABELS = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
 
 const MEDAL_COLORS = { 1: '#FFD700', 2: '#C0C0C0', 3: '#CD7F32' };
 const MEDAL_LABELS = { 1: 'Gold', 2: 'Silver', 3: 'Bronze' };

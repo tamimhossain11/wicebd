@@ -110,13 +110,13 @@ const getParticipantStats = async (req, res) => {
     const [projectBreakdown] = await db.query(`
       SELECT
         projectSubcategory AS subcategory,
-        categories          AS education_group,
+        CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_group,
         COUNT(*)            AS teams,
         SUM(${MEMBER_SUM})  AS individuals
       FROM registrations
       WHERE competitionCategory != 'Megazine'
-      GROUP BY projectSubcategory, categories
-      ORDER BY projectSubcategory, categories
+      GROUP BY projectSubcategory, education_group
+      ORDER BY projectSubcategory, education_group
     `);
 
     // ── Project: breakdown by subcategory only (subtotals) ──────────
@@ -134,13 +134,13 @@ const getParticipantStats = async (req, res) => {
     // ── Project: breakdown by education group only ───────────────────
     const [projectByGroup] = await db.query(`
       SELECT
-        categories         AS education_group,
+        CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_group,
         COUNT(*)           AS teams,
         SUM(${MEMBER_SUM}) AS individuals
       FROM registrations
       WHERE competitionCategory != 'Megazine'
-      GROUP BY categories
-      ORDER BY categories
+      GROUP BY education_group
+      ORDER BY education_group
     `);
 
     // ── Wall Magazine: total teams + individuals ─────────────────────
@@ -155,13 +155,13 @@ const getParticipantStats = async (req, res) => {
     // ── Wall Magazine: breakdown by education group ──────────────────
     const [wallBreakdown] = await db.query(`
       SELECT
-        categories         AS education_group,
+        CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_group,
         COUNT(*)           AS teams,
         SUM(${MEMBER_SUM}) AS individuals
       FROM registrations
       WHERE competitionCategory = 'Megazine'
-      GROUP BY categories
-      ORDER BY categories
+      GROUP BY education_group
+      ORDER BY education_group
     `);
 
     // ── Olympiad: total + by education category ──────────────────────

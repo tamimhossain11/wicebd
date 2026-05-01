@@ -1606,8 +1606,8 @@ export default function AdminDashboard() {
                 const totalIndividuals = (ps.project?.individuals || 0) + (ps.wall_magazine?.individuals || 0) + (ps.olympiad?.individuals || 0);
                 const totalTeams = (ps.project?.teams || 0) + (ps.wall_magazine?.teams || 0);
 
-                const CAT_ORDER = ['Primary School', 'High School', 'college', 'University'];
-                const CAT_LABEL = { 'Primary School': 'Primary School', 'High School': 'High School', college: 'College', University: 'University' };
+                const CAT_ORDER = ['Elementary', 'High School', 'college', 'University'];
+                const CAT_LABEL = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
 
                 // Group project breakdown into subcategory → rows
                 const subMap = {};
@@ -1876,19 +1876,22 @@ export default function AdminDashboard() {
           {/* ══════════════ NATIONAL ROUND ══════════════ */}
           {activeNav === 14 && adminRole === 'super_admin' && (() => {
             // Group marks by subcategory → education_group, sorted by marks desc within each group
+            const normCat = (c) => (c === 'Primary School' || c === 'Elementary') ? 'Elementary' : c;
             const groupMarks = (rows) => {
               const subs = {};
               rows.forEach(r => {
+                const cat = normCat(r.education_category);
                 if (!subs[r.subcategory]) subs[r.subcategory] = {};
-                if (!subs[r.subcategory][r.education_category]) subs[r.subcategory][r.education_category] = [];
-                subs[r.subcategory][r.education_category].push(r);
+                if (!subs[r.subcategory][cat]) subs[r.subcategory][cat] = [];
+                subs[r.subcategory][cat].push(r);
               });
               Object.values(subs).forEach(sub =>
                 Object.values(sub).forEach(grp => grp.sort((a, b) => b.total_marks - a.total_marks))
               );
               return subs;
             };
-            const CAT_ORDER = ['Primary School', 'High School', 'college', 'University'];
+            const CAT_ORDER = ['Elementary', 'High School', 'college', 'University'];
+            const CAT_LABEL = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
             const posColor = (pos) => pos === 'gold' ? '#FFD700' : pos === 'silver' ? '#C0C0C0' : pos === 'bronze' ? '#CD7F32' : CYAN;
 
             const projectGrouped = groupMarks(nrSummary.project);
@@ -1952,7 +1955,8 @@ export default function AdminDashboard() {
               {nrPreview.length > 0 && (() => {
                 const pvGrouped = {};
                 nrPreview.forEach(w => {
-                  const key = `${w.subcategory} — ${w.education_category}`;
+                  const edLabel = CAT_LABEL[w.education_category] || w.education_category;
+                  const key = `${w.subcategory} — ${edLabel}`;
                   if (!pvGrouped[key]) pvGrouped[key] = [];
                   pvGrouped[key].push(w);
                 });
@@ -2005,7 +2009,7 @@ export default function AdminDashboard() {
                       {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
                         <Box key={cat}>
                           <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{cat}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{CAT_LABEL[cat] || cat}</Typography>
                             <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · top {nrTeamsPerGroup} selected</Typography>
                           </Box>
                           <Box sx={{ overflowX: 'auto' }}>
@@ -2075,7 +2079,7 @@ export default function AdminDashboard() {
                       {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
                         <Box key={cat}>
                           <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{cat}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{CAT_LABEL[cat] || cat}</Typography>
                             <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · top {nrTeamsPerGroup} selected</Typography>
                           </Box>
                           <Box sx={{ overflowX: 'auto' }}>
@@ -2149,7 +2153,7 @@ export default function AdminDashboard() {
                                 <td style={{ padding: '10px 14px', color: '#fff', fontWeight: 600, fontSize: 13 }}>{s.team_name}</td>
                                 <td style={{ padding: '10px 14px' }}><Chip label={s.competition_type === 'wall_magazine' ? 'Wall Mag' : 'Project'} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
                                 <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{s.subcategory || '—'}</td>
-                                <td style={{ padding: '10px 14px' }}><Chip label={s.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} /></td>
+                                <td style={{ padding: '10px 14px' }}><Chip label={CAT_LABEL[s.education_category] || s.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} /></td>
                                 <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 700, fontSize: 13 }}>{parseFloat(s.total_marks).toFixed(1)}</Typography></td>
                                 <td style={{ padding: '10px 14px' }}>
                                   <IconButton size="small"

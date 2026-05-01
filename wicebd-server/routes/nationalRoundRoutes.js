@@ -36,7 +36,8 @@ router.get('/marks-summary', authenticateAdmin, requireRole('super_admin'), asyn
       SELECT r.paymentID AS registration_id,
              COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
              r.leader AS leader_name, r.institution,
-             r.projectSubcategory AS subcategory, r.categories AS education_category,
+             r.projectSubcategory AS subcategory,
+             CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
              r.projectTitle AS project_title, 'project' AS competition_type,
              COALESCE(SUM(jm.marks), 0) AS total_marks,
              COUNT(jm.id) AS judge_count
@@ -44,12 +45,13 @@ router.get('/marks-summary', authenticateAdmin, requireRole('super_admin'), asyn
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'project'
       WHERE r.competitionCategory != 'Megazine'
       GROUP BY r.paymentID
-      ORDER BY r.projectSubcategory, r.categories, total_marks DESC
+      ORDER BY r.projectSubcategory, education_category, total_marks DESC
     `);
 
     const [wallRows] = await db.query(`
       SELECT r.paymentID AS registration_id, r.leader AS team_name, r.institution,
-             'Wall Magazine' AS subcategory, r.categories AS education_category,
+             'Wall Magazine' AS subcategory,
+             CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
              r.projectTitle AS project_title, 'wall_magazine' AS competition_type,
              COALESCE(SUM(jm.marks), 0) AS total_marks,
              COUNT(jm.id) AS judge_count
@@ -57,7 +59,7 @@ router.get('/marks-summary', authenticateAdmin, requireRole('super_admin'), asyn
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'wall_magazine'
       WHERE r.competitionCategory = 'Megazine'
       GROUP BY r.paymentID
-      ORDER BY r.categories, total_marks DESC
+      ORDER BY education_category, total_marks DESC
     `);
 
     res.json({ success: true, project: projectRows, wall_magazine: wallRows });
@@ -90,26 +92,28 @@ router.post('/compute', authenticateAdmin, requireRole('super_admin'), async (re
       SELECT r.paymentID AS registration_id,
              COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
              r.leader AS leader_name, r.institution,
-             r.projectSubcategory AS subcategory, r.categories AS education_category,
+             r.projectSubcategory AS subcategory,
+             CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
              r.projectTitle AS project_title, 'project' AS competition_type,
              COALESCE(SUM(jm.marks), 0) AS total_marks
       FROM registrations r
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'project'
       WHERE r.competitionCategory != 'Megazine'
       GROUP BY r.paymentID
-      ORDER BY r.projectSubcategory, r.categories, total_marks DESC
+      ORDER BY r.projectSubcategory, education_category, total_marks DESC
     `);
 
     const [wallRows] = await db.query(`
       SELECT r.paymentID AS registration_id, r.leader AS team_name, r.institution,
-             'Wall Magazine' AS subcategory, r.categories AS education_category,
+             'Wall Magazine' AS subcategory,
+             CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
              r.projectTitle AS project_title, 'wall_magazine' AS competition_type,
              COALESCE(SUM(jm.marks), 0) AS total_marks
       FROM registrations r
       LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'wall_magazine'
       WHERE r.competitionCategory = 'Megazine'
       GROUP BY r.paymentID
-      ORDER BY r.categories, total_marks DESC
+      ORDER BY education_category, total_marks DESC
     `);
 
     const winners = [];

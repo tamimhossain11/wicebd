@@ -71,26 +71,28 @@ router.get('/teams', authenticateJudge, async (req, res) => {
         SELECT paymentID AS registration_id,
                COALESCE(NULLIF(projectTitle,''), leader) AS team_name,
                leader AS leader_name, institution,
-               categories AS education_category, projectTitle AS project_title,
+               CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_category,
+               projectTitle AS project_title,
                leaderEmail AS email, leaderPhone AS phone,
                'wall_magazine' AS competition_type,
                member2, member3, member4, member5, member6
         FROM registrations
         WHERE competitionCategory = 'Megazine'
-        ORDER BY categories, leader
+        ORDER BY education_category, leader
       `);
     } else {
       [rows] = await db.query(`
         SELECT paymentID AS registration_id,
                COALESCE(NULLIF(projectTitle,''), leader) AS team_name,
                leader AS leader_name, institution,
-               categories AS education_category, projectSubcategory AS subcategory,
+               CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_category,
+               projectSubcategory AS subcategory,
                projectTitle AS project_title, leaderEmail AS email, leaderPhone AS phone,
                'project' AS competition_type,
                member2, member3, member4, member5, member6
         FROM registrations
         WHERE competitionCategory != 'Megazine' AND projectSubcategory = ?
-        ORDER BY categories, leader
+        ORDER BY education_category, leader
       `, [subcategory]);
     }
 

@@ -18,8 +18,8 @@ const MEDAL = {
   bronze: { color: '#CD7F32', bg: 'rgba(205,127,50,0.08)',  border: 'rgba(205,127,50,0.25)',  label: 'Bronze', emoji: '🥉', rank: 3 },
 };
 
-const CATEGORY_ORDER = ['Primary School', 'High School', 'college', 'University'];
-const CATEGORY_LABELS = { 'Primary School': 'Primary', 'High School': 'High School', college: 'College', University: 'University' };
+const CATEGORY_ORDER = ['Elementary', 'High School', 'college', 'University'];
+const CATEGORY_LABELS = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
 
 const SelectedTeams = () => {
   const [selections, setSelections] = useState([]);
