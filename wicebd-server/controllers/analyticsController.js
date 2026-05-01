@@ -178,20 +178,20 @@ const getParticipantStats = async (req, res) => {
     res.json({
       success: true,
       project: {
-        teams:       projectTotals.teams       || 0,
-        individuals: projectTotals.individuals || 0,
-        bySubcategory: projectBySubcategory,
-        byGroup:       projectByGroup,
-        breakdown:     projectBreakdown,
+        teams:       Number(projectTotals.teams)       || 0,
+        individuals: Number(projectTotals.individuals) || 0,
+        bySubcategory: projectBySubcategory.map(r => ({ ...r, teams: Number(r.teams), individuals: Number(r.individuals) })),
+        byGroup:       projectByGroup.map(r => ({ ...r, teams: Number(r.teams), individuals: Number(r.individuals) })),
+        breakdown:     projectBreakdown.map(r => ({ ...r, teams: Number(r.teams), individuals: Number(r.individuals) })),
       },
       wall_magazine: {
-        teams:       wallTotals.teams       || 0,
-        individuals: wallTotals.individuals || 0,
-        breakdown:   wallBreakdown,
+        teams:       Number(wallTotals.teams)       || 0,
+        individuals: Number(wallTotals.individuals) || 0,
+        breakdown:   wallBreakdown.map(r => ({ ...r, teams: Number(r.teams), individuals: Number(r.individuals) })),
       },
       olympiad: {
-        individuals: olympiadTotal.individuals || 0,
-        breakdown:   olympiadBreakdown,
+        individuals: Number(olympiadTotal.individuals) || 0,
+        breakdown:   olympiadBreakdown.map(r => ({ ...r, individuals: Number(r.individuals) })),
       },
     });
   } catch (error) {

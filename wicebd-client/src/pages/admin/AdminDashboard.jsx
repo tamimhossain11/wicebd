@@ -1603,8 +1603,8 @@ export default function AdminDashboard() {
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress sx={{ color: ACCENT }} /></Box>
               ) : (() => {
                 const ps = participantStats;
-                const totalIndividuals = (ps.project?.individuals || 0) + (ps.wall_magazine?.individuals || 0) + (ps.olympiad?.individuals || 0);
-                const totalTeams = (ps.project?.teams || 0) + (ps.wall_magazine?.teams || 0);
+                const totalIndividuals = Number(ps.project?.individuals || 0) + Number(ps.wall_magazine?.individuals || 0) + Number(ps.olympiad?.individuals || 0);
+                const totalTeams = Number(ps.project?.teams || 0) + Number(ps.wall_magazine?.teams || 0);
 
                 const CAT_ORDER = ['Elementary', 'High School', 'college', 'University'];
                 const CAT_LABEL = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
