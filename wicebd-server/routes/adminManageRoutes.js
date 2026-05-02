@@ -127,10 +127,8 @@ router.get('/attendance/:cardUid', authenticateAdmin, async (req, res) => {
     if (!cardRows.length) return res.status(404).json({ success: false, message: 'Card not found' });
     const card = cardRows[0];
 
-    /* For robotics types, user_name may be null if registered without an account — resolve from registration table */
-    if (!card.user_name) {
-      card.user_name = await resolveParticipantName(card);
-    }
+    /* Always resolve name from the registration table — account username is not the participant name */
+    card.user_name = await resolveParticipantName(card) || card.user_name;
 
     /* Get attendance record (may not exist yet) */
     const [attRows] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
@@ -274,10 +272,25 @@ router.get('/attendance', authenticateAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT a.*,
+             COALESCE(
+               CASE
+                 WHEN a.registration_type = 'robo_soccer' THEN rs.leader_name
+                 WHEN a.registration_type = 'micromouse'  THEN mm.leader_name
+                 WHEN a.registration_type = 'olympiad'    THEN ol.full_name
+                 WHEN a.registration_type = 'guest'       THEN ic.guest_name
+                 ELSE reg.leader
+               END,
+               a.participant_name
+             ) AS participant_name,
              ci.username AS checked_in_by_name,
              lc.username AS lunch_by_name,
              cc.username AS coffee_by_name
       FROM attendance a
+      LEFT JOIN id_cards ic                ON a.card_uid = ic.card_uid
+      LEFT JOIN robo_soccer_registrations rs ON a.registration_type = 'robo_soccer' AND a.registration_id = rs.registration_id
+      LEFT JOIN micromouse_registrations  mm ON a.registration_type = 'micromouse'  AND a.registration_id = mm.registration_id
+      LEFT JOIN olympiad_registrations    ol ON a.registration_type = 'olympiad'    AND a.registration_id = ol.registration_id
+      LEFT JOIN registrations            reg ON a.registration_type IN ('project','wall-magazine') AND a.registration_id = reg.paymentID
       LEFT JOIN admins ci ON a.checked_in_by   = ci.id
       LEFT JOIN admins lc ON a.lunch_claimed_by = lc.id
       LEFT JOIN admins cc ON a.coffee_claimed_by = cc.id
