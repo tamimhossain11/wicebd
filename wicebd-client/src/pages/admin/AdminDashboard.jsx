@@ -2292,6 +2292,8 @@ export default function AdminDashboard() {
               <MenuItem value="project">Project Only</MenuItem>
               <MenuItem value="wall-magazine">Wall Magazine Only</MenuItem>
               <MenuItem value="olympiad">Olympiad Only</MenuItem>
+              <MenuItem value="robo_soccer">Robo Soccer Only</MenuItem>
+              <MenuItem value="micromouse">Micromouse Only</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
