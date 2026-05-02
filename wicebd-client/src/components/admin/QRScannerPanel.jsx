@@ -21,17 +21,21 @@ const C = {
 };
 
 const ROLE_COLORS = {
-  project:        C.red,
+  project:         C.red,
   'wall-magazine': C.green,
-  olympiad:       C.cyan,
-  guest:          '#a855f7',
+  olympiad:        C.cyan,
+  guest:           '#a855f7',
+  robo_soccer:     '#f59e0b',
+  micromouse:      '#6366f1',
 };
 
 const ROLE_LABELS = {
-  project:        'Project Competition',
+  project:         'Project Competition',
   'wall-magazine': 'Wall Magazine',
-  olympiad:       'Science Olympiad',
-  guest:          'Guest',
+  olympiad:        'Science Olympiad',
+  guest:           'Guest',
+  robo_soccer:     'Robo Soccer',
+  micromouse:      'Micromouse Maze-Solving',
 };
 
 const POSITIONS = [
@@ -44,8 +48,8 @@ const POSITIONS = [
 
 /* Olympiad participants do NOT get lunch but DO get coffee. Guests get both. */
 const hasFood = (registrationType) => registrationType !== 'olympiad';
-/* Only project and wall-magazine participants get certificates */
-const hasCert = (registrationType) => registrationType === 'project' || registrationType === 'wall-magazine';
+/* All participants except olympiad and guests get certificates */
+const hasCert = (registrationType) => registrationType !== 'olympiad' && registrationType !== 'guest' && !!registrationType;
 
 /* Parse card_uid from a verify URL or raw uid */
 const extractUid = (raw) => {

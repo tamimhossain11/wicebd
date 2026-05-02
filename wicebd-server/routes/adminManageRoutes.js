@@ -127,6 +127,11 @@ router.get('/attendance/:cardUid', authenticateAdmin, async (req, res) => {
     if (!cardRows.length) return res.status(404).json({ success: false, message: 'Card not found' });
     const card = cardRows[0];
 
+    /* For robotics types, user_name may be null if registered without an account — resolve from registration table */
+    if (!card.user_name) {
+      card.user_name = await resolveParticipantName(card);
+    }
+
     /* Get attendance record (may not exist yet) */
     const [attRows] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
     const att = attRows[0] || null;
@@ -146,16 +151,7 @@ router.post('/attendance/:cardUid/checkin', authenticateAdmin, async (req, res) 
     if (!card) return res.status(404).json({ success: false, message: 'Card not found' });
 
     /* Get name for display */
-    let participant_name = '';
-    if (card.registration_type === 'guest') {
-      participant_name = card.guest_name || '';
-    } else if (card.registration_type === 'olympiad') {
-      const [[reg]] = await db.query('SELECT full_name FROM olympiad_registrations WHERE registration_id = ?', [card.registration_id]);
-      participant_name = reg?.full_name || '';
-    } else {
-      const [[reg]] = await db.query('SELECT leader FROM registrations WHERE paymentID = ?', [card.registration_id]);
-      participant_name = reg?.leader || '';
-    }
+    const participant_name = await resolveParticipantName(card);
 
     /* Upsert attendance (set check-in if not already done) */
     const [existing] = await db.query('SELECT * FROM attendance WHERE card_uid = ?', [cardUid]);
@@ -182,6 +178,14 @@ async function resolveParticipantName(card) {
   if (card.registration_type === 'olympiad') {
     const [[reg]] = await db.query('SELECT full_name FROM olympiad_registrations WHERE registration_id = ?', [card.registration_id]);
     return reg?.full_name || '';
+  }
+  if (card.registration_type === 'robo_soccer') {
+    const [[reg]] = await db.query('SELECT leader_name FROM robo_soccer_registrations WHERE registration_id = ?', [card.registration_id]);
+    return reg?.leader_name || '';
+  }
+  if (card.registration_type === 'micromouse') {
+    const [[reg]] = await db.query('SELECT leader_name FROM micromouse_registrations WHERE registration_id = ?', [card.registration_id]);
+    return reg?.leader_name || '';
   }
   const [[reg]] = await db.query('SELECT leader FROM registrations WHERE paymentID = ?', [card.registration_id]);
   return reg?.leader || '';
@@ -249,7 +253,7 @@ router.post('/attendance/:cardUid/certificate', authenticateAdmin, async (req, r
     const [[card]] = await db.query('SELECT * FROM id_cards WHERE card_uid = ?', [cardUid]);
     if (!card) return res.status(404).json({ success: false, message: 'Card not found' });
     if (card.registration_type === 'olympiad' || card.registration_type === 'guest') {
-      return res.status(400).json({ success: false, message: 'Certificate collection is only for project and wall magazine participants' });
+      return res.status(400).json({ success: false, message: 'Certificate collection is not available for olympiad or guest cards' });
     }
     if (card.certificate_collected) {
       return res.json({ success: true, already: true, certificate_collected: true, certificate_collected_at: card.certificate_collected_at });
