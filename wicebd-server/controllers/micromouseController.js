@@ -9,9 +9,7 @@ const registerMicromouse = async (req, res) => {
     leader_name, leader_phone, leader_email, leader_size,
     member1_name, member1_phone, member1_size,
     member2_name, member2_phone, member2_size,
-    member3_name, member3_phone, member3_size,
-    member4_name, member4_phone, member4_size,
-    bot_name, prior_experience,
+    bot_name, prior_experience, promo_code,
   } = req.body;
   const user_id = req.user?.id || null;
 
@@ -39,14 +37,14 @@ const registerMicromouse = async (req, res) => {
          leader_name, leader_phone, leader_email, leader_size,
          member1_name, member1_phone, member1_size,
          member2_name, member2_phone, member2_size,
-         bot_name, prior_experience, amount)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 888.00)`,
+         bot_name, prior_experience, promo_code, amount)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 888.00)`,
       [
         registration_id, user_id, team_name, institution,
         leader_name, leader_phone, leader_email, leader_size || null,
         member1_name || null, member1_phone || null, member1_size || null,
         member2_name || null, member2_phone || null, member2_size || null,
-        bot_name || null, prior_experience,
+        bot_name || null, prior_experience, promo_code || null,
       ]
     );
 
@@ -102,9 +100,22 @@ const initiateMicromousePayment = async (req, res) => {
     const invoiceNumber = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
     const frontendBase = (process.env.FRONTEND_BASE_URL || 'https://wicebd.com').split(',')[0].trim();
 
+    let amount = 888;
+    if (reg.promo_code) {
+      const [promoRows] = await db.query(
+        `SELECT discount_percentage FROM promo_codes
+         WHERE code = ? AND is_active = 1
+           AND (competition_type = 'micromouse' OR competition_type = 'all') LIMIT 1`,
+        [reg.promo_code.toUpperCase().trim()]
+      );
+      if (promoRows.length > 0) {
+        amount = Math.round(amount * (1 - promoRows[0].discount_percentage / 100));
+      }
+    }
+
     const result = await paystationInitiate({
       invoiceNumber,
-      amount: 888,
+      amount,
       custName:  reg.leader_name,
       custPhone: reg.leader_phone,
       custEmail: reg.leader_email,
