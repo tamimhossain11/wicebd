@@ -1,152 +1,221 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import HeaderV1 from '../../components/header/HeaderV1';
 import FooterV2 from '../../components/footer/FooterV2';
+import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
+
+const competitions = [
+  {
+    path: '/robo-soccer',
+    icon: '⚽',
+    title: 'Robo Soccer',
+    subtitle: 'Robotic Football Championship',
+    description:
+      'Build and program your robot to compete in head-to-head football matches. Teams of up to 5 members battle it out on the field.',
+    fee: '৳777',
+    badges: ['Team Event', 'Up to 5 Members', '৳777 Entry'],
+    accent: '#f59e0b',
+    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    glow: 'rgba(245,158,11,0.35)',
+    border: 'rgba(245,158,11,0.22)',
+  },
+  {
+    path: '/micromouse',
+    icon: '🐭',
+    title: 'Micromouse Maze-Solving',
+    subtitle: 'Autonomous Maze Navigation',
+    description:
+      'Design a self-contained autonomous robot to navigate and solve a maze in the shortest possible time. Precision engineering meets algorithmic thinking.',
+    fee: '৳888',
+    badges: ['Team Event', 'Up to 5 Members', '৳888 Entry'],
+    accent: '#10b981',
+    gradient: 'linear-gradient(135deg, #10b981, #059669)',
+    glow: 'rgba(16,185,129,0.35)',
+    border: 'rgba(16,185,129,0.22)',
+  },
+];
 
 export default function SurpriseSegment() {
-    return (
-        <>
-            <HeaderV1 headerStyle="header-style-two" parentMenu="register" />
-            <div className="page-wrapper">
-                <span className="header-span" />
+  return (
+    <>
+      <HeaderV1 headerStyle="header-style-two" parentMenu="register" />
+      <BreadCrumb title="Robotics Competitions" breadCrumb="Robotics" />
+      <div className="page-wrapper">
+        <span className="header-span" />
 
-                {/* Hero */}
-                <section style={{
-                    position: 'relative',
-                    background: 'linear-gradient(160deg, #0d0006 0%, #1a000a 50%, #2a0010 100%)',
-                    padding: '160px 0 100px',
-                    overflow: 'hidden',
-                    minHeight: '100vh',
+        <section
+          style={{
+            background: 'linear-gradient(160deg, #0a0a14 0%, #10001a 60%, #0d0d1a 100%)',
+            padding: '80px 0 100px',
+            minHeight: '70vh',
+          }}
+        >
+          <div className="auto-container">
+            {/* Heading */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{ textAlign: 'center', marginBottom: 60 }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.28em',
+                  fontWeight: 700,
+                  color: '#800020',
+                  display: 'block',
+                  marginBottom: 12,
+                }}
+              >
+                WICEBD 2026 · Surprise Segments
+              </span>
+              <h1
+                style={{
+                  color: '#fff',
+                  fontWeight: 900,
+                  fontSize: 'clamp(28px, 5vw, 52px)',
+                  margin: '0 0 16px',
+                  lineHeight: 1.15,
+                }}
+              >
+                Robotics{' '}
+                <span style={{ color: '#800020' }}>Competitions</span>
+              </h1>
+              <p
+                style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: 15,
+                  maxWidth: 520,
+                  margin: '0 auto',
+                  lineHeight: 1.8,
+                }}
+              >
+                Two exciting robotics events revealed for WICE Bangladesh 2026.
+                Choose your competition and register your team below.
+              </p>
+            </motion.div>
+
+            {/* Cards */}
+            <div
+              style={{
+                display: 'flex',
+                gap: 32,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+            >
+              {competitions.map((c, i) => (
+                <motion.div
+                  key={c.path}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + i * 0.15, duration: 0.55 }}
+                  style={{
+                    flex: '1 1 340px',
+                    maxWidth: 430,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 20,
+                    padding: '40px 36px',
                     display: 'flex',
-                    alignItems: 'center',
-                }}>
-                    {/* Ambient blobs */}
-                    <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle,rgba(128,0,32,0.18),transparent 70%)', top: '10%', left: '50%', transform: 'translateX(-50%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
-                    <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle,rgba(128,0,32,0.12),transparent 70%)', bottom: '10%', left: '10%', filter: 'blur(60px)', pointerEvents: 'none' }} />
+                    flexDirection: 'column',
+                    boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  {/* Icon */}
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 16,
+                      background: c.gradient,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 30,
+                      marginBottom: 24,
+                      boxShadow: `0 6px 24px ${c.glow}`,
+                    }}
+                  >
+                    {c.icon}
+                  </div>
 
-                    <div className="auto-container" style={{ position: 'relative', zIndex: 2, textAlign: 'center', width: '100%' }}>
+                  <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22, margin: '0 0 6px' }}>
+                    {c.title}
+                  </h2>
+                  <p
+                    style={{
+                      color: 'rgba(255,255,255,0.4)',
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                      fontWeight: 600,
+                      marginBottom: 16,
+                    }}
+                  >
+                    {c.subtitle}
+                  </p>
+                  <p
+                    style={{
+                      color: 'rgba(255,255,255,0.6)',
+                      fontSize: 14,
+                      lineHeight: 1.8,
+                      marginBottom: 24,
+                      flex: 1,
+                    }}
+                  >
+                    {c.description}
+                  </p>
 
-                        {/* Pulsing question mark */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
-                            style={{ marginBottom: 40 }}
-                        >
-                            <motion.div
-                                animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                style={{
-                                    width: 120, height: 120, borderRadius: '50%', margin: '0 auto',
-                                    background: 'linear-gradient(135deg, rgba(128,0,32,0.25), rgba(128,0,32,0.08))',
-                                    border: '2px solid rgba(128,0,32,0.4)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: 64, color: '#800020',
-                                    boxShadow: '0 0 60px rgba(128,0,32,0.3)',
-                                }}
-                            >
-                                ?
-                            </motion.div>
-                        </motion.div>
+                  {/* Badges */}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
+                    {c.badges.map((b) => (
+                      <span
+                        key={b}
+                        style={{
+                          background: 'rgba(255,255,255,0.07)',
+                          border: `1px solid ${c.border}`,
+                          borderRadius: 50,
+                          padding: '5px 14px',
+                          fontSize: 12,
+                          color: 'rgba(255,255,255,0.7)',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {b}
+                      </span>
+                    ))}
+                  </div>
 
-                        {/* Label */}
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-                            <span style={{
-                                fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.28em',
-                                fontWeight: 700, color: '#800020', display: 'block', marginBottom: 16,
-                            }}>
-                                WICEBD 2025 · Coming Soon
-                            </span>
-                        </motion.div>
-
-                        {/* Title */}
-                        <motion.h1
-                            initial={{ opacity: 0, y: 24 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.35, duration: 0.6 }}
-                            style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(36px,7vw,72px)', lineHeight: 1.1, margin: '0 0 24px' }}
-                        >
-                            Surprise<br />
-                            <span style={{ color: '#800020' }}>Segment</span>
-                        </motion.h1>
-
-                        {/* Subtitle */}
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5, duration: 0.55 }}
-                            style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, maxWidth: 520, margin: '0 auto 48px', lineHeight: 1.9 }}
-                        >
-                            Something extraordinary is being prepared for WICE Bangladesh 2026.
-                            A brand-new competition segment will be revealed at the event.
-                            Stay tuned for the big announcement.
-                        </motion.p>
-
-                        {/* Teaser cards */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.65, duration: 0.55 }}
-                            style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 56 }}
-                        >
-                            {[
-                                { icon: '🎯', label: 'All Levels' },
-                                { icon: '🏆', label: 'Prizes Await' },
-                                { icon: '⚡', label: 'On-Site Reveal' },
-                            ].map(({ icon, label }) => (
-                                <div key={label} style={{
-                                    background: 'rgba(255,255,255,0.04)',
-                                    border: '1px solid rgba(128,0,32,0.3)',
-                                    borderRadius: 12,
-                                    padding: '16px 28px',
-                                    display: 'flex', alignItems: 'center', gap: 10,
-                                    backdropFilter: 'blur(12px)',
-                                }}>
-                                    <span style={{ fontSize: 22 }}>{icon}</span>
-                                    <span style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>{label}</span>
-                                </div>
-                            ))}
-                        </motion.div>
-
-                        {/* CTA */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.8, duration: 0.5 }}
-                        >
-                            <motion.a
-                                href="/registration"
-                                whileHover={{ scale: 1.05, y: -3 }}
-                                whileTap={{ scale: 0.97 }}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 10,
-                                    background: 'linear-gradient(135deg, #800020, #c0002a)',
-                                    color: '#fff', fontWeight: 700, fontSize: 14,
-                                    padding: '15px 40px', borderRadius: 50,
-                                    boxShadow: '0 8px 28px rgba(128,0,32,0.45)',
-                                    textDecoration: 'none', letterSpacing: '0.05em',
-                                }}
-                            >
-                                Register for WICE 2025 →
-                            </motion.a>
-                        </motion.div>
-
-                        {/* Animated dots row */}
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 52 }}>
-                            {[0, 1, 2, 3, 4].map(i => (
-                                <motion.div
-                                    key={i}
-                                    style={{ width: 8, height: 8, borderRadius: '50%', background: '#800020' }}
-                                    animate={{ opacity: [0.2, 1, 0.2] }}
-                                    transition={{ duration: 1.6, repeat: Infinity, delay: i * 0.2 }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                <FooterV2 />
+                  <Link
+                    to={c.path}
+                    style={{
+                      display: 'block',
+                      textAlign: 'center',
+                      background: c.gradient,
+                      color: '#000',
+                      fontWeight: 700,
+                      fontSize: 14,
+                      padding: '14px 32px',
+                      borderRadius: 50,
+                      textDecoration: 'none',
+                      boxShadow: `0 6px 20px ${c.glow}`,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    Register Now →
+                  </Link>
+                </motion.div>
+              ))}
             </div>
-        </>
-    );
+          </div>
+        </section>
+
+        <FooterV2 />
+      </div>
+    </>
+  );
 }

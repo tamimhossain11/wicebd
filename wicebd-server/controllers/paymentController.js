@@ -131,7 +131,39 @@ const confirmPayment = async (req, res) => {
     const verifiedTrxId = statusResult.data.trx_id || trx_id;
     const amount = parseFloat(statusResult.data.request_amount || 0);
 
-    // 2. Get temp registration by invoice_number (stored in bkash_payment_id column)
+    // 2a. Check if this is a Robo Soccer payment
+    const [roboRows] = await db.query(
+      'SELECT * FROM robo_soccer_registrations WHERE payment_id = ?',
+      [invoice_number]
+    );
+    if (roboRows.length > 0) {
+      const reg = roboRows[0];
+      if (reg.payment_status === 'paid') return res.json({ success: true, message: 'Payment already processed' });
+      await db.query(
+        'UPDATE robo_soccer_registrations SET payment_status = ?, amount = ? WHERE payment_id = ?',
+        ['paid', amount || 777, invoice_number]
+      );
+      sendRoboticsEmail(reg, { invoiceNumber: invoice_number, trxID: verifiedTrxId, amount: amount || 777, label: 'Robo Soccer', fee: '৳777' });
+      return res.json({ success: true, message: 'Robo Soccer registration payment confirmed' });
+    }
+
+    // 2b. Check if this is a Micromouse payment
+    const [mouseRows] = await db.query(
+      'SELECT * FROM micromouse_registrations WHERE payment_id = ?',
+      [invoice_number]
+    );
+    if (mouseRows.length > 0) {
+      const reg = mouseRows[0];
+      if (reg.payment_status === 'paid') return res.json({ success: true, message: 'Payment already processed' });
+      await db.query(
+        'UPDATE micromouse_registrations SET payment_status = ?, amount = ? WHERE payment_id = ?',
+        ['paid', amount || 888, invoice_number]
+      );
+      sendRoboticsEmail(reg, { invoiceNumber: invoice_number, trxID: verifiedTrxId, amount: amount || 888, label: 'Micromouse Maze-Solving', fee: '৳888' });
+      return res.json({ success: true, message: 'Micromouse registration payment confirmed' });
+    }
+
+    // 2c. Fall through to temp_registrations (project / olympiad flow)
     const [tempData] = await db.query(
       'SELECT * FROM temp_registrations WHERE bkash_payment_id = ?',
       [invoice_number]
@@ -496,6 +528,52 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
     console.log(`✅ Olympiad confirmation email sent to ${registration.leaderEmail}`);
   } catch (error) {
     console.error('❌ Failed to send Olympiad confirmation email:', error);
+  }
+};
+
+/* ─── Robotics (Robo Soccer / Micromouse) confirmation email ─────── */
+const sendRoboticsEmail = async (reg, { invoiceNumber, trxID, amount, label, fee }) => {
+  try {
+    const body = `
+      <p style="color:rgba(255,255,255,0.55);font-size:14px;margin:0 0 4px;">Dear</p>
+      <h2 style="color:#fff;font-size:20px;font-weight:800;margin:0 0 6px;">${reg.leader_name}</h2>
+      <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0 0 24px;line-height:1.7;">
+        Your team <strong style="color:#fff;">${reg.team_name}</strong> is registered for
+        <strong style="color:#fff;">8th WICE Bangladesh — ${label}</strong>. Payment confirmed!
+      </p>
+      <div style="margin-bottom:28px;">${statusBadge}&nbsp;&nbsp;${gatewayBadge}</div>
+
+      ${sectionTitle('Payment Details')}
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+        ${infoRow('Invoice Number', invoiceNumber)}
+        ${infoRow('Transaction ID', trxID)}
+        ${infoRow('Amount Paid', `${fee} BDT`)}
+        ${infoRow('Status', '&#10003; Completed', true)}
+      </table>
+
+      ${sectionTitle('Team Details')}
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+        ${infoRow('Team Name', reg.team_name)}
+        ${infoRow('Institution', reg.institution)}
+        ${infoRow('Team Leader', reg.leader_name)}
+        ${infoRow('Contact', reg.leader_phone)}
+        ${infoRow('Email', reg.leader_email, true)}
+      </table>
+
+      <p style="color:rgba(255,255,255,0.35);font-size:13px;margin:24px 0 0;line-height:1.7;">
+        Questions? Email us at <a href="mailto:contact@wicebd.com" style="color:#c0002a;text-decoration:none;font-weight:600;">contact@wicebd.com</a>
+      </p>`;
+
+    await emailTransporter.sendMail({
+      from: `"8th WICE Bangladesh" <contact@wicebd.com>`,
+      to: reg.leader_email,
+      subject: `Registration Confirmed — 8th WICE Bangladesh ${label} · ${reg.team_name}`,
+      html: emailBase(body),
+      text: `8th WICE Bangladesh ${label} Registration Confirmed\n\nTeam: ${reg.team_name}\nLeader: ${reg.leader_name}\nInvoice: ${invoiceNumber}\nTransaction ID: ${trxID}\nAmount: ${fee} BDT\n\nFor questions: contact@wicebd.com`,
+    });
+    console.log(`✅ ${label} confirmation email sent to ${reg.leader_email}`);
+  } catch (err) {
+    console.error(`❌ Failed to send ${label} email:`, err);
   }
 };
 

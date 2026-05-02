@@ -82,8 +82,12 @@ const getMyRegistrations = async (req, res) => {
       `SELECT id, registration_id, team_name, institution, leader_name, status, created_at
        FROM robo_soccer_registrations WHERE user_id = ? ORDER BY created_at DESC`, [user_id]
     );
+    const [micromouse] = await db.query(
+      `SELECT id, registration_id, team_name, institution, leader_name, status, created_at
+       FROM micromouse_registrations WHERE user_id = ? ORDER BY created_at DESC`, [user_id]
+    );
 
-    res.json({ success: true, project, wallMagazine, olympiad, roboSoccer });
+    res.json({ success: true, project, wallMagazine, olympiad, roboSoccer, micromouse });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch registrations' });
   }

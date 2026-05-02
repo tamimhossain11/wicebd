@@ -328,7 +328,7 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const [active, setActive] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [registrations, setRegistrations] = useState({ project: [], wallMagazine: [], olympiad: [], roboSoccer: [] });
+  const [registrations, setRegistrations] = useState({ project: [], wallMagazine: [], olympiad: [], roboSoccer: [], micromouse: [] });
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileForm, setProfileForm] = useState({
@@ -365,6 +365,7 @@ export default function UserDashboard() {
           wallMagazine: r.data.wallMagazine  || [],
           olympiad:     r.data.olympiad      || [],
           roboSoccer:   r.data.roboSoccer    || [],
+          micromouse:   r.data.micromouse    || [],
         };
         setRegistrations(regs);
 
@@ -412,8 +413,10 @@ export default function UserDashboard() {
   const hasProject      = registrations.project?.length > 0;
   const hasWallMagazine = registrations.wallMagazine?.length > 0;
   const hasOlympiad     = registrations.olympiad?.length > 0;
-  const hasAnyReg       = hasProject || hasWallMagazine || hasOlympiad;
-  const totalRegs       = (registrations.project?.length || 0) + (registrations.wallMagazine?.length || 0) + (registrations.olympiad?.length || 0);
+  const hasRoboSoccer   = registrations.roboSoccer?.length > 0;
+  const hasMicromouse   = registrations.micromouse?.length > 0;
+  const hasAnyReg       = hasProject || hasWallMagazine || hasOlympiad || hasRoboSoccer || hasMicromouse;
+  const totalRegs       = (registrations.project?.length || 0) + (registrations.wallMagazine?.length || 0) + (registrations.olympiad?.length || 0) + (registrations.roboSoccer?.length || 0) + (registrations.micromouse?.length || 0);
   const completedSteps  = [true, profileComplete, hasAnyReg].filter(Boolean).length;
   const progressPct = Math.round((completedSteps / 3) * 100);
 
@@ -687,11 +690,24 @@ export default function UserDashboard() {
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
-                    icon={<span style={{ fontSize: 22, color: '#fff' }}>🎯</span>} color="#800020"
-                    title="Surprise Segment"
-                    description="Something extraordinary is coming. A brand-new competition segment will be revealed at the event. Stay tuned!"
-                    registered={false} comingSoon
-                    to="/surprise-segment" toLabel="Learn More"
+                    icon={<span style={{ fontSize: 22 }}>⚽</span>} color="#f59e0b"
+                    title="Robo Soccer"
+                    description="Build and program your robot to compete in head-to-head football matches. Teams of up to 5 members."
+                    registered={hasRoboSoccer}
+                    regId={registrations.roboSoccer?.[0]?.registration_id}
+                    to="/robo-soccer" toLabel={hasRoboSoccer ? 'View Registration' : 'Register for Robo Soccer'}
+                    fee={777}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <CompCard
+                    icon={<span style={{ fontSize: 22 }}>🐭</span>} color="#10b981"
+                    title="Micromouse Maze-Solving"
+                    description="Design an autonomous robot to navigate and solve a maze in the shortest time. Precision meets algorithmic thinking."
+                    registered={hasMicromouse}
+                    regId={registrations.micromouse?.[0]?.registration_id}
+                    to="/micromouse" toLabel={hasMicromouse ? 'View Registration' : 'Register for Micromouse'}
+                    fee={888}
                   />
                 </Grid>
               </Grid>
@@ -741,6 +757,32 @@ export default function UserDashboard() {
                     { key: 'registration_id', display: 'Registration ID' },
                     { key: 'full_name',        display: 'Name' },
                     { key: 'institution',      display: 'Institution' },
+                    { key: 'status',           display: 'Status' },
+                  ],
+                },
+                {
+                  label: 'Robo Soccer Registrations',
+                  data: registrations.roboSoccer,
+                  color: '#f59e0b',
+                  icon: <span style={{ fontSize: 18 }}>⚽</span>,
+                  fields: [
+                    { key: 'registration_id', display: 'Registration ID' },
+                    { key: 'team_name',        display: 'Team Name' },
+                    { key: 'institution',      display: 'Institution' },
+                    { key: 'leader_name',      display: 'Leader' },
+                    { key: 'status',           display: 'Status' },
+                  ],
+                },
+                {
+                  label: 'Micromouse Maze-Solving Registrations',
+                  data: registrations.micromouse,
+                  color: '#10b981',
+                  icon: <span style={{ fontSize: 18 }}>🐭</span>,
+                  fields: [
+                    { key: 'registration_id', display: 'Registration ID' },
+                    { key: 'team_name',        display: 'Team Name' },
+                    { key: 'institution',      display: 'Institution' },
+                    { key: 'leader_name',      display: 'Leader' },
                     { key: 'status',           display: 'Status' },
                   ],
                 },

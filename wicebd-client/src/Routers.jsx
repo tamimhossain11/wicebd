@@ -52,6 +52,8 @@ const SignUp             = lazyWithReload(() => import('./pages/userAuth/SignUp'
 const UserProfile        = lazyWithReload(() => import('./pages/userAuth/UserProfile'));
 const UserDashboard      = lazyWithReload(() => import('./pages/userDashboard/UserDashboard'));
 const SurpriseSegment    = lazyWithReload(() => import('./pages/innerPages/SurpriseSegment'));
+const RoboSoccer         = lazyWithReload(() => import('./pages/innerPages/RoboSoccer'));
+const Micromouse         = lazyWithReload(() => import('./pages/innerPages/Micromouse'));
 const OlympiadExamPortal = lazyWithReload(() => import('./pages/userDashboard/OlympiadExamPortal'));
 const PrivacyPolicy      = lazyWithReload(() => import('./pages/innerPages/PrivacyPolicy'));
 const JudgeDashboard     = lazyWithReload(() => import('./pages/judge/JudgeDashboard'));
@@ -104,6 +106,8 @@ const Routers = () => (
       <Route path='/dashboard' element={<UserRoute><UserDashboard /></UserRoute>} />
       <Route path='/profile'   element={<UserRoute><UserProfile /></UserRoute>} />
       <Route path='/surprise-segment' element={<SurpriseSegment />} />
+      <Route path='/robo-soccer'      element={<UserRoute><RoboSoccer /></UserRoute>} />
+      <Route path='/micromouse'        element={<UserRoute><Micromouse /></UserRoute>} />
       <Route path='/partners'         element={<Partners />} />
       <Route path='/contact'          element={<Contact />} />
       <Route path='/privacy-policy'        element={<PrivacyPolicy />} />

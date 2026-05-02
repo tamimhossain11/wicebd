@@ -20,7 +20,9 @@ const MainMenu = ({ parentMenu, toggleMenu, toggleMultiMenu }) => {
                             <li><Link to="/registration#">Project</Link></li>
                             <li><Link to="/registration?tab=wall-magazine#">Wall Magazine</Link></li>
                             <li><Link to="/registration?tab=olympiad#">Olympiad</Link></li>
-                            <li><Link to="/surprise-segment#">Surprise Segment</Link></li>
+                            <li><Link to="/surprise-segment#">Robotics Competitions</Link></li>
+                            <li><Link to="/robo-soccer#">Robo Soccer</Link></li>
+                            <li><Link to="/micromouse#">Micromouse Maze-Solving</Link></li>
                         </ul>
                         <div className="dropdown-btn"><span className="fa fa-angle-down"></span></div>
                     </li>

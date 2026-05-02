@@ -25,6 +25,8 @@ const advisorRoutes      = require('./routes/advisorRoutes');
 const adminManageRoutes  = require('./routes/adminManageRoutes');
 const judgeRoutes        = require('./routes/judgeRoutes');
 const nationalRoundRoutes = require('./routes/nationalRoundRoutes');
+const roboSoccerRoutes   = require('./routes/roboSoccerRoutes');
+const micromouseRoutes   = require('./routes/micromouseRoutes');
 
 
 // ----------------------------
@@ -113,6 +115,8 @@ app.use('/api/advisors', advisorRoutes);
 app.use('/api/admin-manage', adminManageRoutes);
 app.use('/api/judge', judgeRoutes);
 app.use('/api/national-round', nationalRoundRoutes);
+app.use('/api/robo-soccer',   roboSoccerRoutes);
+app.use('/api/micromouse',    micromouseRoutes);
 
 // ----------------------------
 // Server

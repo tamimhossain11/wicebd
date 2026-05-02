@@ -12,6 +12,8 @@ async function issueCard ({ userId, registrationType, registrationId, memberSlot
   const prefix  = registrationType === 'olympiad'     ? 'OLY'
                 : registrationType === 'wall-magazine' ? 'MAG'
                 : registrationType === 'guest'         ? 'GST'
+                : registrationType === 'robo_soccer'   ? 'RSC'
+                : registrationType === 'micromouse'    ? 'MCM'
                 : 'PRJ';
   const slotTag = memberSlot ? `-M${memberSlot}` : '';
   const cardUid = `WICE-${prefix}-${uuidv4().slice(0, 8).toUpperCase()}${slotTag}`;
@@ -150,7 +152,57 @@ const getMyCards = async (req, res) => {
           name:  r.full_name,
           institution: r.institution,
           email: r.email,
-          profile_completed: true,  // olympiad is individual
+          profile_completed: true,
+          card,
+        }],
+      });
+    });
+
+    // Robo Soccer registrations
+    const [roboRows] = await db.query(
+      `SELECT registration_id, team_name, institution, leader_name, leader_email, created_at
+       FROM robo_soccer_registrations WHERE user_id = ? ORDER BY created_at DESC`,
+      [userId]
+    );
+    roboRows.forEach(r => {
+      const card = cardMap[`robo_soccer:${r.registration_id}:null`] || null;
+      registrations.push({
+        type:          'robo_soccer',
+        reg_id:        r.registration_id,
+        label:         'Robo Soccer',
+        title:         r.team_name || '',
+        registered_at: r.created_at,
+        members: [{
+          slot: null,
+          name:  r.leader_name,
+          institution: r.institution,
+          email: r.leader_email,
+          profile_completed: true,
+          card,
+        }],
+      });
+    });
+
+    // Micromouse registrations
+    const [mouseRows] = await db.query(
+      `SELECT registration_id, team_name, institution, leader_name, leader_email, created_at
+       FROM micromouse_registrations WHERE user_id = ? ORDER BY created_at DESC`,
+      [userId]
+    );
+    mouseRows.forEach(r => {
+      const card = cardMap[`micromouse:${r.registration_id}:null`] || null;
+      registrations.push({
+        type:          'micromouse',
+        reg_id:        r.registration_id,
+        label:         'Micromouse Maze-Solving',
+        title:         r.team_name || '',
+        registered_at: r.created_at,
+        members: [{
+          slot: null,
+          name:  r.leader_name,
+          institution: r.institution,
+          email: r.leader_email,
+          profile_completed: true,
           card,
         }],
       });
@@ -281,6 +333,22 @@ const generateCard = async (req, res) => {
       if (!reg) return res.status(403).json({ success: false, message: 'Registration not found' });
       name = reg.full_name; email = reg.email; title = reg.institution;
 
+    } else if (registration_type === 'robo_soccer') {
+      const [[reg]] = await db.query(
+        'SELECT leader_name, leader_email, team_name FROM robo_soccer_registrations WHERE registration_id = ? AND user_id = ?',
+        [registration_id, userId]
+      );
+      if (!reg) return res.status(403).json({ success: false, message: 'Registration not found' });
+      name = reg.leader_name; email = reg.leader_email; title = reg.team_name || '';
+
+    } else if (registration_type === 'micromouse') {
+      const [[reg]] = await db.query(
+        'SELECT leader_name, leader_email, team_name FROM micromouse_registrations WHERE registration_id = ? AND user_id = ?',
+        [registration_id, userId]
+      );
+      if (!reg) return res.status(403).json({ success: false, message: 'Registration not found' });
+      name = reg.leader_name; email = reg.leader_email; title = reg.team_name || '';
+
     } else if (member_slot) {
       // Team member card — verify registration belongs to user
       const [[reg]] = await db.query(
@@ -358,6 +426,24 @@ const verifyCard = async (req, res) => {
       const [[reg]] = await db.query(
         `SELECT full_name, institution, class_grade, phone, email, registration_id
          FROM olympiad_registrations WHERE registration_id = ?`,
+        [card.registration_id]
+      );
+      detail = reg || {};
+
+    } else if (card.registration_type === 'robo_soccer') {
+      const [[reg]] = await db.query(
+        `SELECT team_name, institution, leader_name, leader_email, leader_phone,
+                prior_experience, bot_name, registration_id
+         FROM robo_soccer_registrations WHERE registration_id = ?`,
+        [card.registration_id]
+      );
+      detail = reg || {};
+
+    } else if (card.registration_type === 'micromouse') {
+      const [[reg]] = await db.query(
+        `SELECT team_name, institution, leader_name, leader_email, leader_phone,
+                prior_experience, bot_name, registration_id
+         FROM micromouse_registrations WHERE registration_id = ?`,
         [card.registration_id]
       );
       detail = reg || {};

@@ -8,8 +8,7 @@ import {
 } from '@mui/material';
 import {
   Groups, Person, Email, Phone, Apartment,
-  SmartToy, ArrowBack, ArrowForward,
-  CheckCircle, Cancel, SportsSoccer,
+  SmartToy, ArrowBack, ArrowForward, CheckCircle, Cancel,
 } from '@mui/icons-material';
 import HeaderV1 from '../../components/header/HeaderV1';
 import FooterV2 from '../../components/footer/FooterV2';
@@ -17,13 +16,11 @@ import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
 import api from '../../api/index';
 import { useAuth } from '../../context/AuthContext';
 
-/* ─── Theme tokens (matches site maroon palette) ─── */
+/* ─── Theme tokens (maroon palette, same as site) ─── */
 const C = {
   primary: '#800020',
   accent:  '#c0002a',
   bg:      'linear-gradient(160deg, #0d0006 0%, #1a000a 60%, #200010 100%)',
-  card:    'rgba(255,255,255,0.03)',
-  border:  'rgba(128,0,32,0.25)',
   muted:   'rgba(255,255,255,0.4)',
 };
 
@@ -45,9 +42,7 @@ const f = {
 const MP = {
   PaperProps: {
     sx: {
-      background: '#1a000a',
-      border: '1px solid rgba(128,0,32,0.3)',
-      borderRadius: '10px',
+      background: '#1a000a', border: '1px solid rgba(128,0,32,0.3)', borderRadius: '10px',
       '& .MuiMenuItem-root': {
         color: 'rgba(255,255,255,0.8)',
         '&:hover': { background: 'rgba(128,0,32,0.2)' },
@@ -59,20 +54,17 @@ const MP = {
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const emptyMember = () => ({ name: '', phone: '', size: '' });
-
 const STEPS = ['Team Info', 'Members', 'Robot & Details'];
 
-/* ─── Section label ─── */
 const SLabel = ({ children }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 2.5 }}>
-    <Box sx={{ width: 4, height: 20, borderRadius: 2, background: `linear-gradient(180deg, #800020, #c0002a)` }} />
+    <Box sx={{ width: 4, height: 20, borderRadius: 2, background: 'linear-gradient(180deg,#800020,#c0002a)' }} />
     <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
       {children}
     </Typography>
   </Box>
 );
 
-/* ─── Submit button ─── */
 const SubmitBtn = ({ loading, label }) => (
   <motion.button
     type="submit"
@@ -92,7 +84,13 @@ const SubmitBtn = ({ loading, label }) => (
   </motion.button>
 );
 
-export default function RoboSoccer() {
+const stepVariants = {
+  enter: { opacity: 0, x: 40 },
+  center: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -40 },
+};
+
+export default function Micromouse() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -104,9 +102,7 @@ export default function RoboSoccer() {
     bot_name: '', prior_experience: '',
   });
 
-  const [members, setMembers] = useState([
-    emptyMember(), emptyMember(),
-  ]);
+  const [members, setMembers] = useState([emptyMember(), emptyMember()]);
 
   const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
   const setMember = (i, field) => (e) =>
@@ -132,12 +128,12 @@ export default function RoboSoccer() {
         member1_name: members[0].name || null, member1_phone: members[0].phone || null, member1_size: members[0].size || null,
         member2_name: members[1].name || null, member2_phone: members[1].phone || null, member2_size: members[1].size || null,
       };
-      const { data: regData } = await api.post('/api/robo-soccer/register', payload);
+      const { data: regData } = await api.post('/api/micromouse/register', payload);
       if (!regData.success) throw new Error(regData.message || 'Registration failed');
 
       toast.info('Registration saved! Redirecting to payment…');
 
-      const { data: payData } = await api.post('/api/robo-soccer/initiate-payment', {
+      const { data: payData } = await api.post('/api/micromouse/initiate-payment', {
         registration_id: regData.registration_id,
       });
       if (!payData.success) throw new Error(payData.message || 'Payment initiation failed');
@@ -150,22 +146,16 @@ export default function RoboSoccer() {
     }
   };
 
-  const stepVariants = {
-    enter: { opacity: 0, x: 40 },
-    center: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -40 },
-  };
-
   return (
     <>
       <HeaderV1 headerStyle="header-style-two" parentMenu="register" />
-      <BreadCrumb title="Robo Soccer Registration" breadCrumb="Robo Soccer" />
+      <BreadCrumb title="Micromouse Maze-Solving Registration" breadCrumb="Micromouse" />
 
       <Box sx={{ background: C.bg, minHeight: '80vh', py: { xs: 5, md: 7 }, px: 2 }}>
         <Box sx={{ maxWidth: 760, mx: 'auto' }}>
 
           {/* ── Stepper ── */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 5, gap: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 5 }}>
             {STEPS.map((label, i) => (
               <Box key={i} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.7 }}>
@@ -213,16 +203,16 @@ export default function RoboSoccer() {
                   width: 52, height: 52, borderRadius: '14px', flexShrink: 0,
                   background: 'linear-gradient(135deg,#800020,#c0002a)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 6px 20px rgba(128,0,32,0.5)',
+                  fontSize: 26, boxShadow: '0 6px 20px rgba(128,0,32,0.5)',
                 }}>
-                  <SportsSoccer sx={{ color: '#fff', fontSize: 26 }} />
+                  🐭
                 </Box>
                 <Box>
                   <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', lineHeight: 1.2 }}>
-                    Robo Soccer Registration
+                    Micromouse Maze-Solving
                   </Typography>
                   <Typography sx={{ color: C.muted, fontSize: 13, mt: 0.3 }}>
-                    Registration fee: <span style={{ color: '#c0002a', fontWeight: 700 }}>৳777</span>
+                    Registration fee: <span style={{ color: '#c0002a', fontWeight: 700 }}>৳888</span>
                   </Typography>
                 </Box>
               </Box>
@@ -230,7 +220,6 @@ export default function RoboSoccer() {
               {/* Step content */}
               <Box sx={{ px: { xs: 3, md: 5 }, py: 4 }} component="form" onSubmit={handleSubmit}>
                 <AnimatePresence mode="wait">
-                  {/* ── Step 0: Team Info ── */}
                   {step === 0 && (
                     <motion.div key="step0" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28 }}>
                       <SLabel>Team Information</SLabel>
@@ -244,7 +233,6 @@ export default function RoboSoccer() {
                             InputProps={{ startAdornment: <InputAdornment position="start"><Apartment /></InputAdornment> }} />
                         </Grid>
                       </Grid>
-
                       <Divider sx={{ borderColor: 'rgba(128,0,32,0.15)', mb: 3 }} />
                       <SLabel>Team Leader</SLabel>
                       <Grid container spacing={2.5}>
@@ -270,7 +258,6 @@ export default function RoboSoccer() {
                     </motion.div>
                   )}
 
-                  {/* ── Step 1: Members ── */}
                   {step === 1 && (
                     <motion.div key="step1" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28 }}>
                       <SLabel>Team Members</SLabel>
@@ -278,9 +265,9 @@ export default function RoboSoccer() {
                         <Box key={i} sx={{ mb: 3.5 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                             <Box sx={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>{i + 1}</Typography>
+                              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>{i + 1}</Typography>
                             </Box>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 12.5, fontWeight: 600 }}>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12.5, fontWeight: 600 }}>
                               Member {i + 1} (Optional)
                             </Typography>
                           </Box>
@@ -307,7 +294,6 @@ export default function RoboSoccer() {
                     </motion.div>
                   )}
 
-                  {/* ── Step 2: Robot & Details ── */}
                   {step === 2 && (
                     <motion.div key="step2" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28 }}>
                       <SLabel>Robot Information</SLabel>
@@ -321,7 +307,7 @@ export default function RoboSoccer() {
                       <Divider sx={{ borderColor: 'rgba(128,0,32,0.15)', mb: 3 }} />
                       <SLabel>Competition Details</SLabel>
                       <Typography sx={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, mb: 2 }}>
-                        Have you participated in Robo Soccer competitions before? *
+                        Have you participated in Micromouse Maze-Solving competitions before? *
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1.5, mb: 4, flexWrap: 'wrap' }}>
                         {[{ v: 'yes', label: 'Yes', icon: <CheckCircle sx={{ fontSize: 16 }} /> }, { v: 'no', label: 'No', icon: <Cancel sx={{ fontSize: 16 }} /> }].map(({ v, label, icon }) => (
@@ -342,12 +328,11 @@ export default function RoboSoccer() {
                         ))}
                       </Box>
 
-                      {/* Fee info */}
                       <Box sx={{ p: 2.5, borderRadius: '12px', border: '1px solid rgba(128,0,32,0.3)', background: 'rgba(128,0,32,0.08)', mb: 2 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                           <Box>
                             <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', mb: 0.3 }}>Registration Fee</Typography>
-                            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 26 }}>৳777</Typography>
+                            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 26 }}>৳888</Typography>
                           </Box>
                           <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, maxWidth: 260, lineHeight: 1.6 }}>
                             Payment details will be shared with your team leader after submission.
@@ -358,15 +343,12 @@ export default function RoboSoccer() {
                   )}
                 </AnimatePresence>
 
-                {/* ── Navigation ── */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4, pt: 3, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <Button
-                    onClick={() => step === 0 ? navigate('/surprise-segment') : setStep((s) => s - 1)}
+                  <Button onClick={() => step === 0 ? navigate('/surprise-segment') : setStep((s) => s - 1)}
                     startIcon={<ArrowBack />}
                     sx={{ color: C.muted, textTransform: 'none', fontWeight: 600, '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.05)' } }}>
                     {step === 0 ? 'Back' : 'Previous'}
                   </Button>
-
                   {step < 2
                     ? (
                       <motion.button type="button" onClick={nextStep}
@@ -374,7 +356,7 @@ export default function RoboSoccer() {
                         style={{
                           padding: '12px 36px', borderRadius: '50px', border: 'none',
                           background: 'linear-gradient(135deg,#800020,#c0002a)',
-                          color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: '0.05em',
+                          color: '#fff', fontSize: 14, fontWeight: 700,
                           boxShadow: '0 6px 20px rgba(128,0,32,0.4)', cursor: 'pointer',
                           display: 'inline-flex', alignItems: 'center', gap: 8,
                         }}>

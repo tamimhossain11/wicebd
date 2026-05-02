@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const { initiatePayment: paystationInitiate } = require('../utils/paystation');
 require('dotenv').config();
 
-const registerRoboSoccer = async (req, res) => {
+const registerMicromouse = async (req, res) => {
   const {
     team_name, institution,
     leader_name, leader_phone, leader_email, leader_size,
@@ -22,25 +22,25 @@ const registerRoboSoccer = async (req, res) => {
     return res.status(400).json({ success: false, message: 'prior_experience (yes/no) is required' });
   }
 
-  const registration_id = `ROBO-${uuidv4().substr(0, 8).toUpperCase()}`;
+  const registration_id = `MCM-${uuidv4().substr(0, 8).toUpperCase()}`;
 
   try {
     const [existing] = await db.query(
-      'SELECT id FROM robo_soccer_registrations WHERE leader_email = ?',
+      'SELECT id FROM micromouse_registrations WHERE leader_email = ?',
       [leader_email]
     );
     if (existing.length > 0) {
-      return res.status(409).json({ success: false, message: 'This email is already registered for Robo Soccer' });
+      return res.status(409).json({ success: false, message: 'This email is already registered for Micromouse Maze-Solving' });
     }
 
     await db.query(
-      `INSERT INTO robo_soccer_registrations
+      `INSERT INTO micromouse_registrations
         (registration_id, user_id, team_name, institution,
          leader_name, leader_phone, leader_email, leader_size,
          member1_name, member1_phone, member1_size,
          member2_name, member2_phone, member2_size,
          bot_name, prior_experience, amount)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 777.00)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 888.00)`,
       [
         registration_id, user_id, team_name, institution,
         leader_name, leader_phone, leader_email, leader_size || null,
@@ -50,17 +50,17 @@ const registerRoboSoccer = async (req, res) => {
       ]
     );
 
-    res.json({ success: true, registration_id, message: 'Robo Soccer registration successful' });
+    res.json({ success: true, registration_id, message: 'Micromouse Maze-Solving registration successful' });
   } catch (error) {
-    console.error('Robo Soccer registration error:', error);
+    console.error('Micromouse registration error:', error);
     res.status(500).json({ success: false, message: 'Registration failed' });
   }
 };
 
-const getAllRoboSoccer = async (req, res) => {
+const getAllMicromouse = async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT * FROM robo_soccer_registrations ORDER BY created_at DESC'
+      'SELECT * FROM micromouse_registrations ORDER BY created_at DESC'
     );
     res.json({ success: true, data: rows });
   } catch (error) {
@@ -68,9 +68,9 @@ const getAllRoboSoccer = async (req, res) => {
   }
 };
 
-const exportRoboSoccerCSV = async (req, res) => {
+const exportMicromouseCSV = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM robo_soccer_registrations ORDER BY created_at DESC');
+    const [rows] = await db.query('SELECT * FROM micromouse_registrations ORDER BY created_at DESC');
     if (!rows.length) return res.status(404).json({ success: false, message: 'No data' });
 
     const headers = Object.keys(rows[0]).join(',');
@@ -79,21 +79,21 @@ const exportRoboSoccerCSV = async (req, res) => {
     )].join('\n');
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=robo_soccer.csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=micromouse.csv');
     res.send(csv);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Export failed' });
   }
 };
 
-const initiateRoboSoccerPayment = async (req, res) => {
+const initiateMicromousePayment = async (req, res) => {
   const { registration_id } = req.body;
   const user_id = req.user?.id || null;
   if (!registration_id) return res.status(400).json({ success: false, message: 'registration_id required' });
 
   try {
     const [[reg]] = await db.query(
-      'SELECT * FROM robo_soccer_registrations WHERE registration_id = ? AND user_id = ?',
+      'SELECT * FROM micromouse_registrations WHERE registration_id = ? AND user_id = ?',
       [registration_id, user_id]
     );
     if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
@@ -104,13 +104,13 @@ const initiateRoboSoccerPayment = async (req, res) => {
 
     const result = await paystationInitiate({
       invoiceNumber,
-      amount: 777,
+      amount: 888,
       custName:  reg.leader_name,
       custPhone: reg.leader_phone,
       custEmail: reg.leader_email,
       callbackUrl: `${frontendBase}/callback`,
       reference: registration_id,
-      checkoutItems: 'Robo Soccer',
+      checkoutItems: 'Micromouse',
     });
 
     if (result.status_code !== '200') {
@@ -118,15 +118,15 @@ const initiateRoboSoccerPayment = async (req, res) => {
     }
 
     await db.query(
-      'UPDATE robo_soccer_registrations SET payment_id = ? WHERE registration_id = ?',
+      'UPDATE micromouse_registrations SET payment_id = ? WHERE registration_id = ?',
       [invoiceNumber, registration_id]
     );
 
     res.json({ success: true, payment_url: result.payment_url, invoice_number: invoiceNumber });
   } catch (err) {
-    console.error('Robo Soccer payment initiation error:', err);
+    console.error('Micromouse payment initiation error:', err);
     res.status(500).json({ success: false, message: 'Failed to initiate payment' });
   }
 };
 
-module.exports = { registerRoboSoccer, initiateRoboSoccerPayment, getAllRoboSoccer, exportRoboSoccerCSV };
+module.exports = { registerMicromouse, initiateMicromousePayment, getAllMicromouse, exportMicromouseCSV };

@@ -72,6 +72,8 @@ const NAV_ITEMS = [
   { label: 'Judges',             icon: <Gavel />,               section: 'event',   roles: SA  },
   { label: 'National Round',     icon: <EmojiFlags />,          section: 'event',   roles: SA  },
   { label: 'Statistics',         icon: <BarChartIcon />,        section: 'data',    roles: DE  },
+  { label: 'Robo Soccer Regs',  icon: <span style={{ fontSize: 16 }}>⚽</span>, section: 'data', roles: DE },
+  { label: 'Micromouse Regs',   icon: <span style={{ fontSize: 16 }}>🐭</span>, section: 'data', roles: DE },
 ];
 
 /* ─── Custom tooltip for charts ─── */
@@ -257,6 +259,10 @@ export default function AdminDashboard() {
   const [judgeLoading, setJudgeLoading] = useState(false);
   const [showJudgePwd, setShowJudgePwd] = useState(false);
 
+  // Robotics segments
+  const [roboSoccerData, setRoboSoccerData] = useState([]);
+  const [micromouseData, setMicromouseData] = useState([]);
+
   // National Round
   const [nrSummary, setNrSummary] = useState({ project: [], wall_magazine: [] });
   const [nrSelections, setNrSelections] = useState([]);
@@ -345,6 +351,20 @@ export default function AdminDashboard() {
     } catch { /* non-critical */ }
   }, []);
 
+  const fetchRoboSoccer = useCallback(async () => {
+    try {
+      const res = await api.get('/api/robo-soccer/all');
+      setRoboSoccerData(Array.isArray(res.data?.data) ? res.data.data : []);
+    } catch { /* non-critical */ }
+  }, []);
+
+  const fetchMicromouse = useCallback(async () => {
+    try {
+      const res = await api.get('/api/micromouse/all');
+      setMicromouseData(Array.isArray(res.data?.data) ? res.data.data : []);
+    } catch { /* non-critical */ }
+  }, []);
+
   const fetchAdvisors = useCallback(async () => {
     try {
       const res = await api.get('/api/advisors/admin');
@@ -383,8 +403,10 @@ export default function AdminDashboard() {
     fetchJudges();
     fetchNationalRound();
     fetchParticipantStats();
+    fetchRoboSoccer();
+    fetchMicromouse();
     setLoading(false);
-  }, [logout, navigate, fetchCA, fetchClub, fetchPromo, fetchAdvisors, fetchAdminUsers, fetchJudges, fetchNationalRound, fetchParticipantStats]);
+  }, [logout, navigate, fetchCA, fetchClub, fetchPromo, fetchAdvisors, fetchAdminUsers, fetchJudges, fetchNationalRound, fetchParticipantStats, fetchRoboSoccer, fetchMicromouse]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -586,12 +608,65 @@ export default function AdminDashboard() {
     },
   ];
 
+  const roboticsMemberCols = (n, label) => [
+    { field: `member${n}_name`,  headerName: `${label} Name`,    width: 150, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: `member${n}_phone`, headerName: `${label} Phone`,   width: 130, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: `member${n}_size`,  headerName: `${label} T-Shirt`, width: 100, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+  ];
+
+  const roboSoccerCols = [
+    { field: 'id', headerName: 'ID', width: 55 },
+    { field: 'registration_id', headerName: 'Reg ID', width: 150, renderCell: p => <span style={{ color: AMBER, fontWeight: 700, fontSize: 12 }}>{p.value || '—'}</span> },
+    { field: 'team_name',   headerName: 'Team Name',   width: 160 },
+    { field: 'institution', headerName: 'Institution', width: 200 },
+    { field: 'leader_name',  headerName: 'Leader Name',  width: 150 },
+    { field: 'leader_phone', headerName: 'Leader Phone', width: 130 },
+    { field: 'leader_email', headerName: 'Leader Email', width: 200 },
+    { field: 'leader_size',  headerName: 'Leader T-Shirt', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    ...roboticsMemberCols(1, 'Member 1'),
+    ...roboticsMemberCols(2, 'Member 2'),
+    ...roboticsMemberCols(3, 'Member 3'),
+    ...roboticsMemberCols(4, 'Member 4'),
+    { field: 'bot_name', headerName: 'Bot Name', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'prior_experience', headerName: 'Prior Exp.', width: 100, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: p.value === 'yes' ? `${GREEN}18` : 'rgba(255,255,255,0.06)', color: p.value === 'yes' ? GREEN : 'rgba(255,255,255,0.5)', fontSize: 11, textTransform: 'capitalize' }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'amount', headerName: 'Fee', width: 90, renderCell: p => <span style={{ color: GREEN, fontWeight: 700, fontSize: 12 }}>৳{p.value ?? 777}</span> },
+    { field: 'payment_status', headerName: 'Payment', width: 110, renderCell: p => statusChip(p.value) },
+    { field: 'status', headerName: 'Status', width: 120, renderCell: p => statusChip(p.value) },
+    { field: 'created_at', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
+  ];
+
+  const micromouseCols = [
+    { field: 'id', headerName: 'ID', width: 55 },
+    { field: 'registration_id', headerName: 'Reg ID', width: 150, renderCell: p => <span style={{ color: GREEN, fontWeight: 700, fontSize: 12 }}>{p.value || '—'}</span> },
+    { field: 'team_name',   headerName: 'Team Name',   width: 160 },
+    { field: 'institution', headerName: 'Institution', width: 200 },
+    { field: 'leader_name',  headerName: 'Leader Name',  width: 150 },
+    { field: 'leader_phone', headerName: 'Leader Phone', width: 130 },
+    { field: 'leader_email', headerName: 'Leader Email', width: 200 },
+    { field: 'leader_size',  headerName: 'Leader T-Shirt', width: 110, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 11 }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    ...roboticsMemberCols(1, 'Member 1'),
+    ...roboticsMemberCols(2, 'Member 2'),
+    ...roboticsMemberCols(3, 'Member 3'),
+    ...roboticsMemberCols(4, 'Member 4'),
+    { field: 'bot_name', headerName: 'Bot Name', width: 140, renderCell: p => p.value || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'prior_experience', headerName: 'Prior Exp.', width: 100, renderCell: p => p.value ? <Chip label={p.value} size="small" sx={{ background: p.value === 'yes' ? `${GREEN}18` : 'rgba(255,255,255,0.06)', color: p.value === 'yes' ? GREEN : 'rgba(255,255,255,0.5)', fontSize: 11, textTransform: 'capitalize' }} /> : <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span> },
+    { field: 'amount', headerName: 'Fee', width: 90, renderCell: p => <span style={{ color: GREEN, fontWeight: 700, fontSize: 12 }}>৳{p.value ?? 888}</span> },
+    { field: 'payment_status', headerName: 'Payment', width: 110, renderCell: p => statusChip(p.value) },
+    { field: 'status', headerName: 'Status', width: 120, renderCell: p => statusChip(p.value) },
+    { field: 'created_at', headerName: 'Date', width: 120, valueFormatter: (v) => v ? new Date(v).toLocaleDateString() : '' },
+  ];
+
   /* ── Derived data ── */
   const projects     = participants.filter(p => p.competitionCategory !== 'Megazine');
   const wallMagazine = participants.filter(p => p.competitionCategory === 'Megazine');
 
   /* ── Search filter ── */
-  const activeRows = activeNav === 1 ? projects : activeNav === 2 ? olympiad : activeNav === 3 ? wallMagazine : users;
+  const activeRows = activeNav === 1 ? projects
+    : activeNav === 2 ? olympiad
+    : activeNav === 3 ? wallMagazine
+    : activeNav === 16 ? roboSoccerData
+    : activeNav === 17 ? micromouseData
+    : users;
   const filteredRows = searchQuery.trim()
     ? activeRows.filter(row =>
         Object.values(row).some(val =>
@@ -811,8 +886,10 @@ export default function AdminDashboard() {
                   { icon: <Campaign sx={{ color: AMBER, fontSize: 22 }} />, label: 'Wall Magazine Regs', value: analytics.totals.magazine, color: AMBER, trendLabel: 'registrations' },
                   { icon: <People sx={{ color: GREEN, fontSize: 22 }} />, label: 'Platform Users', value: analytics.totals.users, color: GREEN, trend: 5, trendLabel: 'vs last week' },
                   { icon: <Notifications sx={{ color: ACCENT, fontSize: 22 }} />, label: 'Announcements', value: analytics.totals.announcements, color: ACCENT, sub: 'Published' },
+                  { icon: <span style={{ fontSize: 20 }}>⚽</span>, label: 'Robo Soccer Teams', value: roboSoccerData.length, color: AMBER, sub: 'Registered' },
+                  { icon: <span style={{ fontSize: 20 }}>🐭</span>, label: 'Micromouse Teams', value: micromouseData.length, color: GREEN, sub: 'Registered' },
                 ].map((s, i) => (
-                  <Grid size={{ xs: 12, sm: 6, lg: 2.4 }} key={i}><StatCard {...s} /></Grid>
+                  <Grid size={{ xs: 12, sm: 6, lg: 2 }} key={i}><StatCard {...s} /></Grid>
                 ))}
               </Grid>
 
@@ -952,7 +1029,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ══════════════ DATA TABLES ══════════════ */}
-          {[1, 2, 3, 4].includes(activeNav) && (
+          {[1, 2, 3, 4, 16, 17].includes(activeNav) && (
             <Box>
               {/* ── Search & Actions bar ── */}
               <Box sx={{ display: 'flex', gap: 1.5, mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -975,7 +1052,7 @@ export default function AdminDashboard() {
                     <input
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
-                      placeholder={`Search ${activeNav === 1 ? 'project' : activeNav === 2 ? 'olympiad' : activeNav === 3 ? 'wall magazine' : 'users'} registrations…`}
+                      placeholder={`Search ${activeNav === 1 ? 'project' : activeNav === 2 ? 'olympiad' : activeNav === 3 ? 'wall magazine' : activeNav === 16 ? 'Robo Soccer' : activeNav === 17 ? 'Micromouse' : 'users'} registrations…`}
                       style={{
                         flex: 1, background: 'transparent', border: 'none', outline: 'none',
                         color: '#fff', fontSize: 14, fontFamily: 'inherit',
@@ -1017,12 +1094,30 @@ export default function AdminDashboard() {
                     Export CSV
                   </Button>
                 )}
+                {(activeNav === 16 || activeNav === 17) && (
+                  <Button startIcon={<FileDownload />}
+                    onClick={async () => {
+                      try {
+                        const url = activeNav === 16 ? '/api/robo-soccer/export' : '/api/micromouse/export';
+                        const res = await api.get(url, { responseType: 'blob' });
+                        const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.setAttribute('download', activeNav === 16 ? 'robo_soccer.csv' : 'micromouse.csv');
+                        document.body.appendChild(a); a.click(); a.remove();
+                      } catch { setError('Export failed'); }
+                    }}
+                    variant="outlined" size="small"
+                    sx={{ color: AMBER, borderColor: `${AMBER}50`, textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: AMBER, background: `${AMBER}10` } }}>
+                    Export CSV
+                  </Button>
+                )}
               </Box>
 
               <Paper sx={{ borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, height: '74vh', overflow: 'hidden' }}>
                 <DataGrid
                   rows={filteredRows}
-                  columns={activeNav === 1 ? projectCols : activeNav === 2 ? olympiadCols : activeNav === 3 ? wallMagazineCols : userCols}
+                  columns={activeNav === 1 ? projectCols : activeNav === 2 ? olympiadCols : activeNav === 3 ? wallMagazineCols : activeNav === 16 ? roboSoccerCols : activeNav === 17 ? micromouseCols : userCols}
                   pageSizeOptions={[10, 25, 50]}
                   initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
                   loading={loading}
