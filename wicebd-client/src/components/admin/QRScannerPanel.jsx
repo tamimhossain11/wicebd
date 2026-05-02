@@ -503,7 +503,7 @@ export default function QRScannerPanel() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {['Name', 'Type', 'Card UID', 'Check-in', 'Lunch', 'Coffee'].map(h => (
+                  {['Name', 'Type', 'Card UID', 'Check-in', 'Lunch', 'Coffee', 'Certificate'].map(h => (
                     <TableCell key={h} sx={{ color: 'rgba(255,255,255,0.4)', borderColor: C.border, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       {h}
                     </TableCell>
@@ -543,6 +543,16 @@ export default function QRScannerPanel() {
                             label={new Date(entry.coffee_claimed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} size="small"
                             sx={{ background: `${C.coffee}25`, color: C.coffee, fontSize: 10 }} />
                         : <Chip label="—" size="small" sx={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.25)', fontSize: 10 }} />
+                      }
+                    </TableCell>
+                    <TableCell sx={{ borderColor: C.border }}>
+                      {entry.registration_type === 'olympiad' || entry.registration_type === 'guest'
+                        ? <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>N/A</Typography>
+                        : entry.certificate_collected
+                          ? <Chip icon={<WorkspacePremium sx={{ fontSize: '11px !important', color: '#a78bfa !important' }} />}
+                              label={entry.certificate_collected_at ? new Date(entry.certificate_collected_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Collected'} size="small"
+                              sx={{ background: 'rgba(167,139,250,0.18)', color: '#a78bfa', fontSize: 10 }} />
+                          : <Chip label="—" size="small" sx={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.25)', fontSize: 10 }} />
                       }
                     </TableCell>
                   </TableRow>

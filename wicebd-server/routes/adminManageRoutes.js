@@ -282,6 +282,8 @@ router.get('/attendance', authenticateAdmin, async (req, res) => {
                END,
                a.participant_name
              ) AS participant_name,
+             ic.certificate_collected,
+             ic.certificate_collected_at,
              ci.username AS checked_in_by_name,
              lc.username AS lunch_by_name,
              cc.username AS coffee_by_name

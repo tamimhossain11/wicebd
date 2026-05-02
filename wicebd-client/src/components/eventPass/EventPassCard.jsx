@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import {
   QrCode2, Download, CheckCircle, Lock, ExpandMore, ExpandLess,
-  Person, Group, Edit, Save, WorkspacePremium,
+  Person, Group, Edit, Save, WorkspacePremium, Print,
 } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/index';
@@ -69,153 +69,204 @@ const CardRow = ({ label, value, mono = false }) => (
 );
 
 /* ─────────────────────────────────────────────────────────────
-   IDCardVisual — the printed-looking card + download button
+   IDCardVisual — 6×4 inch landscape printable card
    ───────────────────────────────────────────────────────────── */
 const IDCardVisual = ({ member, reg, card }) => {
   const cardRef = useRef(null);
   const meta    = TYPE_META[reg.type] || TYPE_META.project;
   const verifyUrl = card?.qr_data || '';
+  const titleLabel = reg.type === 'olympiad' ? 'Institution'
+                   : (reg.type === 'robo_soccer' || reg.type === 'micromouse') ? 'Team Name'
+                   : 'Project Title';
 
-  const handleDownload = () => {
+  const captureCanvas = () =>
+    import('html2canvas').then(({ default: h2c }) =>
+      h2c(cardRef.current, { scale: 3, backgroundColor: null, useCORS: true })
+    );
+
+  const handleDownload = async () => {
     if (!cardRef.current) return;
-    import('html2canvas').then(({ default: html2canvas }) => {
-      html2canvas(cardRef.current, { scale: 3, backgroundColor: null, useCORS: true }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `WICE-IDCard-${card.card_uid}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      });
-    }).catch(() => {});
+    const canvas = await captureCanvas().catch(() => null);
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `WICE-IDCard-${card.card_uid}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  const handlePrint = async () => {
+    if (!cardRef.current) return;
+    const canvas = await captureCanvas().catch(() => null);
+    if (!canvas) return;
+    const imgData = canvas.toDataURL('image/png');
+    const win = window.open('', '_blank', 'width=900,height=650');
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html>
+      <html>
+        <head>
+          <title>WICE ID Card – ${card.card_uid}</title>
+          <style>
+            *{margin:0;padding:0;box-sizing:border-box}
+            @page{size:6in 4in landscape;margin:0}
+            html,body{width:6in;height:4in;overflow:hidden;background:#000}
+            img{display:block;width:6in;height:4in;object-fit:fill}
+            @media print{html,body{width:6in;height:4in}img{width:100%;height:100%}}
+          </style>
+        </head>
+        <body>
+          <img src="${imgData}" />
+          <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};}<\/script>
+        </body>
+      </html>`);
+    win.document.close();
   };
 
   return (
     <Box>
+      {/* Card — 6:4 landscape aspect ratio */}
       <Box ref={cardRef} sx={{
-        width: '100%', maxWidth: 420, mx: 'auto',
-        borderRadius: 3, overflow: 'hidden',
+        width: '100%', maxWidth: 600, mx: 'auto',
+        aspectRatio: '6/4',
+        borderRadius: 2, overflow: 'hidden',
+        display: 'flex', flexDirection: 'column',
         boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)`,
       }}>
-        {/* Header band */}
+        {/* Header */}
         <Box sx={{
-          background: `linear-gradient(135deg, ${meta.color}cc 0%, ${meta.color} 60%, ${meta.color}99 100%)`,
-          px: 2.5, py: 2,
+          background: `linear-gradient(135deg, ${meta.color}dd 0%, ${meta.color} 50%, ${meta.color}bb 100%)`,
+          px: 2.5, py: 1.2,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          position: 'relative', overflow: 'hidden',
+          flexShrink: 0, position: 'relative', overflow: 'hidden',
         }}>
-          <Box sx={{ position: 'absolute', right: -30, top: -30, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, zIndex: 1 }}>
-            <img src="/images/logo-normal.PNG" alt="WICE" style={{ height: 36, objectFit: 'contain', filter: 'brightness(1.2)' }} />
-          </Box>
+          <Box sx={{ position: 'absolute', right: -20, top: -20, width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+          <img src="/images/logo-normal.PNG" alt="WICE" style={{ height: 30, objectFit: 'contain', filter: 'brightness(1.2)', zIndex: 1 }} />
           <Box sx={{ textAlign: 'right', zIndex: 1 }}>
-            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700 }}>
-              8th Edition
-            </Typography>
-            <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: 13, letterSpacing: '0.06em', lineHeight: 1.2 }}>
+            <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: 11.5, letterSpacing: '0.08em', lineHeight: 1.2 }}>
               PARTICIPANT ID CARD
             </Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 8.5, letterSpacing: '0.08em' }}>
-              WICE BANGLADESH 2026
+            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 7.5, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              WICE Bangladesh 2026 · 8th Edition
             </Typography>
           </Box>
         </Box>
 
-        {/* Body */}
+        {/* Body — flex row, fills remaining height */}
         <Box sx={{
-          background: 'linear-gradient(180deg, #12000a 0%, #0d0006 100%)',
-          px: 2.5, py: 2.5, display: 'flex', gap: 2.5, alignItems: 'flex-start',
+          flex: 1, minHeight: 0,
+          background: 'linear-gradient(160deg, #14000c 0%, #0d0006 100%)',
+          px: 2.5, py: 2, display: 'flex', gap: 2.5, alignItems: 'stretch',
         }}>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', mb: 0.4 }}>
+          {/* Left: participant details */}
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 7.5, letterSpacing: '0.22em', textTransform: 'uppercase', mb: 0.3 }}>
               Participant
             </Typography>
-            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.2px', wordBreak: 'break-word' }}>
+            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 20, lineHeight: 1.15, letterSpacing: '-0.3px', wordBreak: 'break-word', mb: 0.3 }}>
               {member.name}
             </Typography>
             {member.email && (
-              <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, mt: 0.3, mb: 2 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: 9.5, mb: 1.2 }}>
                 {member.email}
               </Typography>
             )}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: member.email ? 0 : 2 }}>
-              <CardRow label="Competition" value={meta.label} />
-              {reg.title && <CardRow label={reg.type === 'olympiad' ? 'Institution' : (reg.type === 'robo_soccer' || reg.type === 'micromouse') ? 'Team Name' : 'Project Title'} value={reg.title} />}
-              {member.institution && <CardRow label="Institution" value={member.institution} />}
-              <CardRow label="Registration ID" value={reg.reg_id} mono />
-              <CardRow label="Card ID" value={card.card_uid} mono />
-              <CardRow label="Event" value="WICE Bangladesh 2026" />
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px', mt: member.email ? 0 : 1 }}>
               <Box>
-                <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
-                  Status
-                </Typography>
-                <Chip
-                  icon={<CheckCircle sx={{ fontSize: '12px !important', color: '#10b981 !important' }} />}
-                  label="Valid" size="small"
-                  sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 10, height: 20, fontWeight: 700 }}
-                />
+                <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>Competition</Typography>
+                <Typography sx={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>{meta.label}</Typography>
               </Box>
-              {reg.type !== 'olympiad' && (
+              {reg.title && (
                 <Box>
-                  <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>
-                    Certificate
-                  </Typography>
-                  <Chip
-                    icon={<WorkspacePremium sx={{ fontSize: '12px !important', color: card.certificate_collected ? '#a78bfa !important' : 'rgba(255,255,255,0.3) !important' }} />}
-                    label={card.certificate_collected ? 'Collected' : 'Pending'}
-                    size="small"
-                    sx={{
-                      background: card.certificate_collected ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.05)',
-                      color: card.certificate_collected ? '#a78bfa' : 'rgba(255,255,255,0.35)',
-                      border: `1px solid ${card.certificate_collected ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                      fontSize: 10, height: 20, fontWeight: 700,
-                    }}
-                  />
+                  <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>{titleLabel}</Typography>
+                  <Typography sx={{ color: '#fff', fontSize: 10, fontWeight: 700, wordBreak: 'break-word' }}>{reg.title}</Typography>
                 </Box>
               )}
+              {member.institution && (
+                <Box>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>Institution</Typography>
+                  <Typography sx={{ color: '#fff', fontSize: 10, fontWeight: 700, wordBreak: 'break-word' }}>{member.institution}</Typography>
+                </Box>
+              )}
+              <Box>
+                <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.15 }}>Event</Typography>
+                <Typography sx={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>WICE Bangladesh 2026</Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', gap: 0.4 }}>
+              <Box>
+                <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.1 }}>Registration ID</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 9.5, fontFamily: 'monospace', letterSpacing: '0.05em' }}>{reg.reg_id}</Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ color: 'rgba(255,255,255,0.28)', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase', mb: 0.1 }}>Card ID</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 9.5, fontFamily: 'monospace', letterSpacing: '0.05em' }}>{card.card_uid}</Typography>
+              </Box>
             </Box>
           </Box>
 
-          {/* QR */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-            <Box sx={{ p: 1.2, borderRadius: 2, background: '#fff', boxShadow: `0 4px 16px ${meta.color}44` }}>
-              <QRCodeSVG value={verifyUrl || 'https://wicebd.com'} size={90} level="M" bgColor="#ffffff" fgColor="#1a0008" />
+          {/* Right: QR + status badges */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.2, flexShrink: 0, width: 130 }}>
+            <Box sx={{ p: 1.2, borderRadius: 2, background: '#fff', boxShadow: `0 4px 20px ${meta.color}55` }}>
+              <QRCodeSVG value={verifyUrl || 'https://wicebd.com'} size={100} level="H" bgColor="#ffffff" fgColor="#1a0008" />
             </Box>
-            <Typography sx={{ color: 'rgba(255,255,255,0.22)', fontSize: 8.5, textAlign: 'center' }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 7.5, textAlign: 'center', lineHeight: 1.4 }}>
               Admin scan only
             </Typography>
+            <Chip
+              icon={<CheckCircle sx={{ fontSize: '10px !important', color: '#10b981 !important' }} />}
+              label="Valid" size="small"
+              sx={{ background: '#10b98118', color: '#10b981', border: '1px solid #10b98130', fontSize: 9, height: 18, fontWeight: 700 }}
+            />
           </Box>
         </Box>
 
         {/* Footer */}
         <Box sx={{
-          background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.05)',
-          px: 2.5, py: 1.2, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.05)',
+          px: 2.5, py: 0.9, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <Typography sx={{ color: 'rgba(255,255,255,0.18)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.16)', fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             wicebd.com
           </Typography>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {[...Array(8)].map((_, i) => (
-              <Box key={i} sx={{ width: 3, height: 3, borderRadius: '50%', background: i % 2 === 0 ? `${meta.color}88` : 'rgba(255,255,255,0.1)' }} />
+            {[...Array(10)].map((_, i) => (
+              <Box key={i} sx={{ width: 3, height: 3, borderRadius: '50%', background: i % 2 === 0 ? `${meta.color}99` : 'rgba(255,255,255,0.08)' }} />
             ))}
           </Box>
-          <Typography sx={{ color: 'rgba(255,255,255,0.18)', fontSize: 9, letterSpacing: '0.08em' }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.16)', fontSize: 8, letterSpacing: '0.08em' }}>
             {meta.prefix} · 8th Ed.
           </Typography>
         </Box>
       </Box>
 
-      <Box sx={{ textAlign: 'center', mt: 2 }}>
+      {/* Action buttons */}
+      <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', mt: 2, flexWrap: 'wrap' }}>
+        <Button
+          onClick={handlePrint}
+          startIcon={<Print sx={{ fontSize: 15 }} />}
+          size="small" variant="contained"
+          sx={{
+            background: `linear-gradient(135deg,${meta.color},${meta.color}cc)`,
+            color: '#fff', textTransform: 'none', fontWeight: 700, borderRadius: 2, fontSize: 12.5,
+            boxShadow: `0 4px 14px ${meta.color}44`,
+            '&:hover': { opacity: 0.9 },
+          }}
+        >
+          Print (6×4 in)
+        </Button>
         <Button
           onClick={handleDownload}
-          startIcon={<Download sx={{ fontSize: 16 }} />}
+          startIcon={<Download sx={{ fontSize: 15 }} />}
           size="small" variant="outlined"
           sx={{
-            borderColor: `${meta.color}66`, color: 'rgba(255,255,255,0.6)',
+            borderColor: `${meta.color}55`, color: 'rgba(255,255,255,0.6)',
             textTransform: 'none', fontWeight: 600, borderRadius: 2, fontSize: 12.5,
             '&:hover': { borderColor: meta.color, background: `${meta.color}15`, color: '#fff' },
           }}
         >
-          Download ID Card
+          Download PNG
         </Button>
       </Box>
     </Box>
