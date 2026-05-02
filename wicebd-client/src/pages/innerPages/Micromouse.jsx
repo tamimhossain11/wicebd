@@ -90,7 +90,7 @@ export default function Micromouse() {
     try {
       const res = await api.post('/api/promo/validate', {
         code: promoInput.trim().toUpperCase(),
-        competition_type: 'micromouse',
+        competitionType: 'micromouse',
       });
       if (res.data.valid) {
         setPromoStatus({ valid: true, discountPercentage: res.data.discountPercentage });

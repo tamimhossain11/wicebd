@@ -90,7 +90,7 @@ export default function RoboSoccer() {
     try {
       const res = await api.post('/api/promo/validate', {
         code: promoInput.trim().toUpperCase(),
-        competition_type: 'robo_soccer',
+        competitionType: 'robo_soccer',
       });
       if (res.data.valid) {
         setPromoStatus({ valid: true, discountPercentage: res.data.discountPercentage });
