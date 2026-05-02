@@ -473,8 +473,8 @@ const MemberSlot = ({ member, reg, profileComplete, onGenerated }) => {
               sx={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 600 }} />
           )}
 
-          {/* Family info form for non-leader members (only if no card yet) */}
-          {!isLeader && !card && (
+          {/* Family info form for non-leader members — project/wall-magazine only */}
+          {!isLeader && !card && (reg.type === 'project' || reg.type === 'wall-magazine') && (
             <MemberProfileForm paymentId={reg.reg_id} slot={member.slot} onSaved={handleProfileSaved} />
           )}
         </Box>
