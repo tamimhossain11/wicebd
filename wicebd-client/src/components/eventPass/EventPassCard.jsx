@@ -45,9 +45,11 @@ const MP = {
 };
 
 const TYPE_META = {
-  project:         { label: 'Project Competition', color: '#800020', prefix: 'PRJ' },
-  'wall-magazine': { label: 'Wall Magazine',        color: '#10b981', prefix: 'MAG' },
-  olympiad:        { label: 'Science Olympiad',     color: '#0f3460', prefix: 'OLY' },
+  project:         { label: 'Project Competition',    color: '#800020', prefix: 'PRJ' },
+  'wall-magazine': { label: 'Wall Magazine',           color: '#10b981', prefix: 'MAG' },
+  olympiad:        { label: 'Science Olympiad',        color: '#0f3460', prefix: 'OLY' },
+  robo_soccer:     { label: 'Robo Soccer',             color: '#f59e0b', prefix: 'RSC' },
+  micromouse:      { label: 'Micromouse Maze-Solving', color: '#6366f1', prefix: 'MCM' },
 };
 
 /* ─────────────────────────────────────────────────────────────
@@ -136,7 +138,7 @@ const IDCardVisual = ({ member, reg, card }) => {
             )}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: member.email ? 0 : 2 }}>
               <CardRow label="Competition" value={meta.label} />
-              {reg.title && <CardRow label={reg.type === 'olympiad' ? 'Institution' : 'Project Title'} value={reg.title} />}
+              {reg.title && <CardRow label={reg.type === 'olympiad' ? 'Institution' : (reg.type === 'robo_soccer' || reg.type === 'micromouse') ? 'Team Name' : 'Project Title'} value={reg.title} />}
               {member.institution && <CardRow label="Institution" value={member.institution} />}
               <CardRow label="Registration ID" value={reg.reg_id} mono />
               <CardRow label="Card ID" value={card.card_uid} mono />

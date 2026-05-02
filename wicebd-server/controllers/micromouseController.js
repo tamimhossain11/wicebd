@@ -24,11 +24,34 @@ const registerMicromouse = async (req, res) => {
 
   try {
     const [existing] = await db.query(
-      'SELECT id FROM micromouse_registrations WHERE leader_email = ?',
+      'SELECT registration_id, payment_status FROM micromouse_registrations WHERE leader_email = ?',
       [leader_email]
     );
+
     if (existing.length > 0) {
-      return res.status(409).json({ success: false, message: 'This email is already registered for Micromouse Maze-Solving' });
+      if (existing[0].payment_status === 'paid') {
+        return res.status(409).json({ success: false, message: 'This email has already completed Micromouse registration' });
+      }
+      // Pending — overwrite with latest form data so they can retry payment
+      await db.query(
+        `UPDATE micromouse_registrations SET
+          user_id=?, team_name=?, institution=?,
+          leader_name=?, leader_phone=?, leader_size=?,
+          member1_name=?, member1_phone=?, member1_size=?,
+          member2_name=?, member2_phone=?, member2_size=?,
+          bot_name=?, prior_experience=?, promo_code=?,
+          payment_id=NULL, payment_status='pending'
+         WHERE leader_email=?`,
+        [
+          user_id, team_name, institution,
+          leader_name, leader_phone, leader_size || null,
+          member1_name || null, member1_phone || null, member1_size || null,
+          member2_name || null, member2_phone || null, member2_size || null,
+          bot_name || null, prior_experience, promo_code || null,
+          leader_email,
+        ]
+      );
+      return res.json({ success: true, registration_id: existing[0].registration_id, message: 'Registration updated' });
     }
 
     await db.query(
