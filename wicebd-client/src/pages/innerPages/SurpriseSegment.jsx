@@ -12,9 +12,9 @@ const competitions = [
     title: 'Robo Soccer',
     subtitle: 'Robotic Football Championship',
     description:
-      'Build and program your robot to compete in head-to-head football matches. Teams of up to 5 members battle it out on the field.',
+      'Build and program your robot to compete in head-to-head football matches. Teams of up to 3 members battle it out on the field.',
     fee: '৳777',
-    badges: ['Team Event', 'Up to 5 Members', '৳777 Entry'],
+    badges: ['Team Event', 'Up to 3 Members', '৳777 Entry'],
     accent: '#f59e0b',
     gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
     glow: 'rgba(245,158,11,0.35)',
@@ -28,7 +28,7 @@ const competitions = [
     description:
       'Design a self-contained autonomous robot to navigate and solve a maze in the shortest possible time. Precision engineering meets algorithmic thinking.',
     fee: '৳888',
-    badges: ['Team Event', 'Up to 5 Members', '৳888 Entry'],
+    badges: ['Team Event', 'Up to 3 Members', '৳888 Entry'],
     accent: '#10b981',
     gradient: 'linear-gradient(135deg, #10b981, #059669)',
     glow: 'rgba(16,185,129,0.35)',

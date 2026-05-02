@@ -692,7 +692,7 @@ export default function UserDashboard() {
                   <CompCard
                     icon={<span style={{ fontSize: 22 }}>⚽</span>} color="#f59e0b"
                     title="Robo Soccer"
-                    description="Build and program your robot to compete in head-to-head football matches. Teams of up to 5 members."
+                    description="Build and program your robot to compete in head-to-head football matches. Teams of up to 3 members."
                     registered={hasRoboSoccer}
                     regId={registrations.roboSoccer?.[0]?.registration_id}
                     to="/robo-soccer" toLabel={hasRoboSoccer ? 'View Registration' : 'Register for Robo Soccer'}
