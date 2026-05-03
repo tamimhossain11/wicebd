@@ -161,7 +161,7 @@ export default function Micromouse() {
         <div className="auto-container" style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
           <motion.div initial={{ opacity: 0, y: -18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
             <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.22em', fontWeight: 700, color: '#800020' }}>WICEBD 2025 · Robotics</span>
-            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 'clamp(30px,5vw,48px)', margin: '10px 0 14px', lineHeight: 1.15 }}>Micromouse Maze-Solving</h1>
+            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 'clamp(30px,5vw,48px)', margin: '10px 0 14px', lineHeight: 1.15 }}>LFR Maze Solving</h1>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, maxWidth: 480, margin: '0 auto', lineHeight: 1.8 }}>
               Program your autonomous mouse, navigate the maze, and race to the finish in this classic robotics challenge.
               Registration fee: <strong style={{ color: '#c0002a' }}>৳{BASE_FEE}</strong>
@@ -187,7 +187,7 @@ export default function Micromouse() {
 
               {/* Card header */}
               <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '20px', mb: 0.5 }}>
-                Micromouse Maze-Solving Registration
+                LFR Maze Solving Registration
               </Typography>
               <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', mb: 3 }}>
                 8th WICEBD — Robotics Competition
@@ -217,7 +217,7 @@ export default function Micromouse() {
                   <Typography sx={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', mb: 0.5 }}>
                     Competition
                   </Typography>
-                  <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#800020' }}>🐭 Micromouse</Typography>
+                  <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#800020' }}>🤖 LFR Maze Solving</Typography>
                   <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', mt: 0.4 }}>Max 3 members per team</Typography>
                 </Box>
               </Box>
@@ -345,7 +345,7 @@ export default function Micromouse() {
                       <Divider sx={{ borderColor: 'rgba(128,0,32,0.15)', mb: 3 }} />
                       <SLabel>Competition Details</SLabel>
                       <Typography sx={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, mb: 2 }}>
-                        Have you participated in Micromouse Maze-Solving competitions before? *
+                        Have you participated in LFR Maze Solving competitions before? *
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1.5, mb: 4, flexWrap: 'wrap' }}>
                         {[{ v: 'yes', label: 'Yes', icon: <CheckCircle sx={{ fontSize: 16 }} /> }, { v: 'no', label: 'No', icon: <Cancel sx={{ fontSize: 16 }} /> }].map(({ v, label, icon }) => (

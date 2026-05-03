@@ -34,8 +34,8 @@ const ROLE_LABELS = {
   'wall-magazine': 'Wall Magazine',
   olympiad:        'Science Olympiad',
   guest:           'Guest',
-  robo_soccer:     'Robo Soccer',
-  micromouse:      'Micromouse Maze-Solving',
+  robo_soccer:     'Robo Sumo',
+  micromouse:      'LFR Maze Solving',
 };
 
 const POSITIONS = [

@@ -72,8 +72,8 @@ const NAV_ITEMS = [
   { label: 'Judges',             icon: <Gavel />,               section: 'event',   roles: SA  },
   { label: 'National Round',     icon: <EmojiFlags />,          section: 'event',   roles: SA  },
   { label: 'Statistics',         icon: <BarChartIcon />,        section: 'data',    roles: DE  },
-  { label: 'Robo Soccer Regs',  icon: <span style={{ fontSize: 16 }}>⚽</span>, section: 'data', roles: DE },
-  { label: 'Micromouse Regs',   icon: <span style={{ fontSize: 16 }}>🐭</span>, section: 'data', roles: DE },
+  { label: 'Robo Sumo Regs',  icon: <span style={{ fontSize: 16 }}>⚽</span>, section: 'data', roles: DE },
+  { label: 'LFR Maze Solving Regs',   icon: <span style={{ fontSize: 16 }}>🐭</span>, section: 'data', roles: DE },
 ];
 
 /* ─── Custom tooltip for charts ─── */
@@ -886,8 +886,8 @@ export default function AdminDashboard() {
                   { icon: <Campaign sx={{ color: AMBER, fontSize: 22 }} />, label: 'Wall Magazine Regs', value: analytics.totals.magazine, color: AMBER, trendLabel: 'registrations' },
                   { icon: <People sx={{ color: GREEN, fontSize: 22 }} />, label: 'Platform Users', value: analytics.totals.users, color: GREEN, trend: 5, trendLabel: 'vs last week' },
                   { icon: <Notifications sx={{ color: ACCENT, fontSize: 22 }} />, label: 'Announcements', value: analytics.totals.announcements, color: ACCENT, sub: 'Published' },
-                  { icon: <span style={{ fontSize: 20 }}>⚽</span>, label: 'Robo Soccer Teams', value: roboSoccerData.length, color: AMBER, sub: 'Registered' },
-                  { icon: <span style={{ fontSize: 20 }}>🐭</span>, label: 'Micromouse Teams', value: micromouseData.length, color: GREEN, sub: 'Registered' },
+                  { icon: <span style={{ fontSize: 20 }}>⚽</span>, label: 'Robo Sumo Teams', value: roboSoccerData.length, color: AMBER, sub: 'Registered' },
+                  { icon: <span style={{ fontSize: 20 }}>🐭</span>, label: 'LFR Maze Solving Teams', value: micromouseData.length, color: GREEN, sub: 'Registered' },
                 ].map((s, i) => (
                   <Grid size={{ xs: 12, sm: 6, lg: 2 }} key={i}><StatCard {...s} /></Grid>
                 ))}
@@ -1052,7 +1052,7 @@ export default function AdminDashboard() {
                     <input
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
-                      placeholder={`Search ${activeNav === 1 ? 'project' : activeNav === 2 ? 'olympiad' : activeNav === 3 ? 'wall magazine' : activeNav === 16 ? 'Robo Soccer' : activeNav === 17 ? 'Micromouse' : 'users'} registrations…`}
+                      placeholder={`Search ${activeNav === 1 ? 'project' : activeNav === 2 ? 'olympiad' : activeNav === 3 ? 'wall magazine' : activeNav === 16 ? 'Robo Sumo' : activeNav === 17 ? 'LFR Maze Solving' : 'users'} registrations…`}
                       style={{
                         flex: 1, background: 'transparent', border: 'none', outline: 'none',
                         color: '#fff', fontSize: 14, fontFamily: 'inherit',
@@ -2292,8 +2292,8 @@ export default function AdminDashboard() {
               <MenuItem value="project">Project Only</MenuItem>
               <MenuItem value="wall-magazine">Wall Magazine Only</MenuItem>
               <MenuItem value="olympiad">Olympiad Only</MenuItem>
-              <MenuItem value="robo_soccer">Robo Soccer Only</MenuItem>
-              <MenuItem value="micromouse">Micromouse Only</MenuItem>
+              <MenuItem value="robo_soccer">Robo Sumo Only</MenuItem>
+              <MenuItem value="micromouse">LFR Maze Solving Only</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

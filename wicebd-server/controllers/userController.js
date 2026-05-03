@@ -38,7 +38,7 @@ const sendWelcomeEmail = async (name, email) => {
             <ul style="color: #444; line-height: 2;">
               <li><strong>Project Competition</strong> — Team projects in Technology, Science &amp; Social Innovation</li>
               <li><strong>Science Olympiad</strong> — Individual olympiad for school &amp; college students</li>
-              <li><strong>Robo Soccer</strong> — Team robot-building &amp; programming tournament</li>
+              <li><strong>Robo Sumo</strong> — Team robot-building &amp; programming tournament</li>
             </ul>
             <div style="margin: 28px 0; text-align: center;">
               <a href="${frontendUrl}/dashboard"

@@ -9,7 +9,7 @@ const competitions = [
   {
     path: '/robo-soccer',
     icon: '⚽',
-    title: 'Robo Soccer',
+    title: 'Robo Sumo',
     subtitle: 'Robotic Football Championship',
     description:
       'Build and program your robot to compete in head-to-head football matches. Teams of up to 3 members battle it out on the field.',
@@ -23,7 +23,7 @@ const competitions = [
   {
     path: '/micromouse',
     icon: '🐭',
-    title: 'Micromouse Maze-Solving',
+    title: 'LFR Maze Solving',
     subtitle: 'Autonomous Maze Navigation',
     description:
       'Design a self-contained autonomous robot to navigate and solve a maze in the shortest possible time. Precision engineering meets algorithmic thinking.',

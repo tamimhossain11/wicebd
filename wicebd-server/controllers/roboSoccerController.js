@@ -30,7 +30,7 @@ const registerRoboSoccer = async (req, res) => {
 
     if (existing.length > 0) {
       if (existing[0].payment_status === 'paid') {
-        return res.status(409).json({ success: false, message: 'This email has already completed Robo Soccer registration' });
+        return res.status(409).json({ success: false, message: 'This email has already completed Robo Sumo registration' });
       }
       // Pending — overwrite with latest form data so they can retry payment
       await db.query(
@@ -71,9 +71,9 @@ const registerRoboSoccer = async (req, res) => {
       ]
     );
 
-    res.json({ success: true, registration_id, message: 'Robo Soccer registration successful' });
+    res.json({ success: true, registration_id, message: 'Robo Sumo registration successful' });
   } catch (error) {
-    console.error('Robo Soccer registration error:', error);
+    console.error('Robo Sumo registration error:', error);
     res.status(500).json({ success: false, message: 'Registration failed' });
   }
 };
@@ -144,7 +144,7 @@ const initiateRoboSoccerPayment = async (req, res) => {
       custEmail: reg.leader_email,
       callbackUrl: `${frontendBase}/callback`,
       reference: registration_id,
-      checkoutItems: 'Robo Soccer',
+      checkoutItems: 'Robo Sumo',
     });
 
     if (result.status_code !== '200') {
@@ -158,7 +158,7 @@ const initiateRoboSoccerPayment = async (req, res) => {
 
     res.json({ success: true, payment_url: result.payment_url, invoice_number: invoiceNumber });
   } catch (err) {
-    console.error('Robo Soccer payment initiation error:', err);
+    console.error('Robo Sumo payment initiation error:', err);
     res.status(500).json({ success: false, message: 'Failed to initiate payment' });
   }
 };

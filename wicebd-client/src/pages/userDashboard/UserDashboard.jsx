@@ -691,22 +691,22 @@ export default function UserDashboard() {
                 <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
                     icon={<span style={{ fontSize: 22 }}>⚽</span>} color="#f59e0b"
-                    title="Robo Soccer"
+                    title="Robo Sumo"
                     description="Build and program your robot to compete in head-to-head football matches. Teams of up to 3 members."
                     registered={hasRoboSoccer}
                     regId={registrations.roboSoccer?.[0]?.registration_id}
-                    to="/robo-soccer" toLabel={hasRoboSoccer ? 'View Registration' : 'Register for Robo Soccer'}
+                    to="/robo-soccer" toLabel={hasRoboSoccer ? 'View Registration' : 'Register for Robo Sumo'}
                     fee={777}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
                     icon={<span style={{ fontSize: 22 }}>🐭</span>} color="#10b981"
-                    title="Micromouse Maze-Solving"
+                    title="LFR Maze Solving"
                     description="Design an autonomous robot to navigate and solve a maze in the shortest time. Precision meets algorithmic thinking."
                     registered={hasMicromouse}
                     regId={registrations.micromouse?.[0]?.registration_id}
-                    to="/micromouse" toLabel={hasMicromouse ? 'View Registration' : 'Register for Micromouse'}
+                    to="/micromouse" toLabel={hasMicromouse ? 'View Registration' : 'Register for LFR Maze Solving'}
                     fee={888}
                   />
                 </Grid>
@@ -761,7 +761,7 @@ export default function UserDashboard() {
                   ],
                 },
                 {
-                  label: 'Robo Soccer Registrations',
+                  label: 'Robo Sumo Registrations',
                   data: registrations.roboSoccer,
                   color: '#f59e0b',
                   icon: <span style={{ fontSize: 18 }}>⚽</span>,
@@ -774,7 +774,7 @@ export default function UserDashboard() {
                   ],
                 },
                 {
-                  label: 'Micromouse Maze-Solving Registrations',
+                  label: 'LFR Maze Solving Registrations',
                   data: registrations.micromouse,
                   color: '#10b981',
                   icon: <span style={{ fontSize: 18 }}>🐭</span>,

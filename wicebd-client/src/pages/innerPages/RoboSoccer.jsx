@@ -160,7 +160,7 @@ export default function RoboSoccer() {
         <div className="auto-container" style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
           <motion.div initial={{ opacity: 0, y: -18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
             <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.22em', fontWeight: 700, color: '#800020' }}>WICEBD 2025 · Robotics</span>
-            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 'clamp(30px,5vw,48px)', margin: '10px 0 14px', lineHeight: 1.15 }}>Robo Soccer</h1>
+            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 'clamp(30px,5vw,48px)', margin: '10px 0 14px', lineHeight: 1.15 }}>Robo Sumo</h1>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, maxWidth: 460, margin: '0 auto', lineHeight: 1.8 }}>
               Build your bot, form your team, and compete in the ultimate robotics football challenge.
               Registration fee: <strong style={{ color: '#c0002a' }}>৳{BASE_FEE}</strong>
@@ -186,7 +186,7 @@ export default function RoboSoccer() {
 
               {/* Card header */}
               <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '20px', mb: 0.5 }}>
-                Robo Soccer Registration
+                Robo Sumo Registration
               </Typography>
               <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', mb: 3 }}>
                 8th WICEBD — Robotics Competition
@@ -216,7 +216,7 @@ export default function RoboSoccer() {
                   <Typography sx={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', mb: 0.5 }}>
                     Competition
                   </Typography>
-                  <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#800020' }}>⚽ Robo Soccer</Typography>
+                  <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#800020' }}>⚽ Robo Sumo</Typography>
                   <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', mt: 0.4 }}>Max 3 members per team</Typography>
                 </Box>
               </Box>
@@ -344,7 +344,7 @@ export default function RoboSoccer() {
                       <Divider sx={{ borderColor: 'rgba(128,0,32,0.15)', mb: 3 }} />
                       <SLabel>Competition Details</SLabel>
                       <Typography sx={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, mb: 2 }}>
-                        Have you participated in Robo Soccer competitions before? *
+                        Have you participated in Robo Sumo competitions before? *
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1.5, mb: 4, flexWrap: 'wrap' }}>
                         {[{ v: 'yes', label: 'Yes', icon: <CheckCircle sx={{ fontSize: 16 }} /> }, { v: 'no', label: 'No', icon: <Cancel sx={{ fontSize: 16 }} /> }].map(({ v, label, icon }) => (

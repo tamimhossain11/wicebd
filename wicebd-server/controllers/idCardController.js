@@ -158,7 +158,7 @@ const getMyCards = async (req, res) => {
       });
     });
 
-    // Robo Soccer registrations
+    // Robo Sumo registrations
     const [roboRows] = await db.query(
       `SELECT registration_id, team_name, institution, leader_name, leader_email,
               member1_name, member2_name, created_at
@@ -185,7 +185,7 @@ const getMyCards = async (req, res) => {
       });
       registrations.push({
         type: 'robo_soccer', reg_id: r.registration_id,
-        label: 'Robo Soccer', title: r.team_name || '',
+        label: 'Robo Sumo', title: r.team_name || '',
         registered_at: r.created_at, members,
       });
     });
@@ -217,7 +217,7 @@ const getMyCards = async (req, res) => {
       });
       registrations.push({
         type: 'micromouse', reg_id: r.registration_id,
-        label: 'Micromouse Maze-Solving', title: r.team_name || '',
+        label: 'LFR Maze Solving', title: r.team_name || '',
         registered_at: r.created_at, members,
       });
     });

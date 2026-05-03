@@ -131,7 +131,7 @@ const confirmPayment = async (req, res) => {
     const verifiedTrxId = statusResult.data.trx_id || trx_id;
     const amount = parseFloat(statusResult.data.request_amount || 0);
 
-    // 2a. Check if this is a Robo Soccer payment
+    // 2a. Check if this is a Robo Sumo payment
     const [roboRows] = await db.query(
       'SELECT * FROM robo_soccer_registrations WHERE payment_id = ?',
       [invoice_number]
@@ -143,8 +143,8 @@ const confirmPayment = async (req, res) => {
         'UPDATE robo_soccer_registrations SET payment_status = ?, amount = ? WHERE payment_id = ?',
         ['paid', amount || 777, invoice_number]
       );
-      sendRoboticsEmail(reg, { invoiceNumber: invoice_number, trxID: verifiedTrxId, amount: amount || 777, label: 'Robo Soccer', fee: '৳777' });
-      return res.json({ success: true, message: 'Robo Soccer registration payment confirmed' });
+      sendRoboticsEmail(reg, { invoiceNumber: invoice_number, trxID: verifiedTrxId, amount: amount || 777, label: 'Robo Sumo', fee: '৳777' });
+      return res.json({ success: true, message: 'Robo Sumo registration payment confirmed' });
     }
 
     // 2b. Check if this is a Micromouse payment
@@ -159,8 +159,8 @@ const confirmPayment = async (req, res) => {
         'UPDATE micromouse_registrations SET payment_status = ?, amount = ? WHERE payment_id = ?',
         ['paid', amount || 888, invoice_number]
       );
-      sendRoboticsEmail(reg, { invoiceNumber: invoice_number, trxID: verifiedTrxId, amount: amount || 888, label: 'Micromouse Maze-Solving', fee: '৳888' });
-      return res.json({ success: true, message: 'Micromouse registration payment confirmed' });
+      sendRoboticsEmail(reg, { invoiceNumber: invoice_number, trxID: verifiedTrxId, amount: amount || 888, label: 'LFR Maze Solving', fee: '৳888' });
+      return res.json({ success: true, message: 'LFR Maze Solving registration payment confirmed' });
     }
 
     // 2c. Fall through to temp_registrations (project / olympiad flow)
@@ -531,7 +531,7 @@ const sendOlympiadConfirmationEmail = async (registration, paymentDetails) => {
   }
 };
 
-/* ─── Robotics (Robo Soccer / Micromouse) confirmation email ─────── */
+/* ─── Robotics (Robo Sumo / Micromouse) confirmation email ─────── */
 const sendRoboticsEmail = async (reg, { invoiceNumber, trxID, amount, label, fee }) => {
   try {
     const body = `

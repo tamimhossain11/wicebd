@@ -160,7 +160,7 @@ const welcomeEmail = ({ name, frontendUrl = 'https://www.wicebd.com' }) => {
         ${[
           { title: 'Project Competition', desc: 'Team projects in Technology, Science &amp; Social Innovation' },
           { title: 'Science Olympiad',    desc: 'Individual olympiad for school &amp; college students' },
-          { title: 'Robo Soccer',         desc: 'Team robot-building &amp; programming tournament' },
+          { title: 'Robo Sumo',         desc: 'Team robot-building &amp; programming tournament' },
           { title: 'Wall Magazine',       desc: 'Creative magazine &amp; publication competition' },
         ].map((c, i) => `
         <tr>

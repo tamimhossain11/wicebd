@@ -48,8 +48,8 @@ const TYPE_META = {
   project:         { label: 'Project Competition',    color: '#800020', prefix: 'PRJ' },
   'wall-magazine': { label: 'Wall Magazine',           color: '#10b981', prefix: 'MAG' },
   olympiad:        { label: 'Science Olympiad',        color: '#0f3460', prefix: 'OLY' },
-  robo_soccer:     { label: 'Robo Soccer',             color: '#f59e0b', prefix: 'RSC' },
-  micromouse:      { label: 'Micromouse Maze-Solving', color: '#6366f1', prefix: 'MCM' },
+  robo_soccer:     { label: 'Robo Sumo',             color: '#f59e0b', prefix: 'RSC' },
+  micromouse:      { label: 'LFR Maze Solving', color: '#6366f1', prefix: 'MCM' },
 };
 
 /* ─────────────────────────────────────────────────────────────

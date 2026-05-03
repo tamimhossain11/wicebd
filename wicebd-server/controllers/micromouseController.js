@@ -30,7 +30,7 @@ const registerMicromouse = async (req, res) => {
 
     if (existing.length > 0) {
       if (existing[0].payment_status === 'paid') {
-        return res.status(409).json({ success: false, message: 'This email has already completed Micromouse registration' });
+        return res.status(409).json({ success: false, message: 'This email has already completed LFR Maze Solving registration' });
       }
       // Pending — overwrite with latest form data so they can retry payment
       await db.query(
@@ -71,7 +71,7 @@ const registerMicromouse = async (req, res) => {
       ]
     );
 
-    res.json({ success: true, registration_id, message: 'Micromouse Maze-Solving registration successful' });
+    res.json({ success: true, registration_id, message: 'LFR Maze Solving registration successful' });
   } catch (error) {
     console.error('Micromouse registration error:', error);
     res.status(500).json({ success: false, message: 'Registration failed' });
@@ -144,7 +144,7 @@ const initiateMicromousePayment = async (req, res) => {
       custEmail: reg.leader_email,
       callbackUrl: `${frontendBase}/callback`,
       reference: registration_id,
-      checkoutItems: 'Micromouse',
+      checkoutItems: 'LFR Maze Solving',
     });
 
     if (result.status_code !== '200') {

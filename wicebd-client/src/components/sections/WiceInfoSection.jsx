@@ -172,7 +172,7 @@ const TABS = [
     },
     {
         id: 3, type: 'robot',
-        title: 'Robo Soccer',
+        title: 'Robo Sumo',
         short: 'Engineer, program, and compete',
         content: 'Teams build autonomous soccer-playing robots from scratch. Competing in a tournament bracket, teams must master electronics, coding, and mechanical design simultaneously.',
         stats: [{ label: 'Team', val: '≤4' }, { label: 'Format', val: 'Tour.' }, { label: 'Skills', val: 'All' }],
