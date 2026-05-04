@@ -1,12 +1,12 @@
 [
     {
         "id": 1,
-        "icon": "bi bi-stars",
-        "name": "Surprise Segment",
-        "text": "Something exciting is coming. A brand-new competition segment will be revealed soon — stay tuned for the big announcement from WICE Bangladesh.",
+        "icon": "bi bi-robot",
+        "name": "Robo Sumo & LFR Maze Solving",
+        "text": "Two robotics competitions — Robo Sumo (head-to-head robot battles) and LFR Maze Solving (autonomous line-following). Teams of up to 3 members. Prize pool ৳20,000 each.",
         "color": "#800020",
-        "badge": "Coming Soon",
-        "to": "/surprise-segment"
+        "badge": "Robotics",
+        "to": "/registration?tab=robo-sumo"
     },
     {
         "id": 2,

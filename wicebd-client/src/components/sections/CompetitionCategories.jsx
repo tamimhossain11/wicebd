@@ -23,19 +23,22 @@ const CATEGORIES = [
     },
     {
         id: '02',
-        title: 'Surprise Segment',
-        subtitle: 'Stay · Tuned · Soon',
+        title: 'Robo Sumo & LFR Maze Solving',
+        subtitle: 'Build · Program · Compete',
         description:
-            'Something exciting is coming. A brand-new competition segment will be revealed soon — stay tuned for the big announcement.',
-        eligibility: 'To be announced',
-        prize: 'To be announced',
-        fee: 'To be announced',
+            'Two exciting robotics competitions — Robo Sumo (head-to-head robot battles) and LFR Maze Solving (autonomous line-following robots). Teams of up to 3 members.',
+        eligibility: 'Teams · Up to 3 members',
+        prize: 'Prize Pool: ৳20,000 each',
+        fee: 'Robo Sumo ৳777 · LFR ৳888',
         icon: (
             <svg viewBox="0 0 48 48" width="36" height="36" fill="none">
-                <circle cx="24" cy="24" r="16" stroke="#800020" strokeWidth="2.2" strokeDasharray="4 3" />
-                <path d="M24 14v2M24 32v2M14 24h2M32 24h2" stroke="#800020" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="24" cy="24" r="5" fill="rgba(128,0,32,0.25)" stroke="#800020" strokeWidth="1.8" />
-                <path d="M24 21v3l2 2" stroke="#800020" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <rect x="14" y="16" width="20" height="14" rx="4" stroke="#800020" strokeWidth="2.2" />
+                <rect x="18" y="20" width="5" height="6" rx="1.5" fill="rgba(128,0,32,0.25)" stroke="#800020" strokeWidth="1.6" />
+                <rect x="25" y="20" width="5" height="6" rx="1.5" fill="rgba(128,0,32,0.25)" stroke="#800020" strokeWidth="1.6" />
+                <path d="M14 26h-3M37 26h-3" stroke="#800020" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="24" cy="12" r="2.5" stroke="#800020" strokeWidth="1.8" />
+                <path d="M24 14.5v1.5" stroke="#800020" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M10 36h28" stroke="#800020" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="3 2" />
             </svg>
         ),
     },
