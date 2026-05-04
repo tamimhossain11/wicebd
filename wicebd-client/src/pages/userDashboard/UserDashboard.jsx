@@ -690,7 +690,7 @@ export default function UserDashboard() {
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
-                    icon={<span style={{ fontSize: 22 }}>⚽</span>} color="#f59e0b"
+                    icon={<span style={{ fontSize: 22 }}>🤖</span>} color="#f59e0b"
                     title="Robo Sumo"
                     description="Build and program your robot to compete in head-to-head football matches. Teams of up to 3 members."
                     registered={hasRoboSoccer}
@@ -701,7 +701,7 @@ export default function UserDashboard() {
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <CompCard
-                    icon={<span style={{ fontSize: 22 }}>🐭</span>} color="#10b981"
+                    icon={<span style={{ fontSize: 22 }}>🏁</span>} color="#10b981"
                     title="LFR Maze Solving"
                     description="Design an autonomous robot to navigate and solve a maze in the shortest time. Precision meets algorithmic thinking."
                     registered={hasMicromouse}
@@ -764,7 +764,7 @@ export default function UserDashboard() {
                   label: 'Robo Sumo Registrations',
                   data: registrations.roboSoccer,
                   color: '#f59e0b',
-                  icon: <span style={{ fontSize: 18 }}>⚽</span>,
+                  icon: <span style={{ fontSize: 18 }}>🤖</span>,
                   fields: [
                     { key: 'registration_id', display: 'Registration ID' },
                     { key: 'team_name',        display: 'Team Name' },
@@ -777,7 +777,7 @@ export default function UserDashboard() {
                   label: 'LFR Maze Solving Registrations',
                   data: registrations.micromouse,
                   color: '#10b981',
-                  icon: <span style={{ fontSize: 18 }}>🐭</span>,
+                  icon: <span style={{ fontSize: 18 }}>🏁</span>,
                   fields: [
                     { key: 'registration_id', display: 'Registration ID' },
                     { key: 'team_name',        display: 'Team Name' },
