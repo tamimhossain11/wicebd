@@ -10,6 +10,8 @@ import FooterV2 from '../../components/footer/FooterV2';
 import ProjectRegistrationForm from '../../components/registration/ProjectRegistrationForm';
 import WallMagazineRegistrationForm from '../../components/registration/WallMagazineRegistrationForm';
 import OlympiadRegistrationForm from '../../components/registration/OlympiadRegistrationForm';
+import RoboSumoRegistrationForm from '../../components/registration/RoboSumoRegistrationForm';
+import LFRMazeSolvingRegistrationForm from '../../components/registration/LFRMazeSolvingRegistrationForm';
 
 const darkTheme = createTheme({
     palette: { mode: 'dark', primary: { main: '#800020' }, background: { default: 'transparent', paper: 'transparent' } },
@@ -21,12 +23,16 @@ const TABS = [
     { id: 'project',       label: 'Project',         badge: 'Team' },
     { id: 'wall-magazine', label: 'Wall Magazine',    badge: 'Team' },
     { id: 'olympiad',      label: 'Science Olympiad', badge: 'Individual' },
+    { id: 'robo-sumo',     label: 'Robo Sumo',        badge: 'Team' },
+    { id: 'lfr-maze',      label: 'LFR Maze Solving', badge: 'Team' },
 ];
 
 const FEE_INFO = {
     project:         { fee: 999, label: 'Registration Fee', note: null, prize: '৳2,00,000' },
     'wall-magazine': { fee: 399, label: 'Registration Fee', note: null, prize: '৳30,000' },
     olympiad:        { fee: 50,  label: 'Registration Fee', note: null, prize: '৳10,000' },
+    'robo-sumo':     { fee: 777, label: 'Registration Fee', note: null, prize: null },
+    'lfr-maze':      { fee: 888, label: 'Registration Fee', note: null, prize: null },
 };
 
 export default function RegistrationPage() {
@@ -37,7 +43,7 @@ export default function RegistrationPage() {
     useEffect(() => {
         const p = new URLSearchParams(location.search);
         const t = p.get('tab');
-        if (t === 'olympiad' || t === 'wall-magazine' || t === 'project') setTab(t);
+        if (['project', 'wall-magazine', 'olympiad', 'robo-sumo', 'lfr-maze'].includes(t)) setTab(t);
     }, [location.search]);
 
     // Reset promo when tab changes
@@ -113,7 +119,13 @@ export default function RegistrationPage() {
                                 }}
                             >
                                 <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '20px', mb: 0.5 }}>
-                                    {tab === 'project' ? 'Project Registration' : tab === 'wall-magazine' ? 'Wall Magazine Registration' : 'Science Olympiad Registration'}
+                                    {{
+                                        'project':       'Project Registration',
+                                        'wall-magazine': 'Wall Magazine Registration',
+                                        'olympiad':      'Science Olympiad Registration',
+                                        'robo-sumo':     'Robo Sumo Registration',
+                                        'lfr-maze':      'LFR Maze Solving Registration',
+                                    }[tab]}
                                 </Typography>
                                 <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', mb: 2.5 }}>
                                     8th WICEBD — Bangladesh National Round
@@ -158,6 +170,7 @@ export default function RegistrationPage() {
                                             </div>
 
                                             {/* Prize pool */}
+                                            {FEE_INFO[tab].prize && (
                                             <div style={{
                                                 flex: 1, minWidth: 140,
                                                 background: 'rgba(255,255,255,0.04)',
@@ -171,6 +184,7 @@ export default function RegistrationPage() {
                                                     {FEE_INFO[tab].prize}
                                                 </div>
                                             </div>
+                                            )}
                                         </div>
                                     );
                                 })()}
@@ -178,6 +192,8 @@ export default function RegistrationPage() {
                                 {tab === 'project' && <ProjectRegistrationForm onPromoChange={handlePromoChange} />}
                                 {tab === 'wall-magazine' && <WallMagazineRegistrationForm onPromoChange={handlePromoChange} />}
                                 {tab === 'olympiad' && <OlympiadRegistrationForm onPromoChange={handlePromoChange} />}
+                                {tab === 'robo-sumo' && <RoboSumoRegistrationForm onPromoChange={handlePromoChange} />}
+                                {tab === 'lfr-maze' && <LFRMazeSolvingRegistrationForm onPromoChange={handlePromoChange} />}
                             </motion.div>
                         </AnimatePresence>
                     </div>
