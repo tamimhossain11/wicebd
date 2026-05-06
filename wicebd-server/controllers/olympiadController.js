@@ -283,11 +283,11 @@ const exportOlympiadToCSV = async (req, res) => {
     const headers = Object.keys(results[0]).join(',');
     
     // Create CSV rows
-    const rows = results.map(obj => 
-      Object.values(obj).map(value => 
+    const rows = results.map(obj =>
+      Object.values(obj).map(value =>
         `"${value !== null ? value.toString().replace(/"/g, '""') : ''}"`
       ).join(',')
-    ).join('\n');
+    );
 
     const csvContent = [headers, ...rows].join('\n');
     
