@@ -1111,6 +1111,23 @@ export default function AdminDashboard() {
                     Export Full CSV
                   </Button>
                 )}
+                {activeNav === 3 && (
+                  <Button startIcon={<FileDownload />}
+                    onClick={async () => {
+                      try {
+                        const res = await api.get('/api/admin/wall-magazine/export', { responseType: 'blob' });
+                        const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.setAttribute('download', 'wall_magazine.csv');
+                        document.body.appendChild(a); a.click(); a.remove();
+                      } catch { setError('Export failed'); }
+                    }}
+                    variant="outlined" size="small"
+                    sx={{ color: AMBER, borderColor: `${AMBER}50`, textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: AMBER, background: `${AMBER}10` } }}>
+                    Export CSV
+                  </Button>
+                )}
                 {(activeNav === 16 || activeNav === 17) && (
                   <Button startIcon={<FileDownload />}
                     onClick={async () => {
