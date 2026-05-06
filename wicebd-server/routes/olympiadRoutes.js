@@ -12,6 +12,6 @@ router.post('/register', optionalUserAuth, olympiadController.registerParticipan
 
 // Olympiad admin routes
 router.get('/getolympiad',olympiadController.getOlympiadParticipants);
-router.get('/olympiad/export',olympiadController.exportOlympiadToCSV);
+router.get('/export', olympiadController.exportOlympiadToCSV);
 
 module.exports = router;
