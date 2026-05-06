@@ -1094,6 +1094,23 @@ export default function AdminDashboard() {
                     Export CSV
                   </Button>
                 )}
+                {activeNav === 1 && (
+                  <Button startIcon={<FileDownload />}
+                    onClick={async () => {
+                      try {
+                        const res = await api.get('/api/admin/participants/export-full', { responseType: 'blob' });
+                        const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.setAttribute('download', 'participants_full.csv');
+                        document.body.appendChild(a); a.click(); a.remove();
+                      } catch { setError('Export failed'); }
+                    }}
+                    variant="outlined" size="small"
+                    sx={{ color: '#4fc3f7', borderColor: '#4fc3f750', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#4fc3f7', background: '#4fc3f710' } }}>
+                    Export Full CSV
+                  </Button>
+                )}
                 {(activeNav === 16 || activeNav === 17) && (
                   <Button startIcon={<FileDownload />}
                     onClick={async () => {
