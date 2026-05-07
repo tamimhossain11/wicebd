@@ -56,7 +56,7 @@ const NAV = [
   { id: 'event-pass',     label: 'ID Cards',          icon: <Badge           sx={{ fontSize: 19 }} /> },
   { id: 'announcements',  label: 'Announcements',     icon: <Notifications   sx={{ fontSize: 19 }} /> },
   { id: 'results',        label: 'My Results',        icon: <EmojiEvents     sx={{ fontSize: 19 }} /> },
-  { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} />, disabled: true },
+  { id: 'schedule',       label: 'Schedule',          icon: <CalendarMonth   sx={{ fontSize: 19 }} /> },
   { id: 'profile',        label: 'Profile',           icon: <Person          sx={{ fontSize: 19 }} /> },
 ];
 
@@ -935,21 +935,131 @@ export default function UserDashboard() {
             </Box>
           )}
 
-          {active === 'schedule' && (
-            <Box>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>Event Schedule</Typography>
-                <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>WICE Bangladesh — 8th Edition</Typography>
+          {active === 'schedule' && (() => {
+            const SCHEDULE = [
+              { time: '07:30 – 09:30 AM', title: 'Setup & Registration',      sub: 'Project Display • Wall Magazine • Arena Setup',                              highlight: false, color: '#800020' },
+              { time: '09:00 – 09:30 AM', title: "Judges' Briefing",           sub: null,                                                                         highlight: false, color: '#6366f1' },
+              { time: '09:30 – 10:30 AM', title: 'Grand Opening Ceremony',     sub: null,                                                                         highlight: false, color: '#f59e0b' },
+              { time: '10:45 – 01:15 PM', title: 'Judging – Phase 1',          sub: 'Project Display • Wall Magazine\nParallel Competitions – LFR Maze Solving • Robo Sumo', highlight: true,  color: '#800020' },
+              { time: '01:15 – 02:00 PM', title: 'Prayer & Lunch Break',       sub: null,                                                                         highlight: false, color: '#64748b' },
+              { time: '02:00 – 04:00 PM', title: 'Judging – Phase 2',          sub: 'Final Evaluation & Deliberation\nFinal Rounds – LFR Maze Solving • Robo Sumo',           highlight: true,  color: '#800020' },
+              { time: '02:15 – 03:15 PM', title: 'STEM Olympiad',              sub: null,                                                                         highlight: true,  color: '#0f3460' },
+              { time: '02:30 – 04:00 PM', title: 'Celebrity Session & Engagement', sub: null,                                                                     highlight: false, color: '#10b981' },
+              { time: '04:00 – 05:00 PM', title: 'Result Processing & Preparation', sub: null,                                                                    highlight: false, color: '#6366f1' },
+              { time: '05:00 – 07:00 PM', title: 'Prize Giving & Closing Ceremony', sub: null,                                                                    highlight: true,  color: '#f59e0b' },
+            ];
+            return (
+              <Box>
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h5" fontWeight={800} sx={{ color: '#fff' }}>Official Event Schedule</Typography>
+                  <Typography sx={{ color: C.muted, fontSize: 13.5, mt: 0.5 }}>
+                    8th WICE Bangladesh — National Round
+                  </Typography>
+                </Box>
+
+                {/* Header banner */}
+                <Paper sx={{
+                  p: 3, mb: 3.5, borderRadius: 3, overflow: 'hidden', position: 'relative',
+                  background: `linear-gradient(135deg, ${C.primary}28 0%, rgba(255,255,255,0.03) 100%)`,
+                  border: `1px solid ${C.primary}40`,
+                }}>
+                  <Box sx={{ position: 'absolute', top: -30, right: -30, width: 150, height: 150, borderRadius: '50%', background: `radial-gradient(circle, ${C.primary}30, transparent 70%)`, pointerEvents: 'none' }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ width: 52, height: 52, borderRadius: 2, background: `linear-gradient(135deg, ${C.primary}, ${C.accent})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 6px 20px rgba(128,0,32,0.45)`, flexShrink: 0 }}>
+                      <CalendarMonth sx={{ color: '#fff', fontSize: 26 }} />
+                    </Box>
+                    <Box>
+                      <Typography fontWeight={800} sx={{ color: '#fff', fontSize: 16, lineHeight: 1.3 }}>
+                        8th World Invention Competition &amp; Exhibition — 2026
+                      </Typography>
+                      <Typography sx={{ color: C.muted, fontSize: 13, mt: 0.3 }}>
+                        Bangladesh National Round &nbsp;·&nbsp; Venue TBA
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Paper>
+
+                {/* Timeline */}
+                <Box sx={{ position: 'relative' }}>
+                  {/* Vertical line */}
+                  <Box sx={{
+                    display: { xs: 'none', sm: 'block' },
+                    position: 'absolute', left: 128, top: 12, bottom: 12, width: 2,
+                    background: 'rgba(255,255,255,0.06)', borderRadius: 1,
+                  }} />
+
+                  {SCHEDULE.map((item, i) => (
+                    <Box key={i} sx={{ display: 'flex', gap: { xs: 0, sm: 3 }, mb: 2, alignItems: 'flex-start' }}>
+                      {/* Time column */}
+                      <Box sx={{
+                        display: { xs: 'none', sm: 'flex' }, flexDirection: 'column', alignItems: 'flex-end',
+                        width: 120, flexShrink: 0, pt: 2.2,
+                      }}>
+                        <Typography sx={{ color: C.muted, fontSize: 11.5, fontWeight: 600, fontFamily: 'monospace', textAlign: 'right', lineHeight: 1.4 }}>
+                          {item.time.replace(' – ', '\n– ')}
+                        </Typography>
+                      </Box>
+
+                      {/* Dot */}
+                      <Box sx={{
+                        display: { xs: 'none', sm: 'flex' }, alignItems: 'center', justifyContent: 'center',
+                        width: 16, flexShrink: 0, mt: 2.5,
+                      }}>
+                        <Box sx={{
+                          width: item.highlight ? 14 : 10, height: item.highlight ? 14 : 10,
+                          borderRadius: '50%', background: item.highlight ? item.color : 'rgba(255,255,255,0.2)',
+                          boxShadow: item.highlight ? `0 0 10px ${item.color}80` : 'none',
+                          border: item.highlight ? `2px solid ${item.color}60` : 'none',
+                          transition: 'all 0.2s', flexShrink: 0,
+                        }} />
+                      </Box>
+
+                      {/* Card */}
+                      <Box sx={{ flex: 1 }}>
+                        <Paper sx={{
+                          p: { xs: 2, sm: 2.5 }, borderRadius: 2.5,
+                          background: item.highlight
+                            ? `linear-gradient(135deg, ${item.color}18 0%, rgba(255,255,255,0.03) 100%)`
+                            : C.card,
+                          border: `1px solid ${item.highlight ? item.color + '35' : 'rgba(255,255,255,0.07)'}`,
+                          boxShadow: item.highlight ? `0 4px 20px ${item.color}18` : 'none',
+                          transition: 'box-shadow 0.2s',
+                          '&:hover': { boxShadow: `0 6px 24px ${item.color}25` },
+                        }}>
+                          {/* Mobile: show time inside card */}
+                          <Typography sx={{ display: { xs: 'block', sm: 'none' }, color: C.muted, fontSize: 11, fontWeight: 600, fontFamily: 'monospace', mb: 0.8 }}>
+                            {item.time}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                            <Typography fontWeight={item.highlight ? 800 : 600} sx={{ color: item.highlight ? '#fff' : 'rgba(255,255,255,0.8)', fontSize: item.highlight ? 15 : 14, flex: 1 }}>
+                              {item.title}
+                            </Typography>
+                            {item.highlight && (
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', background: item.color, boxShadow: `0 0 6px ${item.color}`, flexShrink: 0 }} />
+                            )}
+                          </Box>
+                          {item.sub && (
+                            <Box sx={{ mt: 1 }}>
+                              {item.sub.split('\n').map((line, li) => (
+                                <Typography key={li} sx={{ color: C.muted, fontSize: 12.5, lineHeight: 1.7 }}>{line}</Typography>
+                              ))}
+                            </Box>
+                          )}
+                        </Paper>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+
+                {/* Footer note */}
+                <Paper sx={{ p: 2.5, mt: 2, borderRadius: 3, background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                  <Typography sx={{ color: 'rgba(245,158,11,0.85)', fontSize: 12.5, fontWeight: 600, textAlign: 'center' }}>
+                    ⚠️ Schedule is subject to change. Please check for the latest updates.
+                  </Typography>
+                </Paper>
               </Box>
-              <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 3, background: C.card, border: `1px solid ${C.border}` }}>
-                <CalendarMonth sx={{ fontSize: 64, color: `${C.primary}55`, mb: 2 }} />
-                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 800, mb: 1 }}>Schedule will be announced soon</Typography>
-                <Typography sx={{ color: C.muted, fontSize: 13 }}>
-                  The detailed event schedule is currently being finalized. Check back here for updates.
-                </Typography>
-              </Paper>
-            </Box>
-          )}
+            );
+          })()}
 
           {/* ══ PROFILE ══ */}
           {active === 'profile' && (
