@@ -352,7 +352,7 @@ export default function AdminDashboard() {
       setNrSummary({ project: data.project || [], wall_magazine: data.wall_magazine || [] });
       setNrJudgeBreakdown(data.judge_breakdown || []);
       setNrSelections(selections.data?.selections || []);
-    } catch { /* non-critical */ }
+    } catch (e) { console.error('fetchNationalRound error:', e?.response?.data || e.message); }
   }, []);
 
   const fetchRoboSoccer = useCallback(async () => {

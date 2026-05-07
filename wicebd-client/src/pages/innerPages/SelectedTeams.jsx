@@ -13,9 +13,10 @@ const Orb = ({ style }) => (
 );
 
 const MEDAL = {
-  gold:   { color: '#FFD700', bg: 'rgba(255,215,0,0.08)',   border: 'rgba(255,215,0,0.25)',   label: 'Gold',   emoji: '🥇', rank: 1 },
-  silver: { color: '#C0C0C0', bg: 'rgba(192,192,192,0.08)', border: 'rgba(192,192,192,0.25)', label: 'Silver', emoji: '🥈', rank: 2 },
-  bronze: { color: '#CD7F32', bg: 'rgba(205,127,50,0.08)',  border: 'rgba(205,127,50,0.25)',  label: 'Bronze', emoji: '🥉', rank: 3 },
+  gold:              { color: '#FFD700', bg: 'rgba(255,215,0,0.08)',    border: 'rgba(255,215,0,0.25)',    label: 'Gold',               emoji: '🥇', rank: 1 },
+  silver:            { color: '#C0C0C0', bg: 'rgba(192,192,192,0.08)',  border: 'rgba(192,192,192,0.25)',  label: 'Silver',             emoji: '🥈', rank: 2 },
+  bronze:            { color: '#CD7F32', bg: 'rgba(205,127,50,0.08)',   border: 'rgba(205,127,50,0.25)',   label: 'Bronze',             emoji: '🥉', rank: 3 },
+  honorable_mention: { color: '#06b6d4', bg: 'rgba(6,182,212,0.07)',   border: 'rgba(6,182,212,0.22)',    label: 'Honorable Mention',  emoji: '🏅', rank: 4 },
 };
 
 const CATEGORY_ORDER = ['Elementary', 'High School', 'college', 'University'];
@@ -32,7 +33,7 @@ const SelectedTeams = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Group selections: type → subcategory → education_category → position
+  // Group selections: type → subcategory → education_category → position → [entries]
   const grouped = {};
   selections.forEach(s => {
     const type = s.competition_type === 'wall_magazine' ? 'Wall Magazine' : 'Project';
@@ -41,7 +42,13 @@ const SelectedTeams = () => {
     if (!grouped[type]) grouped[type] = {};
     if (!grouped[type][sub]) grouped[type][sub] = {};
     if (!grouped[type][sub][cat]) grouped[type][sub][cat] = {};
-    grouped[type][sub][cat][s.position] = s;
+    const pos = s.position;
+    if (pos === 'honorable_mention') {
+      if (!grouped[type][sub][cat][pos]) grouped[type][sub][cat][pos] = [];
+      grouped[type][sub][cat][pos].push(s);
+    } else {
+      grouped[type][sub][cat][pos] = s;
+    }
   });
 
   const hasResults = selections.length > 0;
@@ -101,12 +108,14 @@ const SelectedTeams = () => {
 
               {hasResults && (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
-                  {Object.values(MEDAL).map(m => (
-                    <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: 8, background: m.bg, border: `1px solid ${m.border}`, borderRadius: 50, padding: '8px 20px' }}>
+                  {['gold', 'silver', 'bronze', 'honorable_mention']
+                    .filter(k => selections.some(s => s.position === k))
+                    .map(k => { const m = MEDAL[k]; return (
+                    <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, background: m.bg, border: `1px solid ${m.border}`, borderRadius: 50, padding: '8px 20px' }}>
                       <span style={{ fontSize: 18 }}>{m.emoji}</span>
                       <span style={{ color: m.color, fontWeight: 700, fontSize: 14 }}>{m.label}</span>
                     </div>
-                  ))}
+                  ); })}
                 </div>
               )}
             </motion.div>
@@ -157,6 +166,28 @@ const SelectedTeams = () => {
                           );
                         })}
                       </div>
+                      {cats[cat]['honorable_mention']?.length > 0 && (
+                        <div style={{ marginTop: 16 }}>
+                          <div style={{ color: 'rgba(6,182,212,0.7)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 10 }}>🏅 Honorable Mention</div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
+                            {cats[cat]['honorable_mention'].map((s, hi) => {
+                              const m = MEDAL.honorable_mention;
+                              return (
+                                <motion.div key={s.registration_id || hi} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * hi, duration: 0.4 }}
+                                  style={{ background: m.bg, border: `1px solid ${m.border}`, borderRadius: 16, padding: '18px 20px', position: 'relative', overflow: 'hidden' }}>
+                                  <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: `radial-gradient(circle, ${m.color}15, transparent 70%)`, pointerEvents: 'none' }} />
+                                  <div style={{ color: m.color, fontWeight: 800, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Honorable Mention</div>
+                                  <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 2, lineHeight: 1.3 }}>{s.team_name}</div>
+                                  {s.leader_name && s.leader_name !== s.team_name && (
+                                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginBottom: 4 }}>Leader: {s.leader_name}</div>
+                                  )}
+                                  <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{s.institution}</div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
