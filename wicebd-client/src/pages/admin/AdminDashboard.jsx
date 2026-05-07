@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Grid, Paper, Button, IconButton,
@@ -268,7 +268,9 @@ export default function AdminDashboard() {
   const [nrSelections, setNrSelections] = useState([]);
   const [nrPreview, setNrPreview] = useState([]);
   const [nrComputing, setNrComputing] = useState(false);
-  const [nrTeamsPerGroup, setNrTeamsPerGroup] = useState(3);
+  const [nrJudgeBreakdown, setNrJudgeBreakdown] = useState([]);
+  const [nrHonorableSearch, setNrHonorableSearch] = useState('');
+  const [nrEditMark, setNrEditMark] = useState(null);
 
   // Reset password dialog
   const [resetPwdDialog, setResetPwdDialog] = useState({ open: false, type: '', id: null, name: '' });
@@ -346,7 +348,9 @@ export default function AdminDashboard() {
         api.get('/api/national-round/marks-summary'),
         api.get('/api/national-round'),
       ]);
-      setNrSummary({ project: summary.data?.project || [], wall_magazine: summary.data?.wall_magazine || [] });
+      const { data } = summary;
+      setNrSummary({ project: data.project || [], wall_magazine: data.wall_magazine || [] });
+      setNrJudgeBreakdown(data.judge_breakdown || []);
       setNrSelections(selections.data?.selections || []);
     } catch { /* non-critical */ }
   }, []);
@@ -2004,7 +2008,6 @@ export default function AdminDashboard() {
 
           {/* ══════════════ NATIONAL ROUND ══════════════ */}
           {activeNav === 14 && adminRole === 'super_admin' && (() => {
-            // Group marks by subcategory → education_group, sorted by marks desc within each group
             const normCat = (c) => (c === 'Primary School' || c === 'Elementary') ? 'Elementary' : c;
             const groupMarks = (rows) => {
               const subs = {};
@@ -2015,7 +2018,7 @@ export default function AdminDashboard() {
                 subs[r.subcategory][cat].push(r);
               });
               Object.values(subs).forEach(sub =>
-                Object.values(sub).forEach(grp => grp.sort((a, b) => b.total_marks - a.total_marks))
+                Object.values(sub).forEach(grp => grp.sort((a, b) => b.avg_marks - a.avg_marks))
               );
               return subs;
             };
@@ -2023,8 +2026,100 @@ export default function AdminDashboard() {
             const CAT_LABEL = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
             const posColor = (pos) => pos === 'gold' ? '#FFD700' : pos === 'silver' ? '#C0C0C0' : pos === 'bronze' ? '#CD7F32' : CYAN;
 
+            const thresholdPos   = (avg) => avg >= 91 ? 'gold' : avg >= 81 ? 'silver' : avg >= 71 ? 'bronze' : avg >= 60 ? 'honorable_mention' : null;
+            const thresholdColor = (avg) => avg >= 91 ? '#FFD700' : avg >= 81 ? '#C0C0C0' : avg >= 71 ? '#CD7F32' : avg >= 60 ? CYAN : 'rgba(255,255,255,0.2)';
+            const thresholdLabel = (avg) => avg >= 91 ? 'Gold' : avg >= 81 ? 'Silver' : avg >= 71 ? 'Bronze' : avg >= 60 ? 'Honorable' : 'Below';
+
             const projectGrouped = groupMarks(nrSummary.project);
             const wallGrouped    = groupMarks(nrSummary.wall_magazine);
+
+            // Build breakdown map: registration_id → array of judge entries
+            const breakdownMap = {};
+            nrJudgeBreakdown.forEach(b => {
+              if (!breakdownMap[b.registration_id]) breakdownMap[b.registration_id] = [];
+              breakdownMap[b.registration_id].push(b);
+            });
+
+            // Honorable mention search
+            const hmSearchLower = nrHonorableSearch.trim().toLowerCase();
+            const allTeams = [...nrSummary.project, ...nrSummary.wall_magazine];
+            const hmResults = hmSearchLower
+              ? allTeams.filter(t => (t.team_name || '').toLowerCase().includes(hmSearchLower) || (t.institution || '').toLowerCase().includes(hmSearchLower))
+              : [];
+            const manualSelections = nrSelections.filter(s => s.is_manual);
+
+            // Inline edit state helpers
+            const isEditing = (id) => nrEditMark?.id === id;
+            const editVal   = (key) => nrEditMark?.[key] ?? '';
+
+            const renderMarksSummaryTable = (rows, headers, rowRenderer) => (
+              <Box sx={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.015)' }}>
+                      {headers.map(h => (
+                        <th key={h} style={{ padding: '8px 14px', textAlign: h === 'Avg Marks' || h === 'Rank' ? 'center' : 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>{rowRenderer()}</tbody>
+                </table>
+              </Box>
+            );
+
+            const renderTeamRow = (r, ri, showEdu = false) => {
+              const avg = parseFloat(r.avg_marks);
+              const pos = thresholdPos(avg);
+              const isSelected = pos !== null;
+              const tColor = thresholdColor(avg);
+              const judgeEntries = breakdownMap[r.registration_id] || [];
+              return (
+                <React.Fragment key={r.registration_id}>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${tColor}08` : 'transparent', opacity: isSelected ? 1 : 0.5 }}>
+                    <td style={{ padding: '9px 14px', textAlign: 'center' }}>
+                      {isSelected ? (
+                        <Box sx={{ width: 26, height: 26, borderRadius: '50%', background: `${tColor}22`, border: `1px solid ${tColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
+                          <Typography sx={{ fontSize: 10, fontWeight: 800, color: tColor }}>{ri + 1}</Typography>
+                        </Box>
+                      ) : (
+                        <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>{ri + 1}</Typography>
+                      )}
+                    </td>
+                    <td style={{ padding: '9px 14px' }}>
+                      <Typography sx={{ color: isSelected ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: isSelected ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
+                    </td>
+                    <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.institution}</td>
+                    <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{r.leader_name || '—'}</td>
+                    {showEdu && (
+                      <td style={{ padding: '9px 14px' }}>
+                        <Chip label={CAT_LABEL[r.education_category] || r.education_category || '—'} size="small" sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.45)', fontSize: 11 }} />
+                      </td>
+                    )}
+                    <td style={{ padding: '9px 14px', textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'center' }}>
+                        <Typography sx={{ color: isSelected ? GREEN : 'rgba(255,255,255,0.3)', fontWeight: isSelected ? 800 : 400, fontSize: isSelected ? 15 : 13 }}>{avg.toFixed(1)}</Typography>
+                        {isSelected && <Chip label={thresholdLabel(avg)} size="small" sx={{ background: `${tColor}22`, color: tColor, fontSize: 10, height: 18 }} />}
+                      </Box>
+                    </td>
+                    <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center' }}>{r.judge_count}</td>
+                  </tr>
+                  {judgeEntries.length > 0 && (
+                    <tr style={{ background: 'rgba(255,255,255,0.01)' }}>
+                      <td colSpan={showEdu ? 7 : 6} style={{ padding: '0 14px 8px 48px' }}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, pt: 0.5 }}>
+                          {judgeEntries.map((jb, ji) => (
+                            <Chip key={ji} size="small"
+                              label={`${jb.judge_name}: U${jb.urgency} V${jb.visibility} R${jb.relevance} P${jb.presentation} = ${jb.total}`}
+                              sx={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontSize: 10, fontFamily: 'monospace' }}
+                            />
+                          ))}
+                        </Box>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            };
 
             return (
             <Box>
@@ -2033,27 +2128,14 @@ export default function AdminDashboard() {
                 title="National Round Management"
                 action={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-                    {/* Teams-per-group control */}
-                    <Paper sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, background: 'rgba(255,255,255,0.04)', border: `1px solid ${BORDER}`, borderRadius: 2 }}>
-                      <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600, mr: 0.5 }}>Teams / Group</Typography>
-                      <IconButton size="small" onClick={() => setNrTeamsPerGroup(n => Math.max(1, n - 1))}
-                        sx={{ color: 'rgba(255,255,255,0.6)', width: 26, height: 26, '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.08)' } }}>
-                        <ArrowDownward sx={{ fontSize: 14 }} />
-                      </IconButton>
-                      <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 18, minWidth: 24, textAlign: 'center' }}>{nrTeamsPerGroup}</Typography>
-                      <IconButton size="small" onClick={() => setNrTeamsPerGroup(n => Math.min(20, n + 1))}
-                        sx={{ color: 'rgba(255,255,255,0.6)', width: 26, height: 26, '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.08)' } }}>
-                        <ArrowUpward sx={{ fontSize: 14 }} />
-                      </IconButton>
-                    </Paper>
                     <Button startIcon={<Preview />} variant="outlined" size="small"
                       disabled={nrComputing}
                       onClick={async () => {
                         setNrComputing(true);
                         try {
-                          const { data } = await api.post('/api/national-round/compute', { confirm: false, teams_per_group: nrTeamsPerGroup });
+                          const { data } = await api.post('/api/national-round/compute', { confirm: false });
                           setNrPreview(data.winners || []);
-                          toast.info(`Preview: ${data.winners?.length || 0} winners (top ${nrTeamsPerGroup} per group)`);
+                          toast.info(`Preview: ${data.winners?.length || 0} qualifiers by threshold`);
                         } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
                         finally { setNrComputing(false); }
                       }}
@@ -2063,11 +2145,11 @@ export default function AdminDashboard() {
                     <Button startIcon={<EmojiEvents />} variant="contained" size="small"
                       disabled={nrComputing}
                       onClick={async () => {
-                        if (!window.confirm(`This will select top ${nrTeamsPerGroup} teams per group and overwrite existing selections. Continue?`)) return;
+                        if (!window.confirm('This will compute and publish qualifiers by score threshold. Continue?')) return;
                         setNrComputing(true);
                         try {
-                          const { data } = await api.post('/api/national-round/compute', { confirm: true, teams_per_group: nrTeamsPerGroup });
-                          toast.success(`${data.count} winners published (top ${nrTeamsPerGroup} per group)`);
+                          const { data } = await api.post('/api/national-round/compute', { confirm: true });
+                          toast.success(`${data.count} teams published`);
                           fetchNationalRound();
                           setNrPreview([]);
                         } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
@@ -2080,31 +2162,24 @@ export default function AdminDashboard() {
                 }
               />
 
-              {/* Preview banner */}
+              {/* Preview banner — grouped by position */}
               {nrPreview.length > 0 && (() => {
-                const pvGrouped = {};
-                nrPreview.forEach(w => {
-                  const edLabel = CAT_LABEL[w.education_category] || w.education_category;
-                  const key = w.competition_type === 'wall_magazine'
-                    ? w.subcategory
-                    : `${w.subcategory} — ${edLabel}`;
-                  if (!pvGrouped[key]) pvGrouped[key] = [];
-                  pvGrouped[key].push(w);
-                });
+                const pvGrouped = { gold: [], silver: [], bronze: [], honorable_mention: [] };
+                nrPreview.forEach(w => { if (pvGrouped[w.position]) pvGrouped[w.position].push(w); });
                 return (
                   <Paper sx={{ p: 2.5, mb: 3, background: `${CYAN}08`, border: `1px solid ${CYAN}30`, borderRadius: 3 }}>
                     <Typography sx={{ color: CYAN, fontWeight: 700, fontSize: 14, mb: 2 }}>
-                      Preview — {nrPreview.length} winners · top {nrTeamsPerGroup} per group (not published)
+                      Preview — {nrPreview.length} qualifiers by threshold (not published)
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                      {Object.entries(pvGrouped).map(([grpLabel, teams]) => (
-                        <Box key={grpLabel}>
-                          <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.75 }}>{grpLabel}</Typography>
+                      {Object.entries(pvGrouped).filter(([, teams]) => teams.length > 0).map(([pos, teams]) => (
+                        <Box key={pos}>
+                          <Typography sx={{ color: posColor(pos), fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.75 }}>{pos.replace('_', ' ')}</Typography>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
                             {teams.map((w, i) => (
                               <Chip key={i}
                                 icon={<Star sx={{ fontSize: '13px !important', color: `${posColor(w.position)} !important` }} />}
-                                label={`${w.position.toUpperCase()} · ${w.team_name}`}
+                                label={`${w.team_name} · avg ${parseFloat(w.avg_marks).toFixed(1)}`}
                                 size="small"
                                 sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', fontSize: 11, border: `1px solid ${posColor(w.position)}40` }}
                               />
@@ -2129,59 +2204,23 @@ export default function AdminDashboard() {
                 <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                   {Object.entries(projectGrouped).map(([sub, groups]) => (
                     <Paper key={sub} sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
-                      {/* Subcategory header */}
                       <Box sx={{ px: 2.5, py: 1.5, background: `${ACCENT}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${RED}, ${ACCENT})` }} />
                         <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>{sub}</Typography>
                         <Chip label={`${Object.values(groups).flat().length} teams`} size="small"
                           sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
                       </Box>
-                      {/* Education groups */}
                       {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
                         <Box key={cat}>
                           <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{CAT_LABEL[cat] || cat}</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · top {nrTeamsPerGroup} selected</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · threshold-based selection</Typography>
                           </Box>
-                          <Box sx={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                              <thead>
-                                <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.015)' }}>
-                                  {['Rank', 'Project / Team', 'Institution', 'Leader', 'Total Marks', 'Judges'].map(h => (
-                                    <th key={h} style={{ padding: '8px 14px', textAlign: h === 'Total Marks' || h === 'Rank' ? 'center' : 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
-                                  ))}
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {groups[cat].map((r, ri) => {
-                                  const isSelected = ri < nrTeamsPerGroup;
-                                  const posLbl = ri === 0 ? 'gold' : ri === 1 ? 'silver' : ri === 2 ? 'bronze' : null;
-                                  return (
-                                    <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${posColor(posLbl || 'selected')}08` : 'transparent', opacity: isSelected ? 1 : 0.55 }}>
-                                      <td style={{ padding: '9px 14px', textAlign: 'center' }}>
-                                        {isSelected ? (
-                                          <Box sx={{ width: 26, height: 26, borderRadius: '50%', background: posLbl ? `${posColor(posLbl)}22` : `${CYAN}22`, border: `1px solid ${posLbl ? posColor(posLbl) : CYAN}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-                                            <Typography sx={{ fontSize: 10, fontWeight: 800, color: posLbl ? posColor(posLbl) : CYAN }}>{ri + 1}</Typography>
-                                          </Box>
-                                        ) : (
-                                          <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>{ri + 1}</Typography>
-                                        )}
-                                      </td>
-                                      <td style={{ padding: '9px 14px' }}>
-                                        <Typography sx={{ color: isSelected ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: isSelected ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
-                                      </td>
-                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.institution}</td>
-                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{r.leader_name || '—'}</td>
-                                      <td style={{ padding: '9px 14px', textAlign: 'center' }}>
-                                        <Typography sx={{ color: isSelected ? GREEN : 'rgba(255,255,255,0.3)', fontWeight: isSelected ? 800 : 400, fontSize: isSelected ? 15 : 13 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography>
-                                      </td>
-                                      <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center' }}>{r.judge_count}</td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </Box>
+                          {renderMarksSummaryTable(
+                            groups[cat],
+                            ['Rank', 'Project / Team', 'Institution', 'Leader', 'Avg Marks (Judge)', 'Judges'],
+                            () => groups[cat].map((r, ri) => renderTeamRow(r, ri, false))
+                          )}
                         </Box>
                       ))}
                     </Paper>
@@ -2189,7 +2228,7 @@ export default function AdminDashboard() {
                 </Box>
               )}
 
-              {/* ── Wall Magazine Marks — overall top 3 (Gold / Silver / Bronze) ── */}
+              {/* ── Wall Magazine Marks — same grouped layout ── */}
               <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
                 Marks Summary — Wall Magazine
               </Typography>
@@ -2199,51 +2238,128 @@ export default function AdminDashboard() {
                 </Paper>
               ) : (
                 <Box sx={{ mb: 3 }}>
-                  <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
-                    <Box sx={{ px: 2.5, py: 1.5, background: `${AMBER}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${AMBER}, #d97706)` }} />
-                      <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>Wall Magazine</Typography>
-                      <Chip label={`${nrSummary.wall_magazine.length} teams`} size="small"
-                        sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
-                      <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>· Top 3 overall — Gold, Silver, Bronze</Typography>
-                    </Box>
+                  {Object.entries(wallGrouped).map(([sub, groups]) => (
+                    <Paper key={sub} sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 2 }}>
+                      <Box sx={{ px: 2.5, py: 1.5, background: `${AMBER}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${AMBER}, #d97706)` }} />
+                        <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>{sub}</Typography>
+                        <Chip label={`${Object.values(groups).flat().length} teams`} size="small"
+                          sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
+                        <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>· Threshold-based selection</Typography>
+                      </Box>
+                      {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
+                        <Box key={cat}>
+                          <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{CAT_LABEL[cat] || cat}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams</Typography>
+                          </Box>
+                          {renderMarksSummaryTable(
+                            groups[cat],
+                            ['Rank', 'Magazine / Team', 'Institution', 'Leader', 'Education', 'Avg Marks (Judge)', 'Judges'],
+                            () => groups[cat].map((r, ri) => renderTeamRow(r, ri, true))
+                          )}
+                        </Box>
+                      ))}
+                    </Paper>
+                  ))}
+                </Box>
+              )}
+
+              {/* ── Edit Judge Marks (super_admin) ── */}
+              {nrJudgeBreakdown.length > 0 && (
+                <>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                    Edit Judge Marks
+                  </Typography>
+                  <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
                     <Box sx={{ overflowX: 'auto' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                          <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.015)' }}>
-                            {['Rank', 'Magazine / Team', 'Institution', 'Leader', 'Education', 'Total Marks', 'Judges'].map(h => (
-                              <th key={h} style={{ padding: '8px 14px', textAlign: h === 'Total Marks' || h === 'Rank' ? 'center' : 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                          <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
+                            {['Judge', 'Team', 'U/30', 'V/20', 'R/30', 'P/20', 'Total', 'Actions'].map(h => (
+                              <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
-                          {[...nrSummary.wall_magazine].sort((a, b) => b.total_marks - a.total_marks).map((r, ri) => {
-                            const isSelected = ri < 3;
-                            const posLbl = ri === 0 ? 'gold' : ri === 1 ? 'silver' : ri === 2 ? 'bronze' : null;
+                          {nrJudgeBreakdown.map((jb, i) => {
+                            const editing = isEditing(jb.id);
+                            const cellSx = { padding: '8px 12px', fontSize: 12 };
                             return (
-                              <tr key={r.registration_id} style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${posColor(posLbl)}08` : 'transparent', opacity: isSelected ? 1 : 0.5 }}>
-                                <td style={{ padding: '9px 14px', textAlign: 'center' }}>
-                                  {posLbl ? (
-                                    <Box sx={{ width: 26, height: 26, borderRadius: '50%', background: `${posColor(posLbl)}22`, border: `1px solid ${posColor(posLbl)}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-                                      <Typography sx={{ fontSize: 10, fontWeight: 800, color: posColor(posLbl) }}>{ri + 1}</Typography>
-                                    </Box>
-                                  ) : (
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>{ri + 1}</Typography>
-                                  )}
+                              <tr key={jb.id} style={{ borderBottom: `1px solid ${BORDER}`, background: editing ? `${ACCENT}08` : i % 2 ? 'rgba(255,255,255,0.012)' : 'transparent' }}>
+                                <td style={cellSx}>
+                                  <Typography sx={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>{jb.judge_name}</Typography>
+                                  <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>@{jb.username}</Typography>
                                 </td>
-                                <td style={{ padding: '9px 14px' }}>
-                                  <Typography sx={{ color: isSelected ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: isSelected ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
+                                <td style={cellSx}>
+                                  <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{jb.team_name}</Typography>
+                                  <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>{jb.institution}</Typography>
                                 </td>
-                                <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.institution}</td>
-                                <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{r.leader_name || '—'}</td>
-                                <td style={{ padding: '9px 14px' }}>
-                                  <Chip label={CAT_LABEL[r.education_category] || r.education_category || '—'} size="small"
-                                    sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.45)', fontSize: 11 }} />
-                                </td>
-                                <td style={{ padding: '9px 14px', textAlign: 'center' }}>
-                                  <Typography sx={{ color: isSelected ? GREEN : 'rgba(255,255,255,0.3)', fontWeight: isSelected ? 800 : 400, fontSize: isSelected ? 15 : 13 }}>{parseFloat(r.total_marks).toFixed(1)}</Typography>
-                                </td>
-                                <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center' }}>{r.judge_count}</td>
+                                {editing ? (
+                                  <>
+                                    {[['urgency', 30], ['visibility', 20], ['relevance', 30], ['presentation', 20]].map(([key, max]) => (
+                                      <td key={key} style={{ padding: '8px 6px' }}>
+                                        <input type="number" min={0} max={max} step={0.5}
+                                          value={editVal(key)}
+                                          onChange={e => setNrEditMark(prev => ({ ...prev, [key]: e.target.value }))}
+                                          style={{ width: 52, background: 'rgba(255,255,255,0.06)', border: `1px solid ${ACCENT}50`, borderRadius: 4, color: '#fff', padding: '4px 6px', fontSize: 12 }}
+                                        />
+                                      </td>
+                                    ))}
+                                    <td style={cellSx}>
+                                      <Typography sx={{ color: GREEN, fontWeight: 700 }}>
+                                        {([['urgency',30],['visibility',20],['relevance',30],['presentation',20]].reduce((s, [k]) => s + (parseFloat(editVal(k)) || 0), 0)).toFixed(1)}
+                                      </Typography>
+                                    </td>
+                                    <td style={{ padding: '8px 6px' }}>
+                                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                        <Button size="small" variant="contained"
+                                          sx={{ fontSize: 10, py: 0.25, px: 1, minWidth: 0, background: GREEN, '&:hover': { background: '#059669' } }}
+                                          onClick={async () => {
+                                            try {
+                                              await api.put(`/api/admin-manage/judge-marks/${jb.id}`, {
+                                                urgency: nrEditMark.urgency, visibility: nrEditMark.visibility,
+                                                relevance: nrEditMark.relevance, presentation: nrEditMark.presentation,
+                                                notes: jb.notes,
+                                              });
+                                              toast.success('Marks updated');
+                                              setNrEditMark(null);
+                                              fetchNationalRound();
+                                            } catch { toast.error('Failed to update'); }
+                                          }}>Save</Button>
+                                        <Button size="small"
+                                          sx={{ fontSize: 10, py: 0.25, px: 1, minWidth: 0, color: 'rgba(255,255,255,0.4)' }}
+                                          onClick={() => setNrEditMark(null)}>Cancel</Button>
+                                      </Box>
+                                    </td>
+                                  </>
+                                ) : (
+                                  <>
+                                    <td style={{ ...cellSx, color: '#f59e0b' }}>{jb.urgency}</td>
+                                    <td style={{ ...cellSx, color: '#06b6d4' }}>{jb.visibility}</td>
+                                    <td style={{ ...cellSx, color: '#8b5cf6' }}>{jb.relevance}</td>
+                                    <td style={{ ...cellSx, color: '#10b981' }}>{jb.presentation}</td>
+                                    <td style={cellSx}><Typography sx={{ color: GREEN, fontWeight: 700 }}>{jb.total}</Typography></td>
+                                    <td style={{ padding: '8px 6px' }}>
+                                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                        <Tooltip title="Edit marks">
+                                          <IconButton size="small"
+                                            onClick={() => setNrEditMark({ id: jb.id, urgency: jb.urgency, visibility: jb.visibility, relevance: jb.relevance, presentation: jb.presentation })}
+                                            sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: AMBER } }}>
+                                            <EditIcon sx={{ fontSize: 15 }} />
+                                          </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Delete entry">
+                                          <IconButton size="small"
+                                            onClick={async () => { if (window.confirm('Delete this judge mark?')) { await api.delete(`/api/admin-manage/judge-marks/${jb.id}`); fetchNationalRound(); } }}
+                                            sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
+                                            <Delete sx={{ fontSize: 15 }} />
+                                          </IconButton>
+                                        </Tooltip>
+                                      </Box>
+                                    </td>
+                                  </>
+                                )}
                               </tr>
                             );
                           })}
@@ -2251,36 +2367,40 @@ export default function AdminDashboard() {
                       </table>
                     </Box>
                   </Paper>
-                </Box>
+                </>
               )}
 
               {/* Published Selections */}
               {nrSelections.length > 0 && (
                 <>
                   <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>Published National Round Selections</Typography>
-                  <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
+                  <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
                     <Box sx={{ overflowX: 'auto' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                           <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
-                            {['Position', 'Team', 'Type', 'Subcategory', 'Group', 'Marks', 'Remove'].map(h => (
+                            {['Position', 'Team', 'Type', 'Subcategory', 'Group', 'Avg Marks', 'Remove'].map(h => (
                               <th key={h} style={{ padding: '11px 14px', textAlign: 'left', color: 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
                           {nrSelections.map((s, i) => {
-                            const medalColor = s.position === 'gold' ? '#FFD700' : s.position === 'silver' ? '#C0C0C0' : '#CD7F32';
+                            const isHM = s.position === 'honorable_mention';
+                            const medalColor = isHM ? CYAN : s.position === 'gold' ? '#FFD700' : s.position === 'silver' ? '#C0C0C0' : '#CD7F32';
                             return (
                               <tr key={s.id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
                                 <td style={{ padding: '10px 14px' }}>
-                                  <Chip label={s.position.toUpperCase()} size="small" sx={{ background: `${medalColor}18`, color: medalColor, fontWeight: 800, border: `1px solid ${medalColor}40`, fontSize: 11 }} />
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                                    <Chip label={s.position.replace('_', ' ').toUpperCase()} size="small" sx={{ background: `${medalColor}18`, color: medalColor, fontWeight: 800, border: `1px solid ${medalColor}40`, fontSize: 11 }} />
+                                    {s.is_manual && <Chip label="Manual" size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', fontSize: 10, height: 18 }} />}
+                                  </Box>
                                 </td>
                                 <td style={{ padding: '10px 14px', color: '#fff', fontWeight: 600, fontSize: 13 }}>{s.team_name}</td>
                                 <td style={{ padding: '10px 14px' }}><Chip label={s.competition_type === 'wall_magazine' ? 'Wall Mag' : 'Project'} size="small" sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} /></td>
                                 <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{s.subcategory || '—'}</td>
                                 <td style={{ padding: '10px 14px' }}><Chip label={CAT_LABEL[s.education_category] || s.education_category} size="small" sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} /></td>
-                                <td style={{ padding: '10px 14px' }}><Typography sx={{ color: GREEN, fontWeight: 700, fontSize: 13 }}>{parseFloat(s.total_marks).toFixed(1)}</Typography></td>
+                                <td style={{ padding: '10px 14px' }}><Typography sx={{ color: isHM ? 'rgba(255,255,255,0.35)' : GREEN, fontWeight: 700, fontSize: 13 }}>{isHM ? '—' : parseFloat(s.total_marks).toFixed(1)}</Typography></td>
                                 <td style={{ padding: '10px 14px' }}>
                                   <IconButton size="small"
                                     onClick={async () => { if (window.confirm('Remove this selection?')) { await api.delete(`/api/national-round/${s.id}`); fetchNationalRound(); } }}
@@ -2297,6 +2417,88 @@ export default function AdminDashboard() {
                   </Paper>
                 </>
               )}
+
+              {/* ── Honorable Mention Manual Override ── */}
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1.5 }}>
+                Honorable Mention — Manual Override
+              </Typography>
+              <Paper sx={{ p: 2.5, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, mb: 3 }}>
+                {/* Search box */}
+                <TextField
+                  fullWidth size="small" placeholder="Search team name or institution…"
+                  value={nrHonorableSearch}
+                  onChange={e => setNrHonorableSearch(e.target.value)}
+                  InputProps={{ startAdornment: <Search sx={{ color: 'rgba(255,255,255,0.3)', mr: 1, fontSize: 18 }} /> }}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': { color: '#fff', background: 'rgba(255,255,255,0.04)', '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' }, '&:hover fieldset': { borderColor: `${CYAN}60` }, '&.Mui-focused fieldset': { borderColor: CYAN } },
+                    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.4)' },
+                  }}
+                />
+                {hmSearchLower && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mb: 2, maxHeight: 240, overflowY: 'auto' }}>
+                    {hmResults.length === 0 ? (
+                      <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, py: 1 }}>No teams found</Typography>
+                    ) : hmResults.map(t => {
+                      const alreadySelected = nrSelections.some(s => s.registration_id === t.registration_id);
+                      return (
+                        <Box key={t.registration_id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1.25, background: 'rgba(255,255,255,0.03)', borderRadius: 1.5, border: `1px solid ${BORDER}` }}>
+                          <Box>
+                            <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{t.team_name}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>{t.institution} · {t.competition_type === 'wall_magazine' ? 'Wall Magazine' : t.subcategory}</Typography>
+                          </Box>
+                          {alreadySelected ? (
+                            <Chip label="Already selected" size="small" sx={{ background: `${GREEN}18`, color: GREEN, fontSize: 10 }} />
+                          ) : (
+                            <Button size="small" variant="outlined"
+                              sx={{ borderColor: CYAN, color: CYAN, fontSize: 11, textTransform: 'none', borderRadius: 1.5, '&:hover': { background: `${CYAN}10` } }}
+                              onClick={async () => {
+                                try {
+                                  await api.post('/api/national-round/honorable-mention', { registration_id: t.registration_id });
+                                  toast.success(`${t.team_name} added as honorable mention`);
+                                  fetchNationalRound();
+                                  setNrHonorableSearch('');
+                                } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
+                              }}>
+                              Add as Honorable Mention
+                            </Button>
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+
+                {/* Manually added honorable mentions */}
+                {manualSelections.length > 0 && (
+                  <>
+                    <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>Currently Added Manually</Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                      {manualSelections.map(s => (
+                        <Box key={s.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1.25, background: `${CYAN}08`, borderRadius: 1.5, border: `1px solid ${CYAN}20` }}>
+                          <Box>
+                            <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{s.team_name}</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>{s.institution} · {s.subcategory}</Typography>
+                          </Box>
+                          <IconButton size="small"
+                            onClick={async () => {
+                              if (window.confirm('Remove this manual honorable mention?')) {
+                                await api.delete(`/api/national-round/honorable-mention/${s.registration_id}`);
+                                fetchNationalRound();
+                              }
+                            }}
+                            sx={{ color: 'rgba(255,255,255,0.3)', '&:hover': { color: RED } }}>
+                            <Delete sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Box>
+                      ))}
+                    </Box>
+                  </>
+                )}
+                {manualSelections.length === 0 && !hmSearchLower && (
+                  <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>Search for a team above to add them as an honorable mention.</Typography>
+                )}
+              </Paper>
             </Box>
           );
           })()}

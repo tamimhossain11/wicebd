@@ -60,6 +60,7 @@ router.get('/me', authenticateJudge, async (req, res) => {
    Returns teams for this judge grouped by education category.
    Project judge → sees teams in their subcategory
    Wall magazine judge → sees all wall magazine registrations
+   Includes per-judge breakdown fields + overall judge_count per team.
 */
 router.get('/teams', authenticateJudge, async (req, res) => {
   try {
@@ -96,23 +97,46 @@ router.get('/teams', authenticateJudge, async (req, res) => {
       `, [subcategory]);
     }
 
-    // Attach existing marks
-    const [marks] = await db.query(
-      'SELECT registration_id, marks, notes FROM judge_marks WHERE judge_id = ?',
-      [judgeId]
+    if (rows.length === 0) {
+      return res.json({ success: true, grouped: {} });
+    }
+
+    const registrationIds = rows.map(r => r.registration_id);
+    const competitionType = judge_type === 'wall_magazine' ? 'wall_magazine' : 'project';
+
+    // Fetch this judge's existing marks
+    const [myMarks] = await db.query(
+      'SELECT registration_id, marks, urgency, visibility, relevance, presentation, notes FROM judge_marks WHERE judge_id = ? AND competition_type = ?',
+      [judgeId, competitionType]
     );
-    const marksMap = {};
-    marks.forEach(m => { marksMap[m.registration_id] = m; });
+    const myMarksMap = {};
+    myMarks.forEach(m => { myMarksMap[m.registration_id] = m; });
+
+    // Fetch total judge count per team (across all judges)
+    const [judgeCounts] = await db.query(
+      `SELECT registration_id, COUNT(DISTINCT judge_id) AS judge_count
+       FROM judge_marks WHERE registration_id IN (?) AND competition_type = ?
+       GROUP BY registration_id`,
+      [registrationIds, competitionType]
+    );
+    const judgeCountMap = {};
+    judgeCounts.forEach(jc => { judgeCountMap[jc.registration_id] = jc.judge_count; });
 
     // Group by education_category
     const grouped = {};
     rows.forEach(team => {
       const cat = team.education_category || 'Unknown';
       if (!grouped[cat]) grouped[cat] = [];
+      const myRow = myMarksMap[team.registration_id];
       grouped[cat].push({
         ...team,
-        my_marks: marksMap[team.registration_id]?.marks ?? null,
-        my_notes: marksMap[team.registration_id]?.notes ?? null,
+        my_marks:        myRow?.marks        ?? null,
+        my_urgency:      myRow?.urgency      ?? null,
+        my_visibility:   myRow?.visibility   ?? null,
+        my_relevance:    myRow?.relevance    ?? null,
+        my_presentation: myRow?.presentation ?? null,
+        my_notes:        myRow?.notes        ?? null,
+        judge_count:     judgeCountMap[team.registration_id] || 0,
       });
     });
 
@@ -124,22 +148,43 @@ router.get('/teams', authenticateJudge, async (req, res) => {
 
 /* ── POST /api/judge/marks ─────────────────────────────────────────── */
 router.post('/marks', authenticateJudge, async (req, res) => {
-  const { registration_id, marks, notes, competition_type } = req.body;
-  if (!registration_id || marks === undefined || marks === null)
-    return res.status(400).json({ success: false, message: 'registration_id and marks required' });
-  if (marks < 0 || marks > 100)
-    return res.status(400).json({ success: false, message: 'Marks must be between 0 and 100' });
+  const { registration_id, urgency, visibility, relevance, presentation, notes, competition_type } = req.body;
 
+  if (!registration_id)
+    return res.status(400).json({ success: false, message: 'registration_id required' });
+
+  const u = Number(urgency);
+  const v = Number(visibility);
+  const r = Number(relevance);
+  const p = Number(presentation);
+
+  if (isNaN(u) || u < 0 || u > 30)
+    return res.status(400).json({ success: false, message: 'urgency must be between 0 and 30' });
+  if (isNaN(v) || v < 0 || v > 20)
+    return res.status(400).json({ success: false, message: 'visibility must be between 0 and 20' });
+  if (isNaN(r) || r < 0 || r > 30)
+    return res.status(400).json({ success: false, message: 'relevance must be between 0 and 30' });
+  if (isNaN(p) || p < 0 || p > 20)
+    return res.status(400).json({ success: false, message: 'presentation must be between 0 and 20' });
+
+  const total = u + v + r + p;
   const type = competition_type || (req.judge.judge_type === 'wall_magazine' ? 'wall_magazine' : 'project');
 
   try {
     await db.query(`
-      INSERT INTO judge_marks (judge_id, registration_id, competition_type, marks, notes)
-      VALUES (?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE marks = VALUES(marks), notes = VALUES(notes), updated_at = NOW()
-    `, [req.judge.id, registration_id, type, marks, notes || null]);
+      INSERT INTO judge_marks (judge_id, registration_id, competition_type, urgency, visibility, relevance, presentation, marks, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        urgency = VALUES(urgency),
+        visibility = VALUES(visibility),
+        relevance = VALUES(relevance),
+        presentation = VALUES(presentation),
+        marks = VALUES(marks),
+        notes = VALUES(notes),
+        updated_at = NOW()
+    `, [req.judge.id, registration_id, type, u, v, r, p, total, notes || null]);
 
-    res.json({ success: true, message: 'Marks saved' });
+    res.json({ success: true, message: 'Marks saved', total });
   } catch (e) {
     res.status(500).json({ success: false, message: 'DB error: ' + e.message });
   }

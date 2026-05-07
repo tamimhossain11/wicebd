@@ -373,6 +373,44 @@ router.delete('/judges/:id', authenticateAdmin, requireRole('super_admin'), asyn
   }
 });
 
+/* ══ JUDGE MARKS (super_admin) ══════════════════════════════════════ */
+
+/* ── GET /api/admin-manage/judge-marks (super_admin) */
+router.get('/judge-marks', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const [rows] = await db.query(`
+    SELECT jm.id, jm.judge_id, j.name AS judge_name, j.username,
+           jm.registration_id, jm.competition_type,
+           jm.urgency, jm.visibility, jm.relevance, jm.presentation, jm.marks,
+           jm.notes, jm.updated_at,
+           COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name, r.institution
+    FROM judge_marks jm
+    JOIN judges j ON j.id = jm.judge_id
+    LEFT JOIN registrations r ON r.paymentID = jm.registration_id
+    ORDER BY jm.updated_at DESC
+  `);
+  res.json({ success: true, marks: rows });
+});
+
+/* ── PUT /api/admin-manage/judge-marks/:id (super_admin) */
+router.put('/judge-marks/:id', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  const { urgency, visibility, relevance, presentation, notes } = req.body;
+  const u  = Math.min(30, Math.max(0, Number(urgency)      || 0));
+  const v  = Math.min(20, Math.max(0, Number(visibility)   || 0));
+  const r2 = Math.min(30, Math.max(0, Number(relevance)    || 0));
+  const p  = Math.min(20, Math.max(0, Number(presentation) || 0));
+  await db.query(
+    'UPDATE judge_marks SET urgency=?, visibility=?, relevance=?, presentation=?, marks=?, notes=?, updated_at=NOW() WHERE id=?',
+    [u, v, r2, p, u + v + r2 + p, notes || null, req.params.id]
+  );
+  res.json({ success: true });
+});
+
+/* ── DELETE /api/admin-manage/judge-marks/:id (super_admin) */
+router.delete('/judge-marks/:id', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
+  await db.query('DELETE FROM judge_marks WHERE id=?', [req.params.id]);
+  res.json({ success: true });
+});
+
 /* ══ STUCK PAYMENT RECOVERY ═════════════════════════════════════════
    POST /api/admin-manage/recover-stuck-payments
    Finds temp_registrations with a verified PayStation payment but no

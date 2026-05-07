@@ -46,36 +46,81 @@ const StatCard = ({ icon, label, value, color }) => (
   </Paper>
 );
 
+/* ── Field config for the 4-part scoring ── */
+const FIELDS = [
+  { key: 'urgency',      label: 'Urgency',      max: 30, color: '#f59e0b' },
+  { key: 'visibility',   label: 'Visibility',   max: 20, color: '#06b6d4' },
+  { key: 'relevance',    label: 'Relevance',    max: 30, color: '#8b5cf6' },
+  { key: 'presentation', label: 'Presentation', max: 20, color: '#10b981' },
+];
+
 /* ── Team card for marking ── */
 const TeamCard = ({ team, rank, onMarkSave }) => {
-  const [marks, setMarks] = useState(team.my_marks !== null ? String(team.my_marks) : '');
+  const [fieldValues, setFieldValues] = useState({
+    urgency:      team.my_urgency      !== null ? String(team.my_urgency)      : '',
+    visibility:   team.my_visibility   !== null ? String(team.my_visibility)   : '',
+    relevance:    team.my_relevance    !== null ? String(team.my_relevance)    : '',
+    presentation: team.my_presentation !== null ? String(team.my_presentation) : '',
+  });
   const [notes, setNotes] = useState(team.my_notes || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(team.my_marks !== null);
   const [showNotes, setShowNotes] = useState(false);
 
-  const marksNum = parseFloat(marks);
-  const valid = marks !== '' && !isNaN(marksNum) && marksNum >= 0 && marksNum <= 100;
+  const parsed = {};
+  let allValid = true;
+  FIELDS.forEach(f => {
+    const n = parseFloat(fieldValues[f.key]);
+    if (fieldValues[f.key] === '' || isNaN(n) || n < 0 || n > f.max) {
+      allValid = false;
+      parsed[f.key] = null;
+    } else {
+      parsed[f.key] = n;
+    }
+  });
+
+  const total = allValid
+    ? FIELDS.reduce((sum, f) => sum + parsed[f.key], 0)
+    : null;
+
+  const handleChange = (key, value) => {
+    setFieldValues(prev => ({ ...prev, [key]: value }));
+    setSaved(false);
+  };
 
   const handleSave = async () => {
-    if (!valid) return toast.error('Enter valid marks (0–100)');
+    if (!allValid) return toast.error('Fill in all fields within their valid ranges');
     setSaving(true);
     try {
       await api.post('/api/judge/marks', {
         registration_id: team.registration_id,
-        marks: marksNum,
+        urgency:      parsed.urgency,
+        visibility:   parsed.visibility,
+        relevance:    parsed.relevance,
+        presentation: parsed.presentation,
         notes,
         competition_type: team.competition_type,
       }, { headers: { Authorization: `Bearer ${localStorage.getItem('judgeToken')}` } });
       setSaved(true);
       toast.success('Marks saved');
-      onMarkSave(team.registration_id, marksNum);
+      onMarkSave(team.registration_id, total);
     } catch (e) {
       toast.error(e.response?.data?.message || 'Failed to save');
     } finally {
       setSaving(false);
     }
   };
+
+  const fieldSx = (color) => ({
+    '& .MuiOutlinedInput-root': {
+      color: '#fff', background: 'rgba(255,255,255,0.04)',
+      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+      '&:hover fieldset': { borderColor: `${color}80` },
+      '&.Mui-focused fieldset': { borderColor: color },
+    },
+    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.4)' },
+    '& .MuiInputLabel-root.Mui-focused': { color: color },
+  });
 
   return (
     <Paper sx={{
@@ -88,6 +133,7 @@ const TeamCard = ({ team, rank, onMarkSave }) => {
         <Box sx={{ position: 'absolute', top: 0, right: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 40px 40px 0', borderColor: `transparent ${MEDAL_COLORS[rank]} transparent transparent` }} />
       )}
 
+      {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Avatar sx={{ width: 38, height: 38, background: `${ACCENT}22`, color: ACCENT, fontWeight: 700, fontSize: 15 }}>
@@ -101,14 +147,28 @@ const TeamCard = ({ team, rank, onMarkSave }) => {
             <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{team.institution}</Typography>
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-          {saved && <Chip icon={<CheckCircle sx={{ fontSize: '14px !important' }} />} label={`${marksNum}/100`} size="small" sx={{ background: `${GREEN}18`, color: GREEN, border: `1px solid ${GREEN}30`, fontSize: 11 }} />}
+        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
+          {team.judge_count > 0 && (
+            <Chip
+              label={`${team.judge_count} judge${team.judge_count !== 1 ? 's' : ''} marked`}
+              size="small"
+              sx={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)', fontSize: 10 }}
+            />
+          )}
+          {saved && total !== null && (
+            <Chip
+              icon={<CheckCircle sx={{ fontSize: '14px !important' }} />}
+              label={`${total}/100`}
+              size="small"
+              sx={{ background: `${GREEN}18`, color: GREEN, border: `1px solid ${GREEN}30`, fontSize: 11 }}
+            />
+          )}
         </Box>
       </Box>
 
       {team.project_title && (
         <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, mb: 1.5, fontStyle: 'italic' }}>
-          "{team.project_title}"
+          &ldquo;{team.project_title}&rdquo;
         </Typography>
       )}
 
@@ -116,47 +176,60 @@ const TeamCard = ({ team, rank, onMarkSave }) => {
       {[team.member2, team.member3, team.member4, team.member5, team.member6].filter(Boolean).length > 0 && (
         <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
           {[team.member2, team.member3, team.member4, team.member5, team.member6].filter(Boolean).map((m, i) => (
-            <Chip key={i} icon={<Person sx={{ fontSize: '13px !important' }} />} label={m} size="small" sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)', fontSize: 11 }} />
+            <Chip key={i} icon={<Person sx={{ fontSize: '13px !important' }} />} label={m} size="small"
+              sx={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)', fontSize: 11 }} />
           ))}
         </Box>
       )}
 
-      <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-        <TextField
-          label="Marks (0–100)" size="small" type="number"
-          value={marks}
-          onChange={e => { setMarks(e.target.value); setSaved(false); }}
-          inputProps={{ min: 0, max: 100, step: 0.5 }}
-          sx={{
-            width: 150,
-            '& .MuiOutlinedInput-root': {
-              color: '#fff', background: 'rgba(255,255,255,0.04)',
-              '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-              '&:hover fieldset': { borderColor: `${ACCENT}80` },
-              '&.Mui-focused fieldset': { borderColor: ACCENT },
-            },
-            '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.4)' },
-            '& .MuiInputLabel-root.Mui-focused': { color: ACCENT },
-          }}
-        />
-        <Tooltip title="Add notes">
-          <IconButton size="small" onClick={() => setShowNotes(p => !p)} sx={{ color: showNotes ? AMBER : 'rgba(255,255,255,0.3)', border: `1px solid ${showNotes ? AMBER + '40' : BORDER}`, borderRadius: 1.5 }}>
-            <Notes fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Button
-          variant="contained" size="small" onClick={handleSave}
-          disabled={saving || !valid}
-          startIcon={saving ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <Save />}
-          sx={{
-            borderRadius: '10px', fontWeight: 600, fontSize: 13,
-            background: saved ? GREEN : `linear-gradient(135deg, ${ACCENT}, #4f0014)`,
-            '&:hover': { background: saved ? '#059669' : `linear-gradient(135deg, #a00028, #600018)` },
-            boxShadow: 'none',
-          }}
-        >
-          {saving ? 'Saving…' : saved ? 'Update' : 'Save'}
-        </Button>
+      {/* 4-field scoring grid */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5, mb: 1.5 }}>
+        {FIELDS.map(f => (
+          <Box key={f.key}>
+            <Typography sx={{ color: f.color, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', mb: 0.5 }}>
+              {f.label} <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>/ {f.max}</span>
+            </Typography>
+            <TextField
+              size="small" type="number" fullWidth
+              value={fieldValues[f.key]}
+              onChange={e => handleChange(f.key, e.target.value)}
+              placeholder={`0 – ${f.max}`}
+              inputProps={{ min: 0, max: f.max, step: 0.5 }}
+              sx={fieldSx(f.color)}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Total display */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+          Total:{' '}
+          <span style={{ color: total !== null ? GREEN : 'rgba(255,255,255,0.25)', fontWeight: 800, fontSize: 16 }}>
+            {total !== null ? `${total} / 100` : '— / 100'}
+          </span>
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Tooltip title="Add notes">
+            <IconButton size="small" onClick={() => setShowNotes(p => !p)}
+              sx={{ color: showNotes ? AMBER : 'rgba(255,255,255,0.3)', border: `1px solid ${showNotes ? AMBER + '40' : BORDER}`, borderRadius: 1.5 }}>
+              <Notes fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Button
+            variant="contained" size="small" onClick={handleSave}
+            disabled={saving || !allValid}
+            startIcon={saving ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <Save />}
+            sx={{
+              borderRadius: '10px', fontWeight: 600, fontSize: 13,
+              background: saved ? GREEN : `linear-gradient(135deg, ${ACCENT}, #4f0014)`,
+              '&:hover': { background: saved ? '#059669' : `linear-gradient(135deg, #a00028, #600018)` },
+              boxShadow: 'none',
+            }}
+          >
+            {saving ? 'Saving…' : saved ? 'Update' : 'Save'}
+          </Button>
+        </Box>
       </Box>
 
       <Collapse in={showNotes}>
@@ -165,7 +238,7 @@ const TeamCard = ({ team, rank, onMarkSave }) => {
           value={notes}
           onChange={e => setNotes(e.target.value)}
           sx={{
-            mt: 1.5,
+            mt: 0.5,
             '& .MuiOutlinedInput-root': {
               color: '#fff', background: 'rgba(255,255,255,0.03)',
               '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
@@ -186,6 +259,7 @@ const CategoryGroup = ({ category, teams, onMarkSave }) => {
   const markedCount = teams.filter(t => t.my_marks !== null).length;
 
   const sorted = [...teams].sort((a, b) => (b.my_marks ?? -1) - (a.my_marks ?? -1));
+
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -366,7 +440,7 @@ const JudgeDashboard = () => {
                 {judge?.judge_type === 'wall_magazine' ? 'Wall Magazine Judging' : `${judge?.subcategory} Judging`}
               </Typography>
               <Typography sx={{ color: 'rgba(255,255,255,0.38)', fontSize: 13, mt: 0.5 }}>
-                Mark teams group-wise • Top 3 per group advance to national round
+                Score each team on Urgency · Visibility · Relevance · Presentation (total 100)
               </Typography>
             </Box>
             <Button
