@@ -93,10 +93,25 @@ app.use('/api/payment', (req, res, next) => {
   next();
 });
 
+// ── Registration gate ── set to true to reopen ──────────────────
+const REGISTRATIONS_OPEN = false;
+
+const registrationClosed = (req, res) =>
+  res.status(503).json({ success: false, message: 'Registrations are currently closed.' });
+
 // Routes
-app.use('/api/registration', registrationRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/olympiad', olympiadRoutes);
+app.use('/api/registration', REGISTRATIONS_OPEN ? registrationRoutes : (req, res, next) => {
+  if (req.method === 'POST') return registrationClosed(req, res);
+  next();
+}, registrationRoutes);
+app.use('/api/payment', REGISTRATIONS_OPEN ? paymentRoutes : (req, res, next) => {
+  if (req.method === 'POST') return registrationClosed(req, res);
+  next();
+}, paymentRoutes);
+app.use('/api/olympiad', REGISTRATIONS_OPEN ? olympiadRoutes : (req, res, next) => {
+  if (req.method === 'POST') return registrationClosed(req, res);
+  next();
+}, olympiadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/qr', qr);
@@ -115,8 +130,14 @@ app.use('/api/advisors', advisorRoutes);
 app.use('/api/admin-manage', adminManageRoutes);
 app.use('/api/judge', judgeRoutes);
 app.use('/api/national-round', nationalRoundRoutes);
-app.use('/api/robo-soccer',   roboSoccerRoutes);
-app.use('/api/micromouse',    micromouseRoutes);
+app.use('/api/robo-soccer', REGISTRATIONS_OPEN ? roboSoccerRoutes : (req, res, next) => {
+  if (req.method === 'POST') return registrationClosed(req, res);
+  next();
+}, roboSoccerRoutes);
+app.use('/api/micromouse', REGISTRATIONS_OPEN ? micromouseRoutes : (req, res, next) => {
+  if (req.method === 'POST') return registrationClosed(req, res);
+  next();
+}, micromouseRoutes);
 
 // ----------------------------
 // Server
