@@ -93,8 +93,9 @@ app.use('/api/payment', (req, res, next) => {
   next();
 });
 
-// ── Registration gate ── set to true to reopen ──────────────────
+// ── Registration & signup gate ── set to true to reopen ─────────
 const REGISTRATIONS_OPEN = false;
+const SIGNUP_OPEN = false;
 
 const registrationClosed = (req, res) =>
   res.status(503).json({ success: false, message: 'Registrations are currently closed.' });
@@ -115,7 +116,12 @@ app.use('/api/olympiad', REGISTRATIONS_OPEN ? olympiadRoutes : (req, res, next) 
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/qr', qr);
-app.use('/api/user-auth', userAuthRoutes);
+app.use('/api/user-auth', (req, res, next) => {
+  if (!SIGNUP_OPEN && req.method === 'POST' && req.path === '/signup') {
+    return res.status(503).json({ success: false, message: 'New account registration is currently closed.' });
+  }
+  next();
+}, userAuthRoutes);
 app.use('/api/user-profile', userProfileRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/announcements', announcementRoutes);

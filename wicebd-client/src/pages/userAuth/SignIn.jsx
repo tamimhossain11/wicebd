@@ -305,10 +305,7 @@ const SignIn = () => {
 
             {/* Footer link */}
             <Typography sx={{ textAlign: 'center', mt: 3, color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
-              Don&apos;t have an account?{' '}
-              <Link to="/sign-up" style={{ color: '#e94560', fontWeight: 600, textDecoration: 'none' }}>
-                Create one
-              </Link>
+              New account registration is currently closed.
             </Typography>
           </Paper>
         </Box>
