@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import HeaderV1 from '../../components/header/HeaderV1';
 import FooterV2 from '../../components/footer/FooterV2';
 import BreadCrumb from '../../components/breadCrumb/BreadCrumb';
@@ -190,24 +189,23 @@ export default function SurpriseSegment() {
                     ))}
                   </div>
 
-                  <Link
-                    to={c.path}
+                  <div
                     style={{
                       display: 'block',
                       textAlign: 'center',
-                      background: c.gradient,
-                      color: '#000',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      color: 'rgba(255,255,255,0.35)',
                       fontWeight: 700,
                       fontSize: 14,
                       padding: '14px 32px',
                       borderRadius: 50,
-                      textDecoration: 'none',
-                      boxShadow: `0 6px 20px ${c.glow}`,
                       letterSpacing: '0.04em',
+                      cursor: 'not-allowed',
                     }}
                   >
-                    Register Now →
-                  </Link>
+                    Registration Closed
+                  </div>
                 </motion.div>
               ))}
             </div>
