@@ -1146,6 +1146,34 @@ export default function AdminDashboard() {
                     Export CSV
                   </Button>
                 )}
+                {activeNav === 3 && (
+                  <Button startIcon={<Print />}
+                    onClick={async () => {
+                      try {
+                        const res = await api.get('/api/admin/wall-magazine/print', { responseType: 'blob' });
+                        const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
+                        window.open(blobUrl, '_blank');
+                      } catch { setError('Failed to open print view'); }
+                    }}
+                    variant="outlined" size="small"
+                    sx={{ color: '#81c784', borderColor: '#81c78450', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#81c784', background: '#81c78410' } }}>
+                    Print View
+                  </Button>
+                )}
+                {activeNav === 2 && (
+                  <Button startIcon={<Print />}
+                    onClick={async () => {
+                      try {
+                        const res = await api.get('/api/admin/olympiad/print', { responseType: 'blob' });
+                        const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
+                        window.open(blobUrl, '_blank');
+                      } catch { setError('Failed to open print view'); }
+                    }}
+                    variant="outlined" size="small"
+                    sx={{ color: '#81c784', borderColor: '#81c78450', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#81c784', background: '#81c78410' } }}>
+                    Print View
+                  </Button>
+                )}
                 {(activeNav === 16 || activeNav === 17) && (
                   <Button startIcon={<FileDownload />}
                     onClick={async () => {

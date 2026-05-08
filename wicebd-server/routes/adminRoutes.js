@@ -462,6 +462,210 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
   }
 });
 
+// Print-friendly HTML view of wall magazine participants
+router.get('/wall-magazine/print', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        r.id,
+        r.projectTitle,
+        r.crReference,
+        r.leader,        r.institution,     r.leaderPhone, r.leaderEmail, r.tshirtSizeLeader,
+        r.member2,       r.institution2,    r.tshirtSize2,
+        r.member3,       r.institution3,    r.tshirtSize3,
+        r.member4,       r.institution4,    r.tshirtSize4,
+        r.member5,       r.institution5,    r.tshirtSize5,
+        r.bkashTrxId,    r.amount,          r.paymentID,
+        r.ca_code,       r.club_code,       r.promo_code,
+        r.created_at
+      FROM registrations r
+      WHERE r.competitionCategory = 'Megazine'
+      ORDER BY r.created_at ASC
+    `);
+
+    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    const memberRows = (r) => {
+      const members = [
+        { name: r.leader,  inst: r.institution,  size: r.tshirtSizeLeader, role: 'Leader'   },
+        { name: r.member2, inst: r.institution2, size: r.tshirtSize2,       role: 'Member 2' },
+        { name: r.member3, inst: r.institution3, size: r.tshirtSize3,       role: 'Member 3' },
+        { name: r.member4, inst: r.institution4, size: r.tshirtSize4,       role: 'Member 4' },
+        { name: r.member5, inst: r.institution5, size: r.tshirtSize5,       role: 'Member 5' },
+      ].filter(m => m.name);
+      return members.map(m => `
+        <tr class="member-row">
+          <td>${esc(m.role)}</td>
+          <td>${esc(m.name)}</td>
+          <td>${esc(m.inst)}</td>
+          <td>${esc(m.size)}</td>
+        </tr>`).join('');
+    };
+
+    const cards = rows.map((r, i) => `
+      <div class="card">
+        <div class="card-header">
+          <span class="serial">#${i + 1}</span>
+          <span class="project-title">${esc(r.projectTitle)}</span>
+          <span class="badge">Wall Magazine</span>
+        </div>
+        <div class="meta-row">
+          <span><b>Invoice:</b> ${esc(r.paymentID)}</span>
+          <span><b>Txn:</b> ${esc(r.bkashTrxId)}</span>
+          <span><b>Amount:</b> ৳${esc(r.amount)}</span>
+          ${r.ca_code    ? `<span><b>CA:</b> ${esc(r.ca_code)}</span>` : ''}
+          ${r.club_code  ? `<span><b>Club:</b> ${esc(r.club_code)}</span>` : ''}
+          ${r.crReference ? `<span><b>CR Ref:</b> ${esc(r.crReference)}</span>` : ''}
+          <span><b>Registered:</b> ${new Date(r.created_at).toLocaleDateString('en-GB')}</span>
+        </div>
+        <table class="member-table">
+          <thead>
+            <tr><th>Role</th><th>Name</th><th>Institution</th><th>T-Shirt</th></tr>
+          </thead>
+          <tbody>
+            ${memberRows(r)}
+          </tbody>
+        </table>
+        <div class="contact-row">
+          <span><b>Phone:</b> ${esc(r.leaderPhone)}</span>
+          <span><b>Email:</b> ${esc(r.leaderEmail)}</span>
+        </div>
+      </div>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>WICEBD 2026 — Wall Magazine Participants (${rows.length})</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
+    h1 { font-size: 16px; text-align: center; margin-bottom: 4px; }
+    .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 16px; }
+    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 12px; padding: 10px 12px; page-break-inside: avoid; }
+    .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+    .serial { font-weight: 700; font-size: 13px; color: #1a6632; min-width: 28px; }
+    .project-title { font-weight: 700; font-size: 13px; flex: 1; }
+    .badge { font-size: 10px; background: #e0f0e4; color: #1a6632; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 10px; color: #444; margin-bottom: 8px; }
+    .member-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+    .member-table th { background: #1a6632; color: #fff; font-size: 10px; padding: 3px 6px; text-align: left; }
+    .member-table td { padding: 3px 6px; border-bottom: 1px solid #eee; font-size: 11px; }
+    .member-row:nth-child(even) td { background: #f4faf6; }
+    .contact-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 10px; color: #444; margin-top: 4px; }
+    .no-print { text-align: center; margin-bottom: 16px; }
+    .print-btn { padding: 8px 24px; background: #1a6632; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 0; }
+      .card { margin-bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <h1>WICEBD 2026 — Wall Magazine Participants</h1>
+  <p class="subtitle">Total: ${rows.length} registrations &nbsp;·&nbsp; Generated: ${new Date().toLocaleString('en-GB')}</p>
+  ${cards}
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (error) {
+    console.error('Wall magazine print view failed:', error);
+    res.status(500).json({ error: 'Failed to generate print view' });
+  }
+});
+
+// Print-friendly HTML view of olympiad participants
+router.get('/olympiad/print', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        id, registration_id, full_name, email, phone,
+        institution, class_grade, district, address,
+        cr_reference, ca_code, club_code, status, created_at
+      FROM olympiad_registrations
+      ORDER BY created_at ASC
+    `);
+
+    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    const cards = rows.map((r, i) => `
+      <div class="card">
+        <div class="card-header">
+          <span class="serial">#${i + 1}</span>
+          <span class="participant-name">${esc(r.full_name)}</span>
+          <span class="badge">Science Olympiad</span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><span class="label">Reg ID</span><span class="value">${esc(r.registration_id)}</span></div>
+          <div class="info-item"><span class="label">Institution</span><span class="value">${esc(r.institution)}</span></div>
+          <div class="info-item"><span class="label">Class/Grade</span><span class="value">${esc(r.class_grade)}</span></div>
+          <div class="info-item"><span class="label">District</span><span class="value">${esc(r.district)}</span></div>
+          <div class="info-item"><span class="label">Phone</span><span class="value">${esc(r.phone)}</span></div>
+          <div class="info-item"><span class="label">Email</span><span class="value">${esc(r.email)}</span></div>
+          ${r.cr_reference ? `<div class="info-item"><span class="label">CR Ref</span><span class="value">${esc(r.cr_reference)}</span></div>` : ''}
+          ${r.ca_code ? `<div class="info-item"><span class="label">CA Code</span><span class="value">${esc(r.ca_code)}</span></div>` : ''}
+          ${r.club_code ? `<div class="info-item"><span class="label">Club</span><span class="value">${esc(r.club_code)}</span></div>` : ''}
+          <div class="info-item"><span class="label">Status</span><span class="value status-${esc(r.status)}">${esc(r.status)}</span></div>
+          <div class="info-item"><span class="label">Registered</span><span class="value">${new Date(r.created_at).toLocaleDateString('en-GB')}</span></div>
+        </div>
+        ${r.address ? `<div class="address-row"><b>Address:</b> ${esc(r.address)}</div>` : ''}
+      </div>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>WICEBD 2026 — Science Olympiad Participants (${rows.length})</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
+    h1 { font-size: 16px; text-align: center; margin-bottom: 4px; }
+    .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 16px; }
+    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 12px; padding: 10px 12px; page-break-inside: avoid; }
+    .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .serial { font-weight: 700; font-size: 13px; color: #1565c0; min-width: 28px; }
+    .participant-name { font-weight: 700; font-size: 14px; flex: 1; }
+    .badge { font-size: 10px; background: #e3eaf7; color: #1565c0; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .info-grid { display: flex; flex-wrap: wrap; gap: 4px 0; }
+    .info-item { width: 33.33%; display: flex; gap: 4px; font-size: 10px; padding: 2px 0; }
+    .label { color: #777; min-width: 64px; font-weight: 600; }
+    .value { color: #111; }
+    .status-confirmed { color: #1a6632; font-weight: 700; }
+    .status-pending { color: #b45309; font-weight: 700; }
+    .address-row { font-size: 10px; color: #555; margin-top: 6px; }
+    .no-print { text-align: center; margin-bottom: 16px; }
+    .print-btn { padding: 8px 24px; background: #1565c0; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 0; }
+      .card { margin-bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <h1>WICEBD 2026 — Science Olympiad Participants</h1>
+  <p class="subtitle">Total: ${rows.length} registrations &nbsp;·&nbsp; Generated: ${new Date().toLocaleString('en-GB')}</p>
+  ${cards}
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (error) {
+    console.error('Olympiad print view failed:', error);
+    res.status(500).json({ error: 'Failed to generate print view' });
+  }
+});
+
 function convertToCSV(data) {
   const headers = Object.keys(data[0]).join(',');
   const rows = data.map(obj =>
