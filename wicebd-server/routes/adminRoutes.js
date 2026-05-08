@@ -335,9 +335,10 @@ router.get('/users', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Print-friendly HTML view of project participants
+// Print-friendly HTML view of project participants (optional ?subcategory= filter)
 router.get('/participants/print', authenticateAdmin, async (req, res) => {
   try {
+    const subcat = req.query.subcategory || null;
     const [rows] = await db.query(`
       SELECT
         r.id,
@@ -359,8 +360,9 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
         r.created_at
       FROM registrations r
       WHERE r.competitionCategory != 'Megazine'
-      ORDER BY r.created_at ASC
-    `);
+        ${subcat ? 'AND r.projectSubcategory = ?' : ''}
+      ORDER BY r.projectSubcategory ASC, r.created_at ASC
+    `, subcat ? [subcat] : []);
 
     const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
 
@@ -418,7 +420,7 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>WICEBD 2026 — Project Participants (${rows.length})</title>
+  <title>WICEBD 2026 — Project Participants${subcat ? ` · ${subcat}` : ''} (${rows.length})</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
@@ -448,7 +450,7 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
   <div class="no-print">
     <button class="print-btn" onclick="window.print()">🖨️ Print</button>
   </div>
-  <h1>WICEBD 2026 — Project Participants</h1>
+  <h1>WICEBD 2026 — Project Participants${subcat ? ` · ${subcat}` : ''}</h1>
   <p class="subtitle">Total: ${rows.length} registrations &nbsp;·&nbsp; Generated: ${new Date().toLocaleString('en-GB')}</p>
   ${cards}
 </body>

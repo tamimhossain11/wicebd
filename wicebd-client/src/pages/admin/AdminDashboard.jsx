@@ -252,6 +252,9 @@ export default function AdminDashboard() {
   // Statistics (individual participant counts)
   const [participantStats, setParticipantStats] = useState(null);
 
+  // Print subcategory filter
+  const [printSubcat, setPrintSubcat] = useState('');
+
   // Judges
   const [judges, setJudges] = useState([]);
   const [judgeDialog, setJudgeDialog] = useState(false);
@@ -1116,18 +1119,43 @@ export default function AdminDashboard() {
                   </Button>
                 )}
                 {activeNav === 1 && (
-                  <Button startIcon={<Print />}
-                    onClick={async () => {
-                      try {
-                        const res = await api.get('/api/admin/participants/print', { responseType: 'blob' });
-                        const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
-                        window.open(blobUrl, '_blank');
-                      } catch { setError('Failed to open print view'); }
-                    }}
-                    variant="outlined" size="small"
-                    sx={{ color: '#81c784', borderColor: '#81c78450', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#81c784', background: '#81c78410' } }}>
-                    Print View
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Select
+                      value={printSubcat}
+                      onChange={e => setPrintSubcat(e.target.value)}
+                      size="small"
+                      displayEmpty
+                      sx={{
+                        color: '#81c784', fontSize: 13, height: 32, borderRadius: 2,
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#81c78450' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#81c784' },
+                        '& .MuiSvgIcon-root': { color: '#81c784' },
+                        background: 'transparent',
+                      }}
+                    >
+                      <MenuItem value=''>All Categories</MenuItem>
+                      <MenuItem value='IT and Robotics'>IT and Robotics</MenuItem>
+                      <MenuItem value='Environmental Science'>Environmental Science</MenuItem>
+                      <MenuItem value='Innovative Social Science'>Innovative Social Science</MenuItem>
+                      <MenuItem value='Applied Physics and Engineering'>Applied Physics &amp; Engineering</MenuItem>
+                      <MenuItem value='Applied Life Science'>Applied Life Science</MenuItem>
+                    </Select>
+                    <Button startIcon={<Print />}
+                      onClick={async () => {
+                        try {
+                          const url = printSubcat
+                            ? `/api/admin/participants/print?subcategory=${encodeURIComponent(printSubcat)}`
+                            : '/api/admin/participants/print';
+                          const res = await api.get(url, { responseType: 'blob' });
+                          const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
+                          window.open(blobUrl, '_blank');
+                        } catch { setError('Failed to open print view'); }
+                      }}
+                      variant="outlined" size="small"
+                      sx={{ color: '#81c784', borderColor: '#81c78450', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#81c784', background: '#81c78410' } }}>
+                      Print View
+                    </Button>
+                  </Box>
                 )}
                 {activeNav === 3 && (
                   <Button startIcon={<FileDownload />}
