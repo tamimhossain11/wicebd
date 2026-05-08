@@ -1978,12 +1978,26 @@ export default function AdminDashboard() {
                 icon={<Gavel sx={{ fontSize: 18 }} />}
                 title="Judge Management"
                 action={
-                  <Button startIcon={<Add />}
-                    onClick={() => { setJudgeForm({ name: '', username: '', password: '', email: '', judge_type: 'project', subcategory: '' }); setJudgeDialog(true); }}
-                    variant="contained" size="small"
-                    sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, boxShadow: `0 4px 14px ${RED}40` }}>
-                    Add Judge
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button startIcon={<Print />}
+                      onClick={async () => {
+                        try {
+                          const res = await api.get('/api/admin/judges/print', { responseType: 'blob' });
+                          const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
+                          window.open(blobUrl, '_blank');
+                        } catch { setError('Failed to open print view'); }
+                      }}
+                      variant="outlined" size="small"
+                      sx={{ color: '#81c784', borderColor: '#81c78450', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#81c784', background: '#81c78410' } }}>
+                      Print Credentials
+                    </Button>
+                    <Button startIcon={<Add />}
+                      onClick={() => { setJudgeForm({ name: '', username: '', password: '', email: '', judge_type: 'project', subcategory: '' }); setJudgeDialog(true); }}
+                      variant="contained" size="small"
+                      sx={{ background: `linear-gradient(135deg, ${RED}, ${ACCENT})`, textTransform: 'none', borderRadius: 2, boxShadow: `0 4px 14px ${RED}40` }}>
+                      Add Judge
+                    </Button>
+                  </Box>
                 }
               />
               <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden' }}>
@@ -1991,14 +2005,14 @@ export default function AdminDashboard() {
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}>
-                        {['Name', 'Username', 'Type', 'Subcategory', 'Status', 'Actions'].map(h => (
+                        {['Name', 'Username', 'Type', 'Category', 'Level', 'Status', 'Actions'].map(h => (
                           <th key={h} style={{ padding: '13px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {judges.length === 0 && (
-                        <tr><td colSpan={6} style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>No judges yet. Add one above.</td></tr>
+                        <tr><td colSpan={7} style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>No judges yet. Add one above.</td></tr>
                       )}
                       {judges.map((j, i) => (
                         <tr key={j.id} style={{ borderBottom: `1px solid ${BORDER}`, background: i % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
@@ -2017,6 +2031,7 @@ export default function AdminDashboard() {
                             />
                           </td>
                           <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>{j.subcategory || '—'}</td>
+                          <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{j.education_level || '—'}</td>
                           <td style={{ padding: '11px 16px' }}>
                             <Switch checked={!!j.is_active} size="small"
                               onChange={async () => { await api.patch(`/api/admin-manage/judges/${j.id}/toggle`); fetchJudges(); }}

@@ -309,7 +309,7 @@ router.get('/attendance', authenticateAdmin, async (req, res) => {
 router.get('/judges', authenticateAdmin, requireRole('super_admin'), async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT id, name, username, email, judge_type, subcategory, is_active, created_at FROM judges ORDER BY id DESC'
+      'SELECT id, name, username, email, judge_type, subcategory, education_level, is_active, created_at FROM judges ORDER BY id DESC'
     );
     res.json({ success: true, judges: rows });
   } catch (e) {

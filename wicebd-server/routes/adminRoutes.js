@@ -666,6 +666,145 @@ router.get('/olympiad/print', authenticateAdmin, async (req, res) => {
   }
 });
 
+// Print-friendly HTML credential sheet for all judges
+router.get('/judges/print', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT name, username, judge_type, subcategory, education_level, is_active
+      FROM judges
+      ORDER BY subcategory, education_level, name
+    `);
+
+    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    // Group by subcategory → education_level
+    const grouped = {};
+    for (const j of rows) {
+      const cat = j.subcategory || 'Unassigned';
+      const lvl = j.education_level || 'All Category';
+      if (!grouped[cat]) grouped[cat] = {};
+      if (!grouped[cat][lvl]) grouped[cat][lvl] = [];
+      grouped[cat][lvl].push(j);
+    }
+
+    // Password pattern mirrors the seeded sequence (username → number)
+    const usernameToSeq = {};
+    rows.forEach((j, i) => { usernameToSeq[j.username] = i + 1; });
+
+    const categoryColors = {
+      'IT and Robotics':                '#1565c0',
+      'Environmental Science':          '#1a6632',
+      'Innovative Social Science':      '#6a1b9a',
+      'Applied Physics and Engineering':'#b45309',
+      'Applied Life Science':           '#00695c',
+    };
+
+    const sections = Object.entries(grouped).map(([cat, levels]) => {
+      const color = categoryColors[cat] || '#444';
+      const levelBlocks = Object.entries(levels).map(([lvl, judges]) => `
+        <div class="level-block">
+          <div class="level-label">${esc(lvl)}</div>
+          <table class="judge-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${judges.map((j, i) => {
+                const seq = usernameToSeq[j.username] || '?';
+                return `
+              <tr>
+                <td class="seq">${i + 1}</td>
+                <td class="judge-name">${esc(j.name)}</td>
+                <td class="username">${esc(j.username)}</td>
+                <td class="password">j-2026@wicebd${seq}</td>
+                <td class="${j.is_active ? 'active' : 'inactive'}">${j.is_active ? 'Active' : 'Inactive'}</td>
+              </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`).join('');
+
+      return `
+      <div class="category-section" style="--cat-color:${color}">
+        <div class="category-header">${esc(cat)}</div>
+        ${levelBlocks}
+      </div>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>WICEBD 2026 — Judge Credentials (${rows.length})</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
+    h1 { font-size: 17px; text-align: center; margin-bottom: 3px; }
+    .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 20px; }
+    .category-section { margin-bottom: 20px; page-break-inside: avoid; }
+    .category-header {
+      background: var(--cat-color); color: #fff;
+      padding: 7px 14px; font-size: 13px; font-weight: 700;
+      border-radius: 4px 4px 0 0; letter-spacing: 0.02em;
+    }
+    .level-block { border: 1px solid #ddd; border-top: none; }
+    .level-label {
+      background: #f5f5f5; color: #444;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 4px 14px;
+      border-bottom: 1px solid #ddd;
+    }
+    .judge-table { width: 100%; border-collapse: collapse; }
+    .judge-table th {
+      background: rgba(0,0,0,0.04); color: #555;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 5px 10px; text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .judge-table td { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .judge-table tr:last-child td { border-bottom: none; }
+    .judge-table tr:nth-child(even) td { background: #fafafa; }
+    .seq { color: #999; font-size: 10px; width: 28px; }
+    .judge-name { font-weight: 700; font-size: 12px; }
+    .username { font-family: monospace; font-size: 11px; color: #1565c0; }
+    .password { font-family: monospace; font-size: 11px; color: #c62828; font-weight: 700; }
+    .active { color: #1a6632; font-weight: 700; font-size: 10px; }
+    .inactive { color: #b45309; font-weight: 700; font-size: 10px; }
+    .no-print { text-align: center; margin-bottom: 16px; }
+    .print-btn { padding: 8px 24px; background: #37474f; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    .warning { background: #fff8e1; border: 1px solid #f9a825; border-radius: 4px; padding: 8px 14px; font-size: 11px; color: #7a5800; margin-bottom: 16px; text-align: center; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 4px; }
+      .category-section { margin-bottom: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <h1>WICEBD 2026 — Judge Credentials &amp; Category Assignments</h1>
+  <p class="subtitle">Total Judges: ${rows.length} &nbsp;·&nbsp; Generated: ${new Date().toLocaleString('en-GB')}</p>
+  <p class="warning no-print">⚠️ Confidential — contains login credentials. Do not share publicly.</p>
+  ${sections}
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (error) {
+    console.error('Judges print view failed:', error);
+    res.status(500).json({ error: 'Failed to generate print view' });
+  }
+});
+
 function convertToCSV(data) {
   const headers = Object.keys(data[0]).join(',');
   const rows = data.map(obj =>
