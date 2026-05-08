@@ -189,23 +189,20 @@ export default function RegistrationPage() {
                                     );
                                 })()}
 
-                                {/* REGISTRATIONS CLOSED — remove this block and restore the lines below to reopen */}
-                                <div style={{ textAlign: 'center', padding: '48px 0 24px' }}>
-                                    <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
-                                    <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 22, mb: 1 }}>
-                                        Registration Closed
-                                    </Typography>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, maxWidth: 400, mx: 'auto', lineHeight: 1.8 }}>
-                                        Registrations for WICEBD 2026 are now closed. Thank you to everyone who participated!
-                                    </Typography>
-                                </div>
-                                {/* RESTORE BELOW TO REOPEN:
-                                {tab === 'project' && <ProjectRegistrationForm onPromoChange={handlePromoChange} />}
-                                {tab === 'wall-magazine' && <WallMagazineRegistrationForm onPromoChange={handlePromoChange} />}
-                                {tab === 'olympiad' && <OlympiadRegistrationForm onPromoChange={handlePromoChange} />}
-                                {tab === 'robo-sumo' && <RoboSumoRegistrationForm onPromoChange={handlePromoChange} />}
-                                {tab === 'lfr-maze' && <LFRMazeSolvingRegistrationForm onPromoChange={handlePromoChange} />}
-                                */}
+                                {tab === 'project'
+                                    ? <ProjectRegistrationForm onPromoChange={handlePromoChange} />
+                                    : (
+                                        <div style={{ textAlign: 'center', padding: '48px 0 24px' }}>
+                                            <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+                                            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 22, mb: 1 }}>
+                                                Registration Closed
+                                            </Typography>
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, maxWidth: 400, mx: 'auto', lineHeight: 1.8 }}>
+                                                Registrations for WICEBD 2026 are now closed. Thank you to everyone who participated!
+                                            </Typography>
+                                        </div>
+                                    )
+                                }
                             </motion.div>
                         </AnimatePresence>
                     </div>
