@@ -94,7 +94,7 @@ app.use('/api/payment', (req, res, next) => {
 });
 
 // ── Registration & signup gate ── set to true to reopen ─────────
-const REGISTRATIONS_OPEN = false;
+const REGISTRATIONS_OPEN = true;
 const SIGNUP_OPEN = false;
 
 const registrationClosed = (req, res) =>
