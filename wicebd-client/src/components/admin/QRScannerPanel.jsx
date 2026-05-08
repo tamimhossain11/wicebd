@@ -48,8 +48,8 @@ const POSITIONS = [
 
 /* Olympiad participants do NOT get lunch but DO get coffee. Guests get both. */
 const hasFood = (registrationType) => registrationType !== 'olympiad';
-/* All participants except olympiad and guests get certificates */
-const hasCert = (registrationType) => registrationType !== 'olympiad' && registrationType !== 'guest' && !!registrationType;
+/* All participants except guests get certificates */
+const hasCert = (registrationType) => registrationType !== 'guest' && !!registrationType;
 
 /* Parse card_uid from a verify URL or raw uid */
 const extractUid = (raw) => {

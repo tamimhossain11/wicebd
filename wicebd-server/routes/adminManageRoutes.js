@@ -250,8 +250,8 @@ router.post('/attendance/:cardUid/certificate', authenticateAdmin, async (req, r
   try {
     const [[card]] = await db.query('SELECT * FROM id_cards WHERE card_uid = ?', [cardUid]);
     if (!card) return res.status(404).json({ success: false, message: 'Card not found' });
-    if (card.registration_type === 'olympiad' || card.registration_type === 'guest') {
-      return res.status(400).json({ success: false, message: 'Certificate collection is not available for olympiad or guest cards' });
+    if (card.registration_type === 'guest') {
+      return res.status(400).json({ success: false, message: 'Certificate collection is not available for guest cards' });
     }
     if (card.certificate_collected) {
       return res.json({ success: true, already: true, certificate_collected: true, certificate_collected_at: card.certificate_collected_at });
