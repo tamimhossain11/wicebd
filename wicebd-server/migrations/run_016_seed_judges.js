@@ -15,7 +15,7 @@ const judges = [
   { name: 'MD JAWADUR RAHMAN',                     username: 'jawad-j@wicebd.com',     password: 'j-2026@wicebd4',  subcategory: 'IT and Robotics',                education_level: 'Elementary & High School' },
   { name: 'BULBUL',                                username: 'bulbul-j@wicebd.com',    password: 'j-2026@wicebd5',  subcategory: 'IT and Robotics',                education_level: 'College' },
   { name: 'MD MUBASSIRUL ISLAM',                   username: 'mubassirul-j@wicebd.com',password: 'j-2026@wicebd6',  subcategory: 'IT and Robotics',                education_level: 'College' },
-  { name: 'ASM AHSANUL SARKAR AKIB',               username: 'akib-j@wicebd.com',      password: 'j-2026@wicebd7',  subcategory: 'IT and Robotics',                education_level: 'College' },
+  { name: 'ASM AHSANUL SARKAR AKIB',               username: 'akib-j@wicebd.com',      password: 'j-2026@wicebd12', subcategory: 'IT and Robotics',                education_level: 'College' },
   { name: 'MD SHOHIDUL ISLAM',                     username: 'shohidul-j@wicebd.com',  password: 'j-2026@wicebd8',  subcategory: 'IT and Robotics',                education_level: 'College' },
   { name: 'MD SAFAET HOSSAIN',                     username: 'safaet-j@wicebd.com',    password: 'j-2026@wicebd9',  subcategory: 'IT and Robotics',                education_level: 'University' },
   { name: 'DR. MAHFIDA AMJAD DIPA',                username: 'dipa-j@wicebd.com',      password: 'j-2026@wicebd10', subcategory: 'IT and Robotics',                education_level: 'University' },
