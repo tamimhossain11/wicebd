@@ -10,17 +10,20 @@ const bcrypt = require('bcryptjs');
 const judges = [
   // 1–2 given as naming examples by organiser (tahjib=1, fuad=2)
   { name: 'MD TAHZIB UL ISLAM',                   username: 'tahjib-j@wicebd.com',    password: 'j-2026@wicebd1',  subcategory: 'Innovative Social Science',      education_level: 'All Category' },
-  { name: 'ABU.M.FUAD',                            username: 'fuad-j@wicebd.com',      password: 'j-2026@wicebd2',  subcategory: 'IT and Robotics',                education_level: 'Elementary & High School' },
-  { name: 'RAHAT HASAN SHIHAB',                    username: 'shihab-j@wicebd.com',    password: 'j-2026@wicebd3',  subcategory: 'IT and Robotics',                education_level: 'Elementary & High School' },
+  // IT and Robotics — High School
+  { name: 'FAQUEER TANVIR AHMED',                  username: 'tanvir-j@wicebd.com',    password: 'j-2026@wicebd11', subcategory: 'IT and Robotics',                education_level: 'Elementary & High School' },
   { name: 'MD JAWADUR RAHMAN',                     username: 'jawad-j@wicebd.com',     password: 'j-2026@wicebd4',  subcategory: 'IT and Robotics',                education_level: 'Elementary & High School' },
-  { name: 'BULBUL',                                username: 'bulbul-j@wicebd.com',    password: 'j-2026@wicebd5',  subcategory: 'IT and Robotics',                education_level: 'College' },
-  { name: 'MD MUBASSIRUL ISLAM',                   username: 'mubassirul-j@wicebd.com',password: 'j-2026@wicebd6',  subcategory: 'IT and Robotics',                education_level: 'College' },
+  { name: 'RAHAT HASAN SHIHAB',                    username: 'shihab-j@wicebd.com',    password: 'j-2026@wicebd3',  subcategory: 'IT and Robotics',                education_level: 'Elementary & High School' },
+  // IT and Robotics — College
   { name: 'ASM AHSANUL SARKAR AKIB',               username: 'akib-j@wicebd.com',      password: 'j-2026@wicebd12', subcategory: 'IT and Robotics',                education_level: 'College' },
-  { name: 'MD SHOHIDUL ISLAM',                     username: 'shohidul-j@wicebd.com',  password: 'j-2026@wicebd8',  subcategory: 'IT and Robotics',                education_level: 'College' },
-  { name: 'MD SAFAET HOSSAIN',                     username: 'safaet-j@wicebd.com',    password: 'j-2026@wicebd9',  subcategory: 'IT and Robotics',                education_level: 'University' },
+  { name: 'ABU.M.FUAD',                            username: 'fuad-j@wicebd.com',      password: 'j-2026@wicebd2',  subcategory: 'IT and Robotics',                education_level: 'College' },
+  { name: 'RAJIB MAZUMDER',                        username: 'rajib-j@wicebd.com',     password: 'j-2026@wicebd12', subcategory: 'IT and Robotics',                education_level: 'College' },
+  // IT and Robotics — University
   { name: 'DR. MAHFIDA AMJAD DIPA',                username: 'dipa-j@wicebd.com',      password: 'j-2026@wicebd10', subcategory: 'IT and Robotics',                education_level: 'University' },
-  { name: 'FAQUEER TANVIR AHMED',                  username: 'tanvir-j@wicebd.com',    password: 'j-2026@wicebd11', subcategory: 'IT and Robotics',                education_level: 'University' },
-  { name: 'RAJIB MAZUMDER',                        username: 'rajib-j@wicebd.com',     password: 'j-2026@wicebd12', subcategory: 'IT and Robotics',                education_level: 'University' },
+  { name: 'MD SAFAET HOSSAIN',                     username: 'safaet-j@wicebd.com',    password: 'j-2026@wicebd9',  subcategory: 'IT and Robotics',                education_level: 'University' },
+  { name: 'MD MUBASSIRUL ISLAM',                   username: 'mubassirul-j@wicebd.com',password: 'j-2026@wicebd6',  subcategory: 'IT and Robotics',                education_level: 'University' },
+  { name: 'BULBUL',                                username: 'bulbul-j@wicebd.com',    password: 'j-2026@wicebd5',  subcategory: 'IT and Robotics',                education_level: 'University' },
+  { name: 'MD SHOHIDUL ISLAM',                     username: 'shohidul-j@wicebd.com',  password: 'j-2026@wicebd8',  subcategory: 'IT and Robotics',                education_level: 'College' },
   { name: 'HANA SULTAN CHOWDHURY ZAFI',            username: 'zafi-j@wicebd.com',      password: 'j-2026@wicebd13', subcategory: 'Environmental Science',          education_level: 'Elementary & High School' },
   { name: 'Md. ASHIQUR RAHMAN NOOR',               username: 'noor-j@wicebd.com',      password: 'j-2026@wicebd14', subcategory: 'Environmental Science',          education_level: 'Elementary & High School' },
   { name: 'ABDULLAH AL ARAF',                      username: 'araf-j@wicebd.com',      password: 'j-2026@wicebd15', subcategory: 'Environmental Science',          education_level: 'Elementary & High School' },
