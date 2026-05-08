@@ -2,7 +2,8 @@
  * Migration 016: Add education_level column to judges table + seed 22 judges for WICEBD 2026.
  * Run once: node migrations/run_016_seed_judges.js
  */
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+const envFile = process.env.USE_LIVE ? '.env.live' : '.env';
+require('dotenv').config({ path: envFile });
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 
@@ -35,6 +36,7 @@ const judges = [
 async function run() {
   const conn = await mysql.createConnection({
     host:     process.env.DB_HOST,
+    port:     process.env.DB_PORT || 3306,
     user:     process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
