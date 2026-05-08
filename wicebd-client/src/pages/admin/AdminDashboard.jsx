@@ -16,7 +16,7 @@ import {
   AreaChart, Area,
 } from 'recharts';
 import {
-  Logout, Refresh, FileDownload, Add, Delete, Send,
+  Logout, Refresh, FileDownload, Add, Delete, Send, Print,
   People, Assignment, EmojiEvents,
   TrendingUp, AdminPanelSettings, Menu as MenuIcon,
   RecordVoiceOver, Edit as EditIcon, Quiz,
@@ -1113,6 +1113,20 @@ export default function AdminDashboard() {
                     variant="outlined" size="small"
                     sx={{ color: '#4fc3f7', borderColor: '#4fc3f750', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#4fc3f7', background: '#4fc3f710' } }}>
                     Export Full CSV
+                  </Button>
+                )}
+                {activeNav === 1 && (
+                  <Button startIcon={<Print />}
+                    onClick={async () => {
+                      try {
+                        const res = await api.get('/api/admin/participants/print', { responseType: 'blob' });
+                        const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
+                        window.open(blobUrl, '_blank');
+                      } catch { setError('Failed to open print view'); }
+                    }}
+                    variant="outlined" size="small"
+                    sx={{ color: '#81c784', borderColor: '#81c78450', textTransform: 'none', borderRadius: 2, whiteSpace: 'nowrap', '&:hover': { borderColor: '#81c784', background: '#81c78410' } }}>
+                    Print View
                   </Button>
                 )}
                 {activeNav === 3 && (

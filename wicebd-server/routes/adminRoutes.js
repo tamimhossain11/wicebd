@@ -335,6 +335,133 @@ router.get('/users', authenticateAdmin, async (req, res) => {
   }
 });
 
+// Print-friendly HTML view of project participants
+router.get('/participants/print', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        r.id,
+        r.competitionCategory,
+        r.projectSubcategory,
+        r.categories,
+        r.projectTitle,
+        r.projectCategory,
+        r.crReference,
+        r.leader,        r.institution,     r.leaderPhone, r.leaderEmail, r.tshirtSizeLeader,
+        r.member2,       r.institution2,    r.tshirtSize2,
+        r.member3,       r.institution3,    r.tshirtSize3,
+        r.member4,       r.institution4,    r.tshirtSize4,
+        r.member5,       r.institution5,    r.tshirtSize5,
+        r.member6,       r.institution6,    r.tshirtSize6,
+        r.bkashTrxId,    r.amount,          r.paymentID,
+        r.ca_code,       r.club_code,       r.promo_code,
+        r.participatedBefore, r.infoSource,
+        r.created_at
+      FROM registrations r
+      WHERE r.competitionCategory != 'Megazine'
+      ORDER BY r.created_at ASC
+    `);
+
+    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    const memberRows = (r) => {
+      const members = [
+        { n: 1, name: r.leader,  inst: r.institution,  size: r.tshirtSizeLeader, role: 'Leader' },
+        { n: 2, name: r.member2, inst: r.institution2, size: r.tshirtSize2,       role: 'Member 2' },
+        { n: 3, name: r.member3, inst: r.institution3, size: r.tshirtSize3,       role: 'Member 3' },
+        { n: 4, name: r.member4, inst: r.institution4, size: r.tshirtSize4,       role: 'Member 4' },
+        { n: 5, name: r.member5, inst: r.institution5, size: r.tshirtSize5,       role: 'Member 5' },
+        { n: 6, name: r.member6, inst: r.institution6, size: r.tshirtSize6,       role: 'Member 6' },
+      ].filter(m => m.name);
+      return members.map(m => `
+        <tr class="member-row">
+          <td>${esc(m.role)}</td>
+          <td>${esc(m.name)}</td>
+          <td>${esc(m.inst)}</td>
+          <td>${esc(m.size)}</td>
+        </tr>`).join('');
+    };
+
+    const cards = rows.map((r, i) => `
+      <div class="card">
+        <div class="card-header">
+          <span class="serial">#${i + 1}</span>
+          <span class="project-title">${esc(r.projectTitle)}</span>
+          <span class="badge">${esc(r.competitionCategory)} · ${esc(r.projectSubcategory || r.categories || '')}</span>
+        </div>
+        <div class="meta-row">
+          <span><b>Invoice:</b> ${esc(r.paymentID)}</span>
+          <span><b>Txn:</b> ${esc(r.bkashTrxId)}</span>
+          <span><b>Amount:</b> ৳${esc(r.amount)}</span>
+          <span><b>Category:</b> ${esc(r.projectCategory)}</span>
+          ${r.ca_code   ? `<span><b>CA:</b> ${esc(r.ca_code)}</span>` : ''}
+          ${r.club_code ? `<span><b>Club:</b> ${esc(r.club_code)}</span>` : ''}
+          ${r.crReference ? `<span><b>CR Ref:</b> ${esc(r.crReference)}</span>` : ''}
+          <span><b>Registered:</b> ${new Date(r.created_at).toLocaleDateString('en-GB')}</span>
+        </div>
+        <table class="member-table">
+          <thead>
+            <tr><th>Role</th><th>Name</th><th>Institution</th><th>T-Shirt</th></tr>
+          </thead>
+          <tbody>
+            ${memberRows(r)}
+          </tbody>
+        </table>
+        <div class="contact-row">
+          <span><b>Phone:</b> ${esc(r.leaderPhone)}</span>
+          <span><b>WhatsApp:</b> ${esc(r.leaderWhatsApp)}</span>
+          <span><b>Email:</b> ${esc(r.leaderEmail)}</span>
+        </div>
+      </div>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>WICEBD 2026 — Project Participants (${rows.length})</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
+    h1 { font-size: 16px; text-align: center; margin-bottom: 4px; }
+    .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 16px; }
+    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 12px; padding: 10px 12px; page-break-inside: avoid; }
+    .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+    .serial { font-weight: 700; font-size: 13px; color: #800020; min-width: 28px; }
+    .project-title { font-weight: 700; font-size: 13px; flex: 1; }
+    .badge { font-size: 10px; background: #f0e0e4; color: #800020; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 10px; color: #444; margin-bottom: 8px; }
+    .member-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+    .member-table th { background: #800020; color: #fff; font-size: 10px; padding: 3px 6px; text-align: left; }
+    .member-table td { padding: 3px 6px; border-bottom: 1px solid #eee; font-size: 11px; }
+    .member-row:nth-child(even) td { background: #faf6f7; }
+    .contact-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 10px; color: #444; margin-top: 4px; }
+    .no-print { text-align: center; margin-bottom: 16px; }
+    .print-btn { padding: 8px 24px; background: #800020; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 0; }
+      .card { margin-bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <h1>WICEBD 2026 — Project Participants</h1>
+  <p class="subtitle">Total: ${rows.length} registrations &nbsp;·&nbsp; Generated: ${new Date().toLocaleString('en-GB')}</p>
+  ${cards}
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (error) {
+    console.error('Print view failed:', error);
+    res.status(500).json({ error: 'Failed to generate print view' });
+  }
+});
+
 function convertToCSV(data) {
   const headers = Object.keys(data[0]).join(',');
   const rows = data.map(obj =>
