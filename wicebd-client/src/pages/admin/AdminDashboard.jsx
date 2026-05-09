@@ -2111,9 +2111,8 @@ export default function AdminDashboard() {
             const CAT_LABEL = { Elementary: 'Elementary', 'Primary School': 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
             const posColor = (pos) => pos === 'gold' ? '#FFD700' : pos === 'silver' ? '#C0C0C0' : pos === 'bronze' ? '#CD7F32' : CYAN;
 
-            const thresholdPos   = (avg) => avg >= 91 ? 'gold' : avg >= 81 ? 'silver' : avg >= 71 ? 'bronze' : avg >= 60 ? 'honorable_mention' : null;
-            const thresholdColor = (avg) => avg >= 91 ? '#FFD700' : avg >= 81 ? '#C0C0C0' : avg >= 71 ? '#CD7F32' : avg >= 60 ? CYAN : 'rgba(255,255,255,0.2)';
-            const thresholdLabel = (avg) => avg >= 91 ? 'Gold' : avg >= 81 ? 'Silver' : avg >= 71 ? 'Bronze' : avg >= 60 ? 'Honorable' : 'Below';
+            const rankColor = (rank) => rank === 0 ? '#FFD700' : rank === 1 ? '#C0C0C0' : rank === 2 ? '#CD7F32' : 'rgba(255,255,255,0.15)';
+            const rankLabel = (rank) => rank === 0 ? '1st' : rank === 1 ? '2nd' : rank === 2 ? '3rd' : '';
 
             const projectGrouped = groupMarks(nrSummary.project);
             const wallGrouped    = groupMarks(nrSummary.wall_magazine);
@@ -2154,24 +2153,24 @@ export default function AdminDashboard() {
 
             const renderTeamRow = (r, ri, showEdu = false) => {
               const avg = parseFloat(r.avg_marks);
-              const pos = thresholdPos(avg);
-              const isSelected = pos !== null;
-              const tColor = thresholdColor(avg);
+              const medal = ri < 3;
+              const mColor = rankColor(ri);
+              const mLabel = rankLabel(ri);
               const judgeEntries = breakdownMap[r.registration_id] || [];
               return (
                 <React.Fragment key={r.registration_id}>
-                  <tr style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${tColor}08` : 'transparent', opacity: isSelected ? 1 : 0.5 }}>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}`, background: medal ? `${mColor}08` : 'transparent' }}>
                     <td style={{ padding: '9px 14px', textAlign: 'center' }}>
-                      {isSelected ? (
-                        <Box sx={{ width: 26, height: 26, borderRadius: '50%', background: `${tColor}22`, border: `1px solid ${tColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-                          <Typography sx={{ fontSize: 10, fontWeight: 800, color: tColor }}>{ri + 1}</Typography>
+                      {medal ? (
+                        <Box sx={{ width: 28, height: 28, borderRadius: '50%', background: `${mColor}22`, border: `1px solid ${mColor}60`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
+                          <Typography sx={{ fontSize: 10, fontWeight: 900, color: mColor }}>{mLabel}</Typography>
                         </Box>
                       ) : (
-                        <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>{ri + 1}</Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>{ri + 1}</Typography>
                       )}
                     </td>
                     <td style={{ padding: '9px 14px' }}>
-                      <Typography sx={{ color: isSelected ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: isSelected ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
+                      <Typography sx={{ color: medal ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: medal ? 700 : 400, fontSize: 13 }}>{r.team_name}</Typography>
                     </td>
                     <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{r.institution}</td>
                     <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{r.leader_name || '—'}</td>
@@ -2182,8 +2181,7 @@ export default function AdminDashboard() {
                     )}
                     <td style={{ padding: '9px 14px', textAlign: 'center' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'center' }}>
-                        <Typography sx={{ color: isSelected ? GREEN : 'rgba(255,255,255,0.3)', fontWeight: isSelected ? 800 : 400, fontSize: isSelected ? 15 : 13 }}>{avg.toFixed(1)}</Typography>
-                        {isSelected && <Chip label={thresholdLabel(avg)} size="small" sx={{ background: `${tColor}22`, color: tColor, fontSize: 10, height: 18 }} />}
+                        <Typography sx={{ color: medal ? mColor : 'rgba(255,255,255,0.4)', fontWeight: medal ? 800 : 400, fontSize: medal ? 15 : 13 }}>{avg.toFixed(1)}</Typography>
                       </Box>
                     </td>
                     <td style={{ padding: '9px 14px', color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center' }}>{r.judge_count}</td>
@@ -2299,7 +2297,7 @@ export default function AdminDashboard() {
                         <Box key={cat}>
                           <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{CAT_LABEL[cat] || cat}</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · threshold-based selection</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams · ranked by average marks</Typography>
                           </Box>
                           {renderMarksSummaryTable(
                             groups[cat],
@@ -2321,34 +2319,25 @@ export default function AdminDashboard() {
                 <Paper sx={{ p: 4, mb: 3, borderRadius: 3, background: CARD, border: `1px solid ${BORDER}`, textAlign: 'center' }}>
                   <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>No judge marks submitted yet</Typography>
                 </Paper>
-              ) : (
-                <Box sx={{ mb: 3 }}>
-                  {Object.entries(wallGrouped).map(([sub, groups]) => (
-                    <Paper key={sub} sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 2 }}>
-                      <Box sx={{ px: 2.5, py: 1.5, background: `${AMBER}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${AMBER}, #d97706)` }} />
-                        <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>{sub}</Typography>
-                        <Chip label={`${Object.values(groups).flat().length} teams`} size="small"
-                          sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
-                        <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>· Threshold-based selection</Typography>
-                      </Box>
-                      {[...CAT_ORDER, ...Object.keys(groups).filter(c => !CAT_ORDER.includes(c))].filter(c => groups[c]).map(cat => (
-                        <Box key={cat}>
-                          <Box sx={{ px: 2.5, py: 1, background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{CAT_LABEL[cat] || cat}</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>· {groups[cat].length} teams</Typography>
-                          </Box>
-                          {renderMarksSummaryTable(
-                            groups[cat],
-                            ['Rank', 'Magazine / Team', 'Institution', 'Leader', 'Education', 'Avg Marks (Judge)', 'Judges'],
-                            () => groups[cat].map((r, ri) => renderTeamRow(r, ri, true))
-                          )}
-                        </Box>
-                      ))}
-                    </Paper>
-                  ))}
-                </Box>
-              )}
+              ) : (() => {
+                const wallFlat = [...nrSummary.wall_magazine].sort((a, b) => parseFloat(b.avg_marks) - parseFloat(a.avg_marks));
+                return (
+                  <Paper sx={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 3, overflow: 'hidden', mb: 3 }}>
+                    <Box sx={{ px: 2.5, py: 1.5, background: `${AMBER}18`, borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Box sx={{ width: 4, height: 18, borderRadius: 2, background: `linear-gradient(${AMBER}, #d97706)` }} />
+                      <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>Wall Magazine</Typography>
+                      <Chip label={`${wallFlat.length} teams`} size="small"
+                        sx={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
+                      <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>· ranked by average marks</Typography>
+                    </Box>
+                    {renderMarksSummaryTable(
+                      wallFlat,
+                      ['Rank', 'Magazine / Team', 'Institution', 'Leader', 'Avg Marks (Judge)', 'Judges'],
+                      () => wallFlat.map((r, ri) => renderTeamRow(r, ri, false))
+                    )}
+                  </Paper>
+                );
+              })()}
 
               {/* ── Edit Judge Marks (super_admin) ── */}
               {nrJudgeBreakdown.length > 0 && (
