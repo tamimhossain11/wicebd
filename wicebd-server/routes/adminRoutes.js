@@ -672,7 +672,7 @@ router.get('/olympiad/print', authenticateAdmin, async (req, res) => {
 router.get('/judges/print', authenticateAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT name, username, judge_type, subcategory, education_level, is_active
+      SELECT name, username, judge_type, subcategory, education_level, display_password, is_active
       FROM judges
       ORDER BY subcategory, education_level, name
     `);
@@ -682,16 +682,12 @@ router.get('/judges/print', authenticateAdmin, async (req, res) => {
     // Group by subcategory → education_level
     const grouped = {};
     for (const j of rows) {
-      const cat = j.subcategory || 'Unassigned';
+      const cat = j.subcategory || (j.judge_type === 'wall_magazine' ? 'Wall Magazine' : 'Unassigned');
       const lvl = j.education_level || 'All Category';
       if (!grouped[cat]) grouped[cat] = {};
       if (!grouped[cat][lvl]) grouped[cat][lvl] = [];
       grouped[cat][lvl].push(j);
     }
-
-    // Password pattern mirrors the seeded sequence (username → number)
-    const usernameToSeq = {};
-    rows.forEach((j, i) => { usernameToSeq[j.username] = i + 1; });
 
     const categoryColors = {
       'IT and Robotics':                '#1565c0',
@@ -717,17 +713,14 @@ router.get('/judges/print', authenticateAdmin, async (req, res) => {
               </tr>
             </thead>
             <tbody>
-              ${judges.map((j, i) => {
-                const seq = usernameToSeq[j.username] || '?';
-                return `
+              ${judges.map((j, i) => `
               <tr>
                 <td class="seq">${i + 1}</td>
                 <td class="judge-name">${esc(j.name)}</td>
                 <td class="username">${esc(j.username)}</td>
-                <td class="password">j-2026@wicebd${seq}</td>
+                <td class="password">${esc(j.display_password)}</td>
                 <td class="${j.is_active ? 'active' : 'inactive'}">${j.is_active ? 'Active' : 'Inactive'}</td>
-              </tr>`;
-              }).join('')}
+              </tr>`).join('')}
             </tbody>
           </table>
         </div>`).join('');

@@ -82,19 +82,43 @@ router.get('/teams', authenticateJudge, async (req, res) => {
         ORDER BY education_category, leader
       `);
     } else {
-      [rows] = await db.query(`
-        SELECT paymentID AS registration_id,
-               COALESCE(NULLIF(projectTitle,''), leader) AS team_name,
-               leader AS leader_name, institution,
-               CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_category,
-               projectSubcategory AS subcategory,
-               projectTitle AS project_title, leaderEmail AS email, leaderPhone AS phone,
-               'project' AS competition_type,
-               member2, member3, member4, member5, member6
-        FROM registrations
-        WHERE competitionCategory != 'Megazine' AND projectSubcategory = ?
-        ORDER BY education_category, leader
-      `, [subcategory]);
+      // Check for explicit project assignments for this judge
+      const [assignedRows] = await db.query(
+        'SELECT registration_id FROM judge_project_assignments WHERE judge_id = ?',
+        [judgeId]
+      );
+
+      if (assignedRows.length > 0) {
+        const regIds = assignedRows.map(r => r.registration_id);
+        [rows] = await db.query(`
+          SELECT r.paymentID AS registration_id,
+                 COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
+                 r.leader AS leader_name, r.institution,
+                 CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
+                 r.projectSubcategory AS subcategory,
+                 r.projectTitle AS project_title, r.leaderEmail AS email, r.leaderPhone AS phone,
+                 'project' AS competition_type,
+                 r.member2, r.member3, r.member4, r.member5, r.member6
+          FROM registrations r
+          WHERE r.id IN (?)
+          ORDER BY r.projectSubcategory, r.categories, r.leader
+        `, [regIds]);
+      } else {
+        // Fallback: show all projects in judge's subcategory
+        [rows] = await db.query(`
+          SELECT paymentID AS registration_id,
+                 COALESCE(NULLIF(projectTitle,''), leader) AS team_name,
+                 leader AS leader_name, institution,
+                 CASE WHEN categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE categories END AS education_category,
+                 projectSubcategory AS subcategory,
+                 projectTitle AS project_title, leaderEmail AS email, leaderPhone AS phone,
+                 'project' AS competition_type,
+                 member2, member3, member4, member5, member6
+          FROM registrations
+          WHERE competitionCategory != 'Megazine' AND projectSubcategory = ?
+          ORDER BY education_category, leader
+        `, [subcategory]);
+      }
     }
 
     if (rows.length === 0) {
