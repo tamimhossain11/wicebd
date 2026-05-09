@@ -800,6 +800,202 @@ router.get('/judges/print', authenticateAdmin, async (req, res) => {
   }
 });
 
+// Print-friendly HTML view of national round results grouped by category and education level
+router.get('/national-round/print', authenticateAdmin, async (req, res) => {
+  try {
+    const [projectRows] = await db.query(`
+      SELECT r.paymentID AS registration_id,
+             COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
+             r.leader AS leader_name, r.institution,
+             r.projectSubcategory AS subcategory,
+             CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
+             ROUND(COALESCE(AVG(jm.marks), 0), 2) AS avg_marks,
+             COUNT(DISTINCT jm.judge_id) AS judge_count
+      FROM registrations r
+      LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'project'
+      WHERE r.competitionCategory != 'Megazine'
+      GROUP BY r.paymentID
+      ORDER BY r.projectSubcategory, education_category, avg_marks DESC
+    `);
+
+    const [wallRows] = await db.query(`
+      SELECT r.paymentID AS registration_id,
+             COALESCE(NULLIF(r.projectTitle,''), r.leader) AS team_name,
+             r.leader AS leader_name, r.institution,
+             CASE WHEN r.categories IN ('Primary School','Elementary') THEN 'Elementary' ELSE r.categories END AS education_category,
+             ROUND(COALESCE(AVG(jm.marks), 0), 2) AS avg_marks,
+             COUNT(DISTINCT jm.judge_id) AS judge_count
+      FROM registrations r
+      LEFT JOIN judge_marks jm ON jm.registration_id = r.paymentID AND jm.competition_type = 'wall_magazine'
+      WHERE r.competitionCategory = 'Megazine'
+      GROUP BY r.paymentID
+      ORDER BY avg_marks DESC
+    `);
+
+    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    // Group project rows: subcategory → education_category → sorted rows
+    const CAT_ORDER = ['Elementary', 'High School', 'college', 'University'];
+    const CAT_LABEL = { Elementary: 'Elementary', 'High School': 'High School', college: 'College', University: 'University' };
+    const SUBCAT_ORDER = [
+      'IT and Robotics',
+      'Environmental Science',
+      'Innovative Social Science',
+      'Applied Physics and Engineering',
+      'Applied Life Science',
+    ];
+    const SUBCAT_COLORS = {
+      'IT and Robotics':                '#1565c0',
+      'Environmental Science':          '#1a6632',
+      'Innovative Social Science':      '#6a1b9a',
+      'Applied Physics and Engineering':'#b45309',
+      'Applied Life Science':           '#00695c',
+    };
+
+    const grouped = {};
+    projectRows.forEach(r => {
+      const sub = r.subcategory || 'Other';
+      const cat = r.education_category || 'Other';
+      if (!grouped[sub]) grouped[sub] = {};
+      if (!grouped[sub][cat]) grouped[sub][cat] = [];
+      grouped[sub][cat].push(r);
+    });
+
+    const rankBadge = (ri) => {
+      if (ri === 0) return `<span class="medal gold">1st</span>`;
+      if (ri === 1) return `<span class="medal silver">2nd</span>`;
+      if (ri === 2) return `<span class="medal bronze">3rd</span>`;
+      return `<span class="rank">${ri + 1}</span>`;
+    };
+
+    const buildTable = (rows, showEduCol = false) => {
+      const headerExtra = showEduCol ? '<th>Level</th>' : '';
+      const rowsHtml = rows.map((r, ri) => {
+        const medal = ri < 3;
+        const rowClass = ri === 0 ? 'gold-row' : ri === 1 ? 'silver-row' : ri === 2 ? 'bronze-row' : '';
+        const eduCell = showEduCol ? `<td>${esc(CAT_LABEL[r.education_category] || r.education_category || '—')}</td>` : '';
+        return `<tr class="${rowClass}">
+          <td class="rank-cell">${rankBadge(ri)}</td>
+          <td class="team-name">${esc(r.team_name)}</td>
+          <td>${esc(r.institution)}</td>
+          <td>${esc(r.leader_name)}</td>
+          ${eduCell}
+          <td class="score ${medal ? 'score-medal' : ''}">${parseFloat(r.avg_marks).toFixed(1)}</td>
+          <td class="jcount">${r.judge_count}</td>
+        </tr>`;
+      }).join('');
+      return `<table class="results-table">
+        <thead><tr><th>Rank</th><th>Team / Project</th><th>Institution</th><th>Leader</th>${headerExtra}<th>Avg Score</th><th>Judges</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`;
+    };
+
+    // Project sections
+    const subcatOrder = [...SUBCAT_ORDER, ...Object.keys(grouped).filter(k => !SUBCAT_ORDER.includes(k))];
+    const projectSections = subcatOrder.filter(sub => grouped[sub]).map(sub => {
+      const color = SUBCAT_COLORS[sub] || '#444';
+      const catGroups = grouped[sub];
+      const catBlocks = CAT_ORDER.filter(cat => catGroups[cat]).map(cat => {
+        const rows = catGroups[cat];
+        return `<div class="cat-block">
+          <div class="cat-label">${esc(CAT_LABEL[cat] || cat)}</div>
+          ${buildTable(rows, false)}
+        </div>`;
+      }).join('');
+      return `<div class="subcat-section" style="--sc-color:${color}">
+        <div class="subcat-header">${esc(sub)}</div>
+        ${catBlocks}
+      </div>`;
+    }).join('');
+
+    // Wall magazine section (flat, sorted by avg_marks desc already)
+    const wallSection = wallRows.length === 0 ? '' : `
+      <div class="subcat-section" style="--sc-color:#1a6632">
+        <div class="subcat-header">Wall Magazine</div>
+        <div class="cat-block">
+          ${buildTable(wallRows, true)}
+        </div>
+      </div>`;
+
+    const totalProjectTeams = projectRows.length;
+    const totalWallTeams = wallRows.length;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>WICEBD 2026 — National Round Results</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
+    h1 { font-size: 18px; text-align: center; margin-bottom: 3px; }
+    .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 20px; }
+    .subcat-section { margin-bottom: 22px; }
+    .subcat-header {
+      background: var(--sc-color); color: #fff;
+      padding: 8px 14px; font-size: 13px; font-weight: 700;
+      border-radius: 4px 4px 0 0; letter-spacing: 0.02em;
+    }
+    .cat-block { border: 1px solid #ccc; border-top: none; margin-bottom: 0; }
+    .cat-label {
+      background: #f5f5f5; color: #555; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      padding: 5px 14px; border-bottom: 1px solid #ddd;
+    }
+    .results-table { width: 100%; border-collapse: collapse; }
+    .results-table th {
+      background: rgba(0,0,0,0.04); color: #666; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 5px 10px; text-align: left; border-bottom: 1px solid #ddd;
+    }
+    .results-table td { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .results-table tr:last-child td { border-bottom: none; }
+    .gold-row   td { background: #fffde7; }
+    .silver-row td { background: #fafafa; }
+    .bronze-row td { background: #fff8f0; }
+    .medal { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 900; }
+    .gold   { background: #FFD700; color: #7a5800; }
+    .silver { background: #C0C0C0; color: #444; }
+    .bronze { background: #CD7F32; color: #fff; }
+    .rank { color: #aaa; font-size: 11px; }
+    .rank-cell { width: 52px; text-align: center; }
+    .team-name { font-weight: 700; font-size: 12px; max-width: 220px; }
+    .score { text-align: center; font-size: 12px; font-weight: 600; color: #555; }
+    .score-medal { font-size: 14px; font-weight: 900; color: #222; }
+    .jcount { text-align: center; color: #aaa; font-size: 10px; }
+    .no-print { text-align: center; margin-bottom: 16px; }
+    .print-btn { padding: 8px 24px; background: #37474f; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 0; }
+      .subcat-section { margin-bottom: 14px; page-break-inside: avoid; }
+      .cat-block { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <h1>WICEBD 2026 — National Round Results</h1>
+  <p class="subtitle">
+    Project Teams: ${totalProjectTeams} &nbsp;·&nbsp;
+    Wall Magazine: ${totalWallTeams} &nbsp;·&nbsp;
+    Generated: ${new Date().toLocaleString('en-GB')}
+  </p>
+  ${projectSections}
+  ${wallSection}
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (error) {
+    console.error('National round print view failed:', error);
+    res.status(500).json({ error: 'Failed to generate print view' });
+  }
+});
+
 function convertToCSV(data) {
   const headers = Object.keys(data[0]).join(',');
   const rows = data.map(obj =>

@@ -2211,6 +2211,17 @@ export default function AdminDashboard() {
                 title="National Round Management"
                 action={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                    <Button startIcon={<Print />} variant="outlined" size="small"
+                      onClick={async () => {
+                        try {
+                          const res = await api.get('/api/admin/national-round/print', { responseType: 'blob' });
+                          const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'text/html' }));
+                          window.open(blobUrl, '_blank');
+                        } catch { toast.error('Failed to open print view'); }
+                      }}
+                      sx={{ borderColor: '#ffd54f', color: '#ffd54f', borderRadius: 2, textTransform: 'none', '&:hover': { borderColor: '#ffd54f', background: '#ffd54f10' } }}>
+                      Print Results
+                    </Button>
                     <Button startIcon={<Preview />} variant="outlined" size="small"
                       disabled={nrComputing}
                       onClick={async () => {
