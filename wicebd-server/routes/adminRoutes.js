@@ -335,84 +335,163 @@ router.get('/users', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Print-friendly HTML view of project participants (optional ?subcategory= filter)
+// Print-friendly HTML view of project participants with parent info (optional ?subcategory= filter)
 router.get('/participants/print', authenticateAdmin, async (req, res) => {
   try {
     const subcat = req.query.subcategory || null;
     const [rows] = await db.query(`
       SELECT
-        r.id,
-        r.competitionCategory,
-        r.projectSubcategory,
-        r.categories,
-        r.projectTitle,
-        r.projectCategory,
-        r.crReference,
-        r.leader,        r.institution,     r.leaderPhone, r.leaderEmail, r.tshirtSizeLeader,
-        r.member2,       r.institution2,    r.tshirtSize2,
-        r.member3,       r.institution3,    r.tshirtSize3,
-        r.member4,       r.institution4,    r.tshirtSize4,
-        r.member5,       r.institution5,    r.tshirtSize5,
-        r.member6,       r.institution6,    r.tshirtSize6,
-        r.bkashTrxId,    r.amount,          r.paymentID,
-        r.ca_code,       r.club_code,       r.promo_code,
-        r.participatedBefore, r.infoSource,
-        r.created_at
+        r.id, r.competitionCategory, r.projectSubcategory, r.categories,
+        r.projectTitle, r.projectCategory, r.crReference,
+        r.bkashTrxId, r.amount, r.paymentID,
+        r.ca_code, r.club_code, r.promo_code,
+        r.participatedBefore, r.infoSource, r.created_at,
+
+        r.leader,   r.institution,   r.leaderPhone, r.leaderWhatsApp, r.leaderEmail, r.tshirtSizeLeader,
+        lp.father_name        AS l_father_name,
+        lp.father_occupation  AS l_father_occ,
+        lp.mother_name        AS l_mother_name,
+        lp.mother_occupation  AS l_mother_occ,
+        lp.guardian_phone     AS l_guardian_phone,
+        lp.date_of_birth      AS l_dob,
+        lp.gender             AS l_gender,
+        lp.address            AS l_address,
+
+        r.member2, r.institution2, r.tshirtSize2,
+        mp2.father_name       AS m2_father_name,
+        mp2.father_occupation AS m2_father_occ,
+        mp2.mother_name       AS m2_mother_name,
+        mp2.mother_occupation AS m2_mother_occ,
+        mp2.guardian_phone    AS m2_guardian_phone,
+        mp2.date_of_birth     AS m2_dob,
+        mp2.gender            AS m2_gender,
+        mp2.address           AS m2_address,
+
+        r.member3, r.institution3, r.tshirtSize3,
+        mp3.father_name       AS m3_father_name,
+        mp3.father_occupation AS m3_father_occ,
+        mp3.mother_name       AS m3_mother_name,
+        mp3.mother_occupation AS m3_mother_occ,
+        mp3.guardian_phone    AS m3_guardian_phone,
+        mp3.date_of_birth     AS m3_dob,
+        mp3.gender            AS m3_gender,
+        mp3.address           AS m3_address,
+
+        r.member4, r.institution4, r.tshirtSize4,
+        mp4.father_name       AS m4_father_name,
+        mp4.father_occupation AS m4_father_occ,
+        mp4.mother_name       AS m4_mother_name,
+        mp4.mother_occupation AS m4_mother_occ,
+        mp4.guardian_phone    AS m4_guardian_phone,
+        mp4.date_of_birth     AS m4_dob,
+        mp4.gender            AS m4_gender,
+        mp4.address           AS m4_address,
+
+        r.member5, r.institution5, r.tshirtSize5,
+        mp5.father_name       AS m5_father_name,
+        mp5.father_occupation AS m5_father_occ,
+        mp5.mother_name       AS m5_mother_name,
+        mp5.mother_occupation AS m5_mother_occ,
+        mp5.guardian_phone    AS m5_guardian_phone,
+        mp5.date_of_birth     AS m5_dob,
+        mp5.gender            AS m5_gender,
+        mp5.address           AS m5_address,
+
+        r.member6, r.institution6, r.tshirtSize6,
+        mp6.father_name       AS m6_father_name,
+        mp6.father_occupation AS m6_father_occ,
+        mp6.mother_name       AS m6_mother_name,
+        mp6.mother_occupation AS m6_mother_occ,
+        mp6.guardian_phone    AS m6_guardian_phone,
+        mp6.date_of_birth     AS m6_dob,
+        mp6.gender            AS m6_gender,
+        mp6.address           AS m6_address
+
       FROM registrations r
+      LEFT JOIN users               lu  ON r.user_id = lu.id
+      LEFT JOIN user_profiles       lp  ON lu.id = lp.user_id
+      LEFT JOIN team_member_profiles mp2 ON mp2.payment_id = r.paymentID AND mp2.member_slot = 2
+      LEFT JOIN team_member_profiles mp3 ON mp3.payment_id = r.paymentID AND mp3.member_slot = 3
+      LEFT JOIN team_member_profiles mp4 ON mp4.payment_id = r.paymentID AND mp4.member_slot = 4
+      LEFT JOIN team_member_profiles mp5 ON mp5.payment_id = r.paymentID AND mp5.member_slot = 5
+      LEFT JOIN team_member_profiles mp6 ON mp6.payment_id = r.paymentID AND mp6.member_slot = 6
+
       WHERE r.competitionCategory != 'Megazine'
         ${subcat ? 'AND r.projectSubcategory = ?' : ''}
       ORDER BY r.projectSubcategory ASC, r.created_at ASC
     `, subcat ? [subcat] : []);
 
-    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+    const esc = v => (v == null ? '' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+    const val = v => esc(v) || '—';
 
-    const memberRows = (r) => {
+    const parentBlock = (prefix, r) => {
+      const fatherName = r[`${prefix}_father_name`];
+      const motherName = r[`${prefix}_mother_name`];
+      const dob        = r[`${prefix}_dob`];
+      const gender     = r[`${prefix}_gender`];
+      const phone      = r[`${prefix}_guardian_phone`];
+      const address    = r[`${prefix}_address`];
+      if (!fatherName && !motherName && !phone && !address) return '';
+      const dobStr = dob ? new Date(dob).toLocaleDateString('en-GB') : '—';
+      return `<div class="parent-block">
+        <div class="parent-row">
+          ${fatherName ? `<span><b>Father:</b> ${esc(fatherName)}${r[`${prefix}_father_occ`] ? ` <em>(${esc(r[`${prefix}_father_occ`])})</em>` : ''}</span>` : ''}
+          ${motherName ? `<span><b>Mother:</b> ${esc(motherName)}${r[`${prefix}_mother_occ`] ? ` <em>(${esc(r[`${prefix}_mother_occ`])})</em>` : ''}</span>` : ''}
+          ${phone ? `<span><b>Guardian Phone:</b> ${esc(phone)}</span>` : ''}
+          ${gender ? `<span><b>Gender:</b> ${esc(gender)}</span>` : ''}
+          ${dob ? `<span><b>DOB:</b> ${dobStr}</span>` : ''}
+        </div>
+        ${address ? `<div class="parent-address"><b>Address:</b> ${esc(address)}</div>` : ''}
+      </div>`;
+    };
+
+    const memberSection = (r) => {
       const members = [
-        { n: 1, name: r.leader,  inst: r.institution,  size: r.tshirtSizeLeader, role: 'Leader' },
-        { n: 2, name: r.member2, inst: r.institution2, size: r.tshirtSize2,       role: 'Member 2' },
-        { n: 3, name: r.member3, inst: r.institution3, size: r.tshirtSize3,       role: 'Member 3' },
-        { n: 4, name: r.member4, inst: r.institution4, size: r.tshirtSize4,       role: 'Member 4' },
-        { n: 5, name: r.member5, inst: r.institution5, size: r.tshirtSize5,       role: 'Member 5' },
-        { n: 6, name: r.member6, inst: r.institution6, size: r.tshirtSize6,       role: 'Member 6' },
+        { name: r.leader,  inst: r.institution,  size: r.tshirtSizeLeader, role: 'Leader',   prefix: 'l'  },
+        { name: r.member2, inst: r.institution2, size: r.tshirtSize2,       role: 'Member 2', prefix: 'm2' },
+        { name: r.member3, inst: r.institution3, size: r.tshirtSize3,       role: 'Member 3', prefix: 'm3' },
+        { name: r.member4, inst: r.institution4, size: r.tshirtSize4,       role: 'Member 4', prefix: 'm4' },
+        { name: r.member5, inst: r.institution5, size: r.tshirtSize5,       role: 'Member 5', prefix: 'm5' },
+        { name: r.member6, inst: r.institution6, size: r.tshirtSize6,       role: 'Member 6', prefix: 'm6' },
       ].filter(m => m.name);
+
       return members.map(m => `
-        <tr class="member-row">
-          <td>${esc(m.role)}</td>
-          <td>${esc(m.name)}</td>
-          <td>${esc(m.inst)}</td>
-          <td>${esc(m.size)}</td>
-        </tr>`).join('');
+        <div class="member-block">
+          <div class="member-header">
+            <span class="member-role">${esc(m.role)}</span>
+            <span class="member-name">${esc(m.name)}</span>
+            <span class="member-inst">${esc(m.inst)}</span>
+            ${m.size ? `<span class="member-tshirt">T-Shirt: ${esc(m.size)}</span>` : ''}
+          </div>
+          ${parentBlock(m.prefix, r)}
+        </div>`).join('');
     };
 
     const cards = rows.map((r, i) => `
       <div class="card">
         <div class="card-header">
           <span class="serial">#${i + 1}</span>
-          <span class="project-title">${esc(r.projectTitle)}</span>
-          <span class="badge">${esc(r.competitionCategory)} · ${esc(r.projectSubcategory || r.categories || '')}</span>
+          <span class="project-title">${esc(r.projectTitle) || esc(r.leader)}</span>
+          <span class="badge">${esc(r.projectSubcategory || r.categories || '')}</span>
         </div>
         <div class="meta-row">
-          <span><b>Invoice:</b> ${esc(r.paymentID)}</span>
-          <span><b>Txn:</b> ${esc(r.bkashTrxId)}</span>
-          <span><b>Amount:</b> ৳${esc(r.amount)}</span>
-          <span><b>Category:</b> ${esc(r.projectCategory)}</span>
+          <span><b>Invoice:</b> ${val(r.paymentID)}</span>
+          <span><b>Txn:</b> ${val(r.bkashTrxId)}</span>
+          <span><b>Amount:</b> ৳${val(r.amount)}</span>
+          <span><b>Edu Level:</b> ${val(r.categories)}</span>
+          ${r.projectCategory ? `<span><b>Category:</b> ${esc(r.projectCategory)}</span>` : ''}
           ${r.ca_code   ? `<span><b>CA:</b> ${esc(r.ca_code)}</span>` : ''}
           ${r.club_code ? `<span><b>Club:</b> ${esc(r.club_code)}</span>` : ''}
           ${r.crReference ? `<span><b>CR Ref:</b> ${esc(r.crReference)}</span>` : ''}
           <span><b>Registered:</b> ${new Date(r.created_at).toLocaleDateString('en-GB')}</span>
         </div>
-        <table class="member-table">
-          <thead>
-            <tr><th>Role</th><th>Name</th><th>Institution</th><th>T-Shirt</th></tr>
-          </thead>
-          <tbody>
-            ${memberRows(r)}
-          </tbody>
-        </table>
         <div class="contact-row">
-          <span><b>Phone:</b> ${esc(r.leaderPhone)}</span>
-          <span><b>WhatsApp:</b> ${esc(r.leaderWhatsApp)}</span>
-          <span><b>Email:</b> ${esc(r.leaderEmail)}</span>
+          <span><b>Phone:</b> ${val(r.leaderPhone)}</span>
+          ${r.leaderWhatsApp ? `<span><b>WhatsApp:</b> ${esc(r.leaderWhatsApp)}</span>` : ''}
+          <span><b>Email:</b> ${val(r.leaderEmail)}</span>
+        </div>
+        <div class="members-section">
+          ${memberSection(r)}
         </div>
       </div>`).join('');
 
@@ -426,23 +505,39 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
     body { font-family: Arial, sans-serif; font-size: 11px; color: #111; background: #fff; padding: 16px; }
     h1 { font-size: 16px; text-align: center; margin-bottom: 4px; }
     .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 16px; }
-    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 12px; padding: 10px 12px; page-break-inside: avoid; }
-    .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+
+    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 14px; padding: 10px 12px; page-break-inside: avoid; }
+    .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
     .serial { font-weight: 700; font-size: 13px; color: #800020; min-width: 28px; }
     .project-title { font-weight: 700; font-size: 13px; flex: 1; }
     .badge { font-size: 10px; background: #f0e0e4; color: #800020; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
-    .meta-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 10px; color: #444; margin-bottom: 8px; }
-    .member-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
-    .member-table th { background: #800020; color: #fff; font-size: 10px; padding: 3px 6px; text-align: left; }
-    .member-table td { padding: 3px 6px; border-bottom: 1px solid #eee; font-size: 11px; }
-    .member-row:nth-child(even) td { background: #faf6f7; }
-    .contact-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 10px; color: #444; margin-top: 4px; }
+
+    .meta-row { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 10px; color: #444; margin-bottom: 5px; }
+    .contact-row { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 10px; color: #444; margin-bottom: 8px; }
+
+    .members-section { display: flex; flex-direction: column; gap: 6px; }
+
+    .member-block { border: 1px solid #e0e0e0; border-radius: 3px; overflow: hidden; }
+    .member-header {
+      display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+      background: #800020; color: #fff; padding: 4px 8px;
+    }
+    .member-role  { font-weight: 700; font-size: 10px; min-width: 52px; opacity: 0.85; }
+    .member-name  { font-weight: 700; font-size: 12px; flex: 1; }
+    .member-inst  { font-size: 10px; opacity: 0.8; }
+    .member-tshirt{ font-size: 10px; opacity: 0.7; }
+
+    .parent-block { padding: 5px 8px; background: #faf6f7; }
+    .parent-row   { display: flex; flex-wrap: wrap; gap: 3px 18px; font-size: 10px; color: #333; margin-bottom: 2px; }
+    .parent-row em { color: #666; font-style: italic; }
+    .parent-address { font-size: 10px; color: #555; }
+
     .no-print { text-align: center; margin-bottom: 16px; }
     .print-btn { padding: 8px 24px; background: #800020; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
     @media print {
       .no-print { display: none; }
       body { padding: 0; }
-      .card { margin-bottom: 8px; }
+      .card { margin-bottom: 10px; }
     }
   </style>
 </head>
