@@ -421,6 +421,21 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
       ORDER BY r.projectSubcategory ASC, r.created_at ASC
     `, subcat ? [subcat] : []);
 
+    // Fetch all judge marks for project registrations
+    const [markRows] = await db.query(`
+      SELECT jm.registration_id, jm.urgency, jm.visibility, jm.relevance, jm.presentation, jm.marks,
+             j.name AS judge_name
+      FROM judge_marks jm
+      JOIN judges j ON j.id = jm.judge_id
+      WHERE jm.competition_type = 'project'
+      ORDER BY jm.registration_id, j.name
+    `);
+    const marksMap = {};
+    markRows.forEach(m => {
+      if (!marksMap[m.registration_id]) marksMap[m.registration_id] = [];
+      marksMap[m.registration_id].push(m);
+    });
+
     const esc = v => (v == null ? '' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
     const val = v => esc(v) || '—';
 
@@ -467,18 +482,51 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
         </div>`).join('');
     };
 
+    const marksSection = (paymentID) => {
+      const entries = marksMap[paymentID] || [];
+      if (entries.length === 0) return `<div class="marks-none">No marks recorded yet</div>`;
+      const total = entries.reduce((s, e) => s + (e.marks || 0), 0);
+      const avg   = (total / entries.length).toFixed(1);
+      const trs = entries.map(e => `
+        <tr>
+          <td class="judge-name-cell">${esc(e.judge_name)}</td>
+          <td class="score-cell">${e.urgency  ?? '—'}</td>
+          <td class="score-cell">${e.visibility ?? '—'}</td>
+          <td class="score-cell">${e.relevance ?? '—'}</td>
+          <td class="score-cell">${e.presentation ?? '—'}</td>
+          <td class="total-cell">${e.marks ?? '—'}</td>
+        </tr>`).join('');
+      return `<div class="marks-section">
+        <div class="marks-header">
+          <span class="marks-title">Judge Scores</span>
+          <span class="marks-summary">${entries.length} judge${entries.length > 1 ? 's' : ''} &nbsp;·&nbsp; Avg: <strong>${avg}</strong> &nbsp;·&nbsp; Sum: <strong>${total}</strong></span>
+        </div>
+        <table class="marks-table">
+          <thead><tr>
+            <th>Judge</th>
+            <th>Urgency<br><small>/30</small></th>
+            <th>Visibility<br><small>/20</small></th>
+            <th>Relevance<br><small>/30</small></th>
+            <th>Presentation<br><small>/20</small></th>
+            <th>Total<br><small>/100</small></th>
+          </tr></thead>
+          <tbody>${trs}</tbody>
+        </table>
+      </div>`;
+    };
+
     const cards = rows.map((r, i) => `
       <div class="card">
         <div class="card-header">
           <span class="serial">#${i + 1}</span>
           <span class="project-title">${esc(r.projectTitle) || esc(r.leader)}</span>
-          <span class="badge">${esc(r.projectSubcategory || r.categories || '')}</span>
+          <span class="badge">${esc(r.projectSubcategory || '')}</span>
+          <span class="edu-badge">${esc(r.categories || '')}</span>
         </div>
         <div class="meta-row">
           <span><b>Invoice:</b> ${val(r.paymentID)}</span>
           <span><b>Txn:</b> ${val(r.bkashTrxId)}</span>
           <span><b>Amount:</b> ৳${val(r.amount)}</span>
-          <span><b>Edu Level:</b> ${val(r.categories)}</span>
           ${r.projectCategory ? `<span><b>Category:</b> ${esc(r.projectCategory)}</span>` : ''}
           ${r.ca_code   ? `<span><b>CA:</b> ${esc(r.ca_code)}</span>` : ''}
           ${r.club_code ? `<span><b>Club:</b> ${esc(r.club_code)}</span>` : ''}
@@ -490,6 +538,7 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
           ${r.leaderWhatsApp ? `<span><b>WhatsApp:</b> ${esc(r.leaderWhatsApp)}</span>` : ''}
           <span><b>Email:</b> ${val(r.leaderEmail)}</span>
         </div>
+        ${marksSection(r.paymentID)}
         <div class="members-section">
           ${memberSection(r)}
         </div>
@@ -506,16 +555,33 @@ router.get('/participants/print', authenticateAdmin, async (req, res) => {
     h1 { font-size: 16px; text-align: center; margin-bottom: 4px; }
     .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 16px; }
 
-    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 14px; padding: 10px 12px; page-break-inside: avoid; }
+    .card { border: 1px solid #bbb; border-radius: 4px; margin-bottom: 16px; padding: 10px 12px; page-break-inside: avoid; }
     .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
     .serial { font-weight: 700; font-size: 13px; color: #800020; min-width: 28px; }
     .project-title { font-weight: 700; font-size: 13px; flex: 1; }
     .badge { font-size: 10px; background: #f0e0e4; color: #800020; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .edu-badge { font-size: 10px; background: #e8f0fe; color: #1a56db; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
 
     .meta-row { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 10px; color: #444; margin-bottom: 5px; }
     .contact-row { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 10px; color: #444; margin-bottom: 8px; }
 
-    .members-section { display: flex; flex-direction: column; gap: 6px; }
+    .marks-section { border: 1px solid #d4a800; border-radius: 3px; margin-bottom: 8px; overflow: hidden; }
+    .marks-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #fffbea; padding: 5px 10px; border-bottom: 1px solid #d4a800; }
+    .marks-title { font-weight: 700; font-size: 11px; color: #7a5800; }
+    .marks-summary { font-size: 10px; color: #555; }
+    .marks-summary strong { color: #800020; }
+    .marks-table { width: 100%; border-collapse: collapse; }
+    .marks-table th { background: #fff8dc; color: #7a5800; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 8px; text-align: center; border-bottom: 1px solid #e8d080; }
+    .marks-table th:first-child { text-align: left; }
+    .marks-table td { padding: 4px 8px; border-bottom: 1px solid #f5f0dc; font-size: 11px; }
+    .marks-table tr:last-child td { border-bottom: none; }
+    .marks-table tr:nth-child(even) td { background: #fffdf5; }
+    .judge-name-cell { font-weight: 600; color: #333; }
+    .score-cell { text-align: center; color: #555; }
+    .total-cell { text-align: center; font-weight: 700; color: #800020; font-size: 12px; }
+    .marks-none { font-size: 10px; color: #aaa; font-style: italic; padding: 4px 0 6px; }
+
+    .members-section { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 
     .member-block { border: 1px solid #e0e0e0; border-radius: 3px; overflow: hidden; }
     .member-header {
