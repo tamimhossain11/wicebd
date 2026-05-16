@@ -993,7 +993,68 @@ router.get('/national-round/print', authenticateAdmin, async (req, res) => {
       ORDER BY avg_marks DESC
     `);
 
-    const esc = v => (v == null ? '—' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+    // Per-judge breakdown for all registrations
+    const [breakdownRows] = await db.query(`
+      SELECT jm.registration_id, jm.urgency, jm.visibility, jm.relevance, jm.presentation, jm.marks,
+             j.name AS judge_name
+      FROM judge_marks jm
+      JOIN judges j ON j.id = jm.judge_id
+      ORDER BY jm.registration_id, j.name
+    `);
+    const marksMap = {};
+    breakdownRows.forEach(m => {
+      if (!marksMap[m.registration_id]) marksMap[m.registration_id] = [];
+      marksMap[m.registration_id].push(m);
+    });
+
+    // Member + parent info for all registrations
+    const [memberRows] = await db.query(`
+      SELECT
+        r.paymentID,
+        r.leader,   r.institution,   r.leaderPhone, r.leaderEmail, r.tshirtSizeLeader,
+        lp.father_name AS l_fn, lp.father_occupation AS l_fo,
+        lp.mother_name AS l_mn, lp.mother_occupation AS l_mo,
+        lp.guardian_phone AS l_gp, lp.date_of_birth AS l_dob, lp.gender AS l_gender, lp.address AS l_addr,
+
+        r.member2, r.institution2, r.tshirtSize2,
+        mp2.father_name AS m2_fn, mp2.father_occupation AS m2_fo,
+        mp2.mother_name AS m2_mn, mp2.mother_occupation AS m2_mo,
+        mp2.guardian_phone AS m2_gp, mp2.date_of_birth AS m2_dob, mp2.gender AS m2_gender, mp2.address AS m2_addr,
+
+        r.member3, r.institution3, r.tshirtSize3,
+        mp3.father_name AS m3_fn, mp3.father_occupation AS m3_fo,
+        mp3.mother_name AS m3_mn, mp3.mother_occupation AS m3_mo,
+        mp3.guardian_phone AS m3_gp, mp3.date_of_birth AS m3_dob, mp3.gender AS m3_gender, mp3.address AS m3_addr,
+
+        r.member4, r.institution4, r.tshirtSize4,
+        mp4.father_name AS m4_fn, mp4.father_occupation AS m4_fo,
+        mp4.mother_name AS m4_mn, mp4.mother_occupation AS m4_mo,
+        mp4.guardian_phone AS m4_gp, mp4.date_of_birth AS m4_dob, mp4.gender AS m4_gender, mp4.address AS m4_addr,
+
+        r.member5, r.institution5, r.tshirtSize5,
+        mp5.father_name AS m5_fn, mp5.father_occupation AS m5_fo,
+        mp5.mother_name AS m5_mn, mp5.mother_occupation AS m5_mo,
+        mp5.guardian_phone AS m5_gp, mp5.date_of_birth AS m5_dob, mp5.gender AS m5_gender, mp5.address AS m5_addr,
+
+        r.member6, r.institution6, r.tshirtSize6,
+        mp6.father_name AS m6_fn, mp6.father_occupation AS m6_fo,
+        mp6.mother_name AS m6_mn, mp6.mother_occupation AS m6_mo,
+        mp6.guardian_phone AS m6_gp, mp6.date_of_birth AS m6_dob, mp6.gender AS m6_gender, mp6.address AS m6_addr
+
+      FROM registrations r
+      LEFT JOIN users               lu  ON r.user_id = lu.id
+      LEFT JOIN user_profiles       lp  ON lu.id = lp.user_id
+      LEFT JOIN team_member_profiles mp2 ON mp2.payment_id = r.paymentID AND mp2.member_slot = 2
+      LEFT JOIN team_member_profiles mp3 ON mp3.payment_id = r.paymentID AND mp3.member_slot = 3
+      LEFT JOIN team_member_profiles mp4 ON mp4.payment_id = r.paymentID AND mp4.member_slot = 4
+      LEFT JOIN team_member_profiles mp5 ON mp5.payment_id = r.paymentID AND mp5.member_slot = 5
+      LEFT JOIN team_member_profiles mp6 ON mp6.payment_id = r.paymentID AND mp6.member_slot = 6
+    `);
+    const membersMap = {};
+    memberRows.forEach(r => { membersMap[r.paymentID] = r; });
+
+    const esc = v => (v == null ? '' : String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+    const val = v => esc(v) || '—';
 
     // Group project rows: subcategory → education_category → sorted rows
     const CAT_ORDER = ['Elementary', 'High School', 'college', 'University'];
@@ -1029,12 +1090,64 @@ router.get('/national-round/print', authenticateAdmin, async (req, res) => {
       return `<span class="rank">${ri + 1}</span>`;
     };
 
+    const renderMembers = (paymentID) => {
+      const d = membersMap[paymentID];
+      if (!d) return '';
+      const slots = [
+        { name: d.leader,  inst: d.institution,  size: d.tshirtSizeLeader, role: 'Leader',   p: 'l'  },
+        { name: d.member2, inst: d.institution2, size: d.tshirtSize2,       role: 'Member 2', p: 'm2' },
+        { name: d.member3, inst: d.institution3, size: d.tshirtSize3,       role: 'Member 3', p: 'm3' },
+        { name: d.member4, inst: d.institution4, size: d.tshirtSize4,       role: 'Member 4', p: 'm4' },
+        { name: d.member5, inst: d.institution5, size: d.tshirtSize5,       role: 'Member 5', p: 'm5' },
+        { name: d.member6, inst: d.institution6, size: d.tshirtSize6,       role: 'Member 6', p: 'm6' },
+      ].filter(m => m.name);
+
+      return slots.map(m => {
+        const fn = d[`${m.p}_fn`], fo = d[`${m.p}_fo`];
+        const mn = d[`${m.p}_mn`], mo = d[`${m.p}_mo`];
+        const gp = d[`${m.p}_gp`], dob = d[`${m.p}_dob`];
+        const gender = d[`${m.p}_gender`], addr = d[`${m.p}_addr`];
+        const dobStr = dob ? new Date(dob).toLocaleDateString('en-GB') : '';
+        const hasParent = fn || mn || gp || addr;
+        return `<div class="mb">
+          <div class="mb-hdr">
+            <span class="mb-role">${esc(m.role)}</span>
+            <span class="mb-name">${esc(m.name)}</span>
+            <span class="mb-inst">${esc(m.inst)}</span>
+            ${m.size ? `<span class="mb-ts">T-Shirt: ${esc(m.size)}</span>` : ''}
+          </div>
+          ${hasParent ? `<div class="mb-parent">
+            ${fn ? `<span><b>Father:</b> ${esc(fn)}${fo ? ` <em>(${esc(fo)})</em>` : ''}</span>` : ''}
+            ${mn ? `<span><b>Mother:</b> ${esc(mn)}${mo ? ` <em>(${esc(mo)})</em>` : ''}</span>` : ''}
+            ${gp ? `<span><b>Guardian Ph:</b> ${esc(gp)}</span>` : ''}
+            ${gender ? `<span><b>Gender:</b> ${esc(gender)}</span>` : ''}
+            ${dobStr ? `<span><b>DOB:</b> ${dobStr}</span>` : ''}
+            ${addr ? `<div class="mb-addr"><b>Address:</b> ${esc(addr)}</div>` : ''}
+          </div>` : ''}
+        </div>`;
+      }).join('');
+    };
+
     const buildTable = (rows, showEduCol = false) => {
+      const colSpan = showEduCol ? 7 : 6;
       const headerExtra = showEduCol ? '<th>Level</th>' : '';
       const rowsHtml = rows.map((r, ri) => {
-        const medal = ri < 3;
+        const medal    = ri < 3;
         const rowClass = ri === 0 ? 'gold-row' : ri === 1 ? 'silver-row' : ri === 2 ? 'bronze-row' : '';
-        const eduCell = showEduCol ? `<td>${esc(CAT_LABEL[r.education_category] || r.education_category || '—')}</td>` : '';
+        const eduCell  = showEduCol ? `<td>${esc(CAT_LABEL[r.education_category] || r.education_category || '—')}</td>` : '';
+        const entries  = marksMap[r.registration_id] || [];
+        const judgeRows = entries.length === 0
+          ? `<tr><td colspan="${colSpan}" class="no-marks">No marks recorded</td></tr>`
+          : entries.map(e => `
+              <tr class="judge-row">
+                <td class="judge-indent"></td>
+                <td class="jn">${esc(e.judge_name)}</td>
+                <td class="js">U: ${e.urgency ?? '—'}</td>
+                <td class="js">V: ${e.visibility ?? '—'}</td>
+                <td class="js">R: ${e.relevance ?? '—'}</td>
+                <td class="js">P: ${e.presentation ?? '—'}</td>
+                <td class="jt">${e.marks ?? '—'}</td>
+              </tr>`).join('');
         return `<tr class="${rowClass}">
           <td class="rank-cell">${rankBadge(ri)}</td>
           <td class="team-name">${esc(r.team_name)}</td>
@@ -1043,6 +1156,25 @@ router.get('/national-round/print', authenticateAdmin, async (req, res) => {
           ${eduCell}
           <td class="score ${medal ? 'score-medal' : ''}">${parseFloat(r.avg_marks).toFixed(1)}</td>
           <td class="jcount">${r.judge_count}</td>
+        </tr>
+        <tr class="breakdown-row">
+          <td colspan="${colSpan}" style="padding:0 0 8px 0;">
+            <table class="jbreakdown">
+              <thead>
+                <tr>
+                  <th class="judge-indent-th"></th>
+                  <th>Judge</th>
+                  <th>Urgency/30</th>
+                  <th>Visibility/20</th>
+                  <th>Relevance/30</th>
+                  <th>Presentation/20</th>
+                  <th>Total/100</th>
+                </tr>
+              </thead>
+              <tbody>${judgeRows}</tbody>
+            </table>
+            <div class="members-wrap">${renderMembers(r.registration_id)}</div>
+          </td>
         </tr>`;
       }).join('');
       return `<table class="results-table">
@@ -1124,6 +1256,27 @@ router.get('/national-round/print', authenticateAdmin, async (req, res) => {
     .score { text-align: center; font-size: 12px; font-weight: 600; color: #555; }
     .score-medal { font-size: 14px; font-weight: 900; color: #222; }
     .jcount { text-align: center; color: #aaa; font-size: 10px; }
+    .breakdown-row td { padding: 0 !important; border-bottom: 1px solid #e8e8e8 !important; background: #fafafa; }
+    .jbreakdown { width: 100%; border-collapse: collapse; font-size: 10px; }
+    .jbreakdown th { color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; text-align: center; border-bottom: 1px solid #eee; background: #f5f5f5; }
+    .jbreakdown th:nth-child(2) { text-align: left; }
+    .jbreakdown td { padding: 3px 8px; border-bottom: 1px solid #f0f0f0; text-align: center; color: #555; }
+    .jbreakdown tr:last-child td { border-bottom: none; }
+    .judge-indent, .judge-indent-th { width: 20px; }
+    .jn { text-align: left; font-weight: 600; color: #333; }
+    .js { color: #555; }
+    .jt { font-weight: 700; color: #800020; }
+    .no-marks { font-size: 10px; color: #bbb; font-style: italic; padding: 4px 10px; text-align: left; }
+    .members-wrap { display: flex; flex-direction: column; gap: 4px; padding: 6px 10px 2px; }
+    .mb { border: 1px solid #e0e0e0; border-radius: 3px; overflow: hidden; }
+    .mb-hdr { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; background: #800020; color: #fff; padding: 3px 8px; }
+    .mb-role { font-weight: 700; font-size: 9px; min-width: 48px; opacity: 0.8; }
+    .mb-name { font-weight: 700; font-size: 11px; flex: 1; }
+    .mb-inst { font-size: 9px; opacity: 0.75; }
+    .mb-ts   { font-size: 9px; opacity: 0.65; }
+    .mb-parent { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 9px; color: #333; padding: 4px 8px; background: #faf6f7; }
+    .mb-parent em { color: #777; font-style: italic; }
+    .mb-addr { width: 100%; font-size: 9px; color: #666; margin-top: 1px; }
     .no-print { text-align: center; margin-bottom: 16px; }
     .print-btn { padding: 8px 24px; background: #37474f; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
     @media print {
